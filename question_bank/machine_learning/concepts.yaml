@@ -1,0 +1,104 @@
+# Machine Learning subject: concepts and prerequisite graph.
+# `prerequisites` must reference codes in this file and must form a DAG (no cycles).
+# Validated by backend/tests/unit/test_question_bank.py.
+
+subject:
+  code: ML
+  name: Machine Learning
+  description: Core supervised and unsupervised machine learning for undergraduate students.
+
+concepts:
+  - code: ml.foundations
+    name: ML Foundations
+    description: Types of learning (supervised, unsupervised, reinforcement), features and labels, training vs test data, generalisation.
+    prerequisites: []
+
+  - code: ml.linear_algebra
+    name: Linear Algebra for ML
+    description: Vectors, matrices, dot products, norms, matrix multiplication, eigenvectors at an intuitive level.
+    prerequisites: []
+
+  - code: ml.probability
+    name: Probability and Statistics for ML
+    description: Random variables, common distributions, expectation and variance, conditional probability, Bayes' theorem, likelihood.
+    prerequisites: []
+
+  - code: ml.data_preprocessing
+    name: Data Preprocessing
+    description: Missing values, feature scaling, categorical encoding, outliers, train/test split hygiene and data leakage.
+    prerequisites: [ml.foundations]
+
+  - code: ml.linear_regression
+    name: Linear Regression
+    description: Hypothesis function, mean squared error, closed-form solution, interpreting coefficients, assumptions.
+    prerequisites: [ml.foundations, ml.linear_algebra]
+
+  - code: ml.gradient_descent
+    name: Gradient Descent and Optimisation
+    description: Loss surfaces, gradients, learning rate, batch vs stochastic vs mini-batch, convergence issues.
+    prerequisites: [ml.linear_regression]
+
+  - code: ml.logistic_regression
+    name: Logistic Regression
+    description: Sigmoid, log loss (cross-entropy), decision boundary, probabilistic outputs, multiclass via softmax / one-vs-rest.
+    prerequisites: [ml.gradient_descent, ml.probability]
+
+  - code: ml.evaluation_metrics
+    name: Evaluation Metrics
+    description: Confusion matrix, accuracy, precision, recall, F1, ROC-AUC, log loss, calibration, regression metrics (MAE, RMSE, R²).
+    prerequisites: [ml.foundations, ml.probability]
+
+  - code: ml.bias_variance
+    name: Bias, Variance and Overfitting
+    description: Underfitting vs overfitting, bias-variance trade-off, learning curves, model capacity.
+    prerequisites: [ml.linear_regression]
+
+  - code: ml.regularization
+    name: Regularisation
+    description: L1 (lasso) and L2 (ridge) penalties, sparsity, regularisation strength, early stopping.
+    prerequisites: [ml.bias_variance, ml.gradient_descent]
+
+  - code: ml.model_validation
+    name: Model Validation and Tuning
+    description: Train/validation/test splits, k-fold and grouped cross-validation, hyperparameter search, leakage in validation.
+    prerequisites: [ml.evaluation_metrics, ml.bias_variance, ml.data_preprocessing]
+
+  - code: ml.knn
+    name: k-Nearest Neighbours
+    description: Distance metrics, choice of k, effect of feature scaling, curse of dimensionality.
+    prerequisites: [ml.data_preprocessing, ml.linear_algebra]
+
+  - code: ml.naive_bayes
+    name: Naive Bayes
+    description: Conditional independence assumption, Gaussian and multinomial variants, Laplace smoothing.
+    prerequisites: [ml.probability, ml.foundations]
+
+  - code: ml.decision_trees
+    name: Decision Trees
+    description: Splitting criteria (Gini, entropy, information gain), tree depth, pruning, interpretability.
+    prerequisites: [ml.foundations, ml.probability]
+
+  - code: ml.ensembles
+    name: Ensemble Methods
+    description: Bagging, random forests, boosting (AdaBoost, gradient boosting), why ensembles reduce error.
+    prerequisites: [ml.decision_trees, ml.bias_variance]
+
+  - code: ml.svm
+    name: Support Vector Machines
+    description: Maximum-margin classifiers, support vectors, soft margin and C, kernels.
+    prerequisites: [ml.logistic_regression, ml.linear_algebra]
+
+  - code: ml.clustering
+    name: Clustering
+    description: k-means and its objective, choosing k, hierarchical clustering, DBSCAN at a high level.
+    prerequisites: [ml.data_preprocessing, ml.linear_algebra]
+
+  - code: ml.dimensionality_reduction
+    name: Dimensionality Reduction
+    description: PCA, explained variance, when and why to reduce dimensions.
+    prerequisites: [ml.linear_algebra, ml.data_preprocessing]
+
+  - code: ml.neural_networks
+    name: Neural Network Basics
+    description: Perceptron, multilayer networks, activation functions, backpropagation, overfitting in networks.
+    prerequisites: [ml.logistic_regression, ml.regularization]

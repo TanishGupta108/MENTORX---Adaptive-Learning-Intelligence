@@ -5,7 +5,21 @@ __pycache__/
 venv/
 .env
 .env.*
+!.env.example
 dist/
 build/
 .DS_Store
 Thumbs.db
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+coverage/
+*.log
+
+# ML: raw/processed datasets are never committed (size + licence terms)
+ml/data/
+ml/artifacts/*
+!ml/artifacts/.gitkeep
+*.tsbuildinfo

@@ -1,0 +1,87 @@
+# Sample questions showing the required format. The full bank is written in milestone M2.
+# Rules:
+#   - id: unique, stable, never reused (format <concept-short>-<number>)
+#   - concept: a code from concepts.yaml
+#   - difficulty: 1 = easy, 2 = medium, 3 = hard (author's estimate; the system later learns real difficulty)
+#   - exactly 4 options with keys A-D, one correct answer
+#   - explanation: why the answer is right AND why the main distractor is wrong
+#   - original wording only: do not copy textbook or exam questions
+
+questions:
+  - id: found-001
+    concept: ml.foundations
+    difficulty: 1
+    diagnostic: true
+    stem: A model is trained on emails labelled "spam" or "not spam". What type of learning is this?
+    options:
+      A: Supervised learning
+      B: Unsupervised learning
+      C: Reinforcement learning
+      D: Self-supervised learning
+    answer: A
+    explanation: Every training example has a known label (spam / not spam), which is the defining feature of supervised learning. Unsupervised learning has no labels at all.
+
+  - id: prep-001
+    concept: ml.data_preprocessing
+    difficulty: 2
+    diagnostic: true
+    stem: You standardise features (subtract the mean, divide by the standard deviation) before training. Which approach avoids data leakage?
+    options:
+      A: Compute the mean and standard deviation on the full dataset, then split into train and test
+      B: Split first, compute the mean and standard deviation on the training set only, and apply them to both sets
+      C: Compute separate means and standard deviations for the train and test sets
+      D: Standardisation can never cause leakage, so the order does not matter
+    answer: B
+    explanation: Statistics must be learned from training data only and then reused on the test set. Computing them on the full dataset (A) lets information about the test set influence training.
+
+  - id: linreg-001
+    concept: ml.linear_regression
+    difficulty: 1
+    diagnostic: true
+    stem: Which loss function is minimised by ordinary least squares linear regression?
+    options:
+      A: Mean absolute error
+      B: Cross-entropy (log loss)
+      C: Mean squared error
+      D: Hinge loss
+    answer: C
+    explanation: Ordinary least squares minimises the sum (equivalently, the mean) of squared residuals. Cross-entropy is the loss used for logistic regression.
+
+  - id: gd-001
+    concept: ml.gradient_descent
+    difficulty: 2
+    diagnostic: true
+    stem: During gradient descent, the training loss gets larger and oscillates from one iteration to the next. What is the most likely cause?
+    options:
+      A: The learning rate is too small
+      B: The learning rate is too large
+      C: The model has too few features
+      D: The training set is too large
+    answer: B
+    explanation: A learning rate that is too large makes each step overshoot the minimum, so the loss bounces around or diverges. A learning rate that is too small makes progress slow but steady.
+
+  - id: metrics-001
+    concept: ml.evaluation_metrics
+    difficulty: 2
+    diagnostic: true
+    stem: In a dataset, 99% of transactions are legitimate and 1% are fraud. A model predicts "legitimate" for every transaction. What is its accuracy and its recall for the fraud class?
+    options:
+      A: Accuracy 99%, recall 0%
+      B: Accuracy 99%, recall 99%
+      C: Accuracy 1%, recall 100%
+      D: Accuracy 50%, recall 50%
+    answer: A
+    explanation: It is right on the 99% legitimate cases, so accuracy is 99%, but it never catches a single fraud case, so fraud recall is 0%. This is why accuracy is misleading on imbalanced data.
+
+  - id: bv-001
+    concept: ml.bias_variance
+    difficulty: 2
+    diagnostic: true
+    stem: A model has 99% training accuracy but 70% validation accuracy. Which change is most likely to help?
+    options:
+      A: Increase the model's complexity
+      B: Train for many more epochs
+      C: Add regularisation or collect more training data
+      D: Remove the validation set
+    answer: C
+    explanation: The large gap between training and validation accuracy indicates overfitting (high variance). Regularisation and more data reduce variance; more complexity or longer training would usually make it worse.

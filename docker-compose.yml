@@ -1,0 +1,20 @@
+# Local development database. Start with: docker compose up -d db
+services:
+  db:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_USER: mentorx
+      POSTGRES_PASSWORD: mentorx
+      POSTGRES_DB: mentorx
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U mentorx -d mentorx"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+volumes:
+  pgdata:

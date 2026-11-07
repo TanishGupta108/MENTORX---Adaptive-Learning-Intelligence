@@ -1,7 +1,9 @@
 # MENTORX — Project Plan (v0.1)
 
-> Status: **planning**. Nothing below is implemented yet. Every metric in this repo must come from a script that was actually run.
-> Plan date: 2026-11-08. Assumed schedule: 12 weeks, Mon 2026-11-09 → Sun 2027-01-31. Adjust to your real submission date.
+> Status: **M0 (scaffold) in progress**. Every metric in this repo must come from a script that was actually run.
+> Plan date: 2026-11-08 (v0.2). There's no fixed deadline: the goal is the best possible product, built in milestone order. Each milestone is finished, tested and deployed before the next one starts.
+>
+> **Decisions made:** MVP subject = **Machine Learning** · Frontend = **TypeScript** · No ethics approval required by the college (consent + privacy safeguards stay in place anyway).
 
 Contents
 1. Feasibility analysis
@@ -20,15 +22,15 @@ Contents
 ## 1. Feasibility analysis
 
 ### 1.1 Verdict
-**Feasible for a 4-person team in 12 weeks, if the scope is cut to one subject for the MVP and the pilot starts by week 8.** The full feature list (5 subjects, DKT, full gamification, a long pilot) is not feasible in 12 weeks. The plan below separates the MVP from the stretch goals.
+**Feasible for a 4-person team, if it's built as one subject first and the pilot starts as soon as the MVP is deployed.** Trying to build every feature for 5 subjects at once is the main risk. The plan below separates the MVP from the extensions that follow it.
 
 ### 1.2 Technical feasibility
 
 | Area | Risk | Why | Mitigation |
 |---|---|---|---|
-| Web app (React + FastAPI + Postgres) | Low | Standard, well-documented stack | Scaffold in week 1, deploy a "hello world" in week 2 |
+| Web app (React + FastAPI + Postgres) | Low | Standard, well-documented stack | Scaffold first (M0), deploy a "hello world" early |
 | Knowledge-tracing models (LR, GBM, BKT) | Low–Medium | Methods are well established; libraries exist (scikit-learn, XGBoost, pyBKT) | Benchmark on public data first |
-| **Domain mismatch** | **High** | Public KT datasets cover **math** (ASSISTments) and **English/TOEIC** (EdNet), not CS subjects | Use concept-agnostic features so a model trained on public data can transfer; retrain on MENTORX data once it exists; report the two results separately |
+| **Domain mismatch** | **High** | Public KT datasets cover **math** (ASSISTments) and **English/TOEIC** (EdNet), not Machine Learning | Use concept-agnostic features so a model trained on public data can transfer; retrain on MENTORX data once it exists; report the two results separately |
 | **Cold start** | **High** | New students and new questions have no history | Diagnostic test + difficulty priors from authors + model features that work with zero history |
 | **Question bank** | **High (effort)** | Good MCQs with concept tags take time to write and review | One subject, ~200–250 questions, divided across all 4 members, reviewed by a peer |
 | Real-user data volume | Medium | A pilot of 30–60 students gives roughly 3k–10k attempts: enough to retrain LR/BKT, small for GBM, too small for DKT | Present MENTORX-data results with confidence intervals; treat DKT as public-data-only research |
@@ -37,7 +39,7 @@ Contents
 
 ### 1.3 Operational / ethical feasibility
 - Student data is personal data. Collect only the minimum: name/email, attempts, timings. Get explicit consent at signup, offer account + data deletion, and use only pseudonymised exports for ML training.
-- **Ask your department whether a pilot with students needs ethics/IRB approval**, especially if you plan to publish.
+- The college doesn't require ethics approval for the pilot. If the work is ever submitted for publication, check the venue's requirements first.
 - Write all questions yourselves. Don't paste copyrighted textbook or exam questions verbatim.
 
 ### 1.4 Value
@@ -47,8 +49,8 @@ A real problem (one-size-fits-all practice) with a measurable outcome. It shows 
 
 ## 2. Refined scope and MVP
 
-### 2.1 MVP (must ship by week 8, deployed)
-1. **One subject: DBMS** (recommended: concepts are clear and separable, with good prerequisites). About 15 concepts and ~200–250 MCQs at 3 difficulty levels.
+### 2.1 MVP (ships first, deployed, then the pilot starts)
+1. **One subject: Machine Learning.** 19 concepts with a prerequisite graph (see [question_bank/machine_learning/concepts.yaml](../question_bank/machine_learning/concepts.yaml)), ~250 MCQs at 3 difficulty levels. A nice side effect: the platform teaches the same subject whose methods it uses, which is a good story for the ML course evaluation.
 2. Registration and login (JWT), profile, consent, subject enrolment.
 3. A 15–20-question diagnostic test that covers every concept.
 4. An adaptive quiz engine driven by the ML model's predicted P(correct).
@@ -62,7 +64,7 @@ A real problem (one-size-fits-all practice) with a measurable outcome. It shows 
 
 ### 2.2 Stretch goals (only after the MVP works)
 - Second subject (DSA or OS). The pipeline is subject-agnostic, so this is mostly content work.
-- Achievements, adaptive challenges, weekly email/in-app report.
+- Achievements, adaptive challenges, weekly in-app report.
 - Revision calendar UI with scheduled sessions.
 - DKT (PyTorch) benchmark on public data.
 - Admin panel for question authoring.
@@ -201,11 +203,11 @@ erDiagram
 | timezone | VARCHAR(64) DEFAULT 'Asia/Kolkata' | for streaks |
 | created_at, updated_at | TIMESTAMPTZ | |
 
-**subjects**: id SERIAL PK, code VARCHAR(20) UNIQUE ('DBMS'), name, description, is_active.
+**subjects**: id SERIAL PK, code VARCHAR(20) UNIQUE ('ML'), name, description, is_active.
 
 **enrollments\***: user_id FK, subject_id FK, enrolled_at, diagnostic_completed_at NULL. PK(user_id, subject_id).
 
-**concepts**: id SERIAL PK, subject_id FK NOT NULL, code VARCHAR(40) (e.g. `dbms.normalization.3nf`), name, description, display_order. UNIQUE(subject_id, code).
+**concepts**: id SERIAL PK, subject_id FK NOT NULL, code VARCHAR(40) (e.g. `ml.regularization`), name, description, display_order. UNIQUE(subject_id, code).
 
 **concept_prerequisites\***: concept_id FK, prerequisite_id FK, PK(both), CHECK(concept_id <> prerequisite_id). Must stay a DAG (checked in the service layer + tests).
 
@@ -282,7 +284,7 @@ Gamification (streaks, goals) is **computed from attempts**, not stored as count
 | **EdNet (KT1)** | TOEIC English | ~780k students, ~95M interactions | **CC BY-NC 4.0** (non-commercial). Check the repo README. | ⚠️ Huge; use a sample of students. Includes elapsed-time features |
 | pyKT toolkit | Loaders + DKT/SAKT etc. baselines | — | MIT (check the repo) | ✅ Useful for DKT and standard preprocessing |
 
-**Recommendation:** use ASSISTments 2009 as the primary benchmark, plus a 5–10k-student sample of EdNet as a second benchmark that has timing. Neither is CS content. Their role is **method validation and pre-training of concept-agnostic models**, not proof of performance on DBMS. Say this explicitly in the report.
+**Recommendation:** use ASSISTments 2009 as the primary benchmark, plus a 5–10k-student sample of EdNet as a second benchmark that has timing. Neither covers Machine Learning content. Their role is **method validation and pre-training of concept-agnostic models**, not proof of performance on MENTORX's ML questions. Say this explicitly in the report.
 
 Before choosing a dataset, record in `docs/datasets.md`: source URL, download date, licence text, columns, row/student/skill counts (computed by `ml/src/eda.py`), known issues (e.g. duplicate rows in ASSISTments 2009 and multi-skill rows), and why it is suitable.
 
@@ -329,10 +331,10 @@ Pick the model with the best **val log loss**. Accept it only if it's well calib
 A question counts toward streaks and goals only if `response_ms` is above a minimum (e.g. 3 s) and the student isn't rapidly guessing through many questions in a row. This blocks farming streaks by clicking randomly.
 
 ### 5.9 Two-phase training plan
-- **Phase A (weeks 2–4):** train and compare on public data and ship the concept-agnostic model as `v1`.
-- **Phase B (week 10–11):** retrain on consented MENTORX attempts (+ optionally public data) as `v2`. Compare v1 vs v2 on held-out MENTORX students and report honestly, including when the data is too small to separate the models.
+- **Phase A (M3–M4):** train and compare on public data and ship the concept-agnostic model as `v1`.
+- **Phase B (M11):** retrain on consented MENTORX attempts (+ optionally public data) as `v2`. Compare v1 vs v2 on held-out MENTORX students and report honestly, including when the data is too small to separate the models.
 
-### 5.10 Pilot evaluation design (week 8–11)
+### 5.10 Pilot evaluation design (M11, starting right after the MVP is deployed)
 - Pre-test and post-test: two **parallel forms** of equal difficulty (counterbalanced: half the students take form A first).
 - Comparison: randomly assign students to **adaptive** (ML selection) vs **control** (random question order within the same concepts). Compare learning gain = post − pre.
 - Engagement: WAU, D1/D7 return rate, sessions per user, quiz completion rate.
@@ -350,7 +352,7 @@ Each milestone ends with: tests passing in CI, deployed (if applicable), and a s
 |---|---|---|---|
 | M0 | Repo scaffold + CI | Everyone works on one consistent base | `backend`, `frontend`, `ml` skeletons; lint + test GitHub Actions green; local Postgres via Docker |
 | M1 | Requirements & design docs | Agree on *what* before *how* | SRS v1, user stories, use-case + ER + architecture diagrams merged to `docs/` |
-| M2 | Question bank v1 | The content that everything depends on | 15 DBMS concepts + prerequisite DAG; ≥150 reviewed MCQs in YAML; validator script passes |
+| M2 | Question bank v1 | The content that everything depends on | 19 ML concepts + prerequisite DAG; ≥250 reviewed MCQs in YAML; validator script passes |
 | M3 | ML data pipeline + EDA | Understand the data before modelling | Download/clean scripts for ASSISTments; EDA report with real numbers |
 | M4 | Models + evaluation | The ML core | `train.py`/`evaluate.py` for LR, GBM, BKT; comparison report with CIs; chosen artifact + `metadata.json` saved |
 | M5 | DB + auth + core API | A secure foundation | Alembic migrations; register/login/me; subjects/concepts endpoints; pytest + API tests |
@@ -366,30 +368,38 @@ Each milestone ends with: tests passing in CI, deployed (if applicable), and a s
 
 ---
 
-## 7. Timeline (12 weeks)
+## 7. Build order (no fixed deadline)
 
-Key change from the original roadmap: **deploy the MVP by week 8 and start the pilot then**. A pilot that starts in week 11 collects too little data to retrain or evaluate anything.
+There are no dates. Milestones run in order, each one only "done" when it is tested and deployed. The one ordering rule that matters: **deploy the MVP (M9) and start the pilot (M11) before building the extensions**, because real usage data is what the ML retraining and the evaluation chapter need.
 
-| Week | Dates | ML (M1) | Backend (M2) | Frontend (M3) | Integration/QA/Docs (M4) |
-|---|---|---|---|---|---|
-| 1 | Nov 9–15 | Dataset research, licences | Schema draft, FastAPI scaffold | Wireframes, design tokens, Vite scaffold | SRS, user stories, CI, repo rules |
-| 2 | Nov 16–22 | Download + clean + EDA | Alembic, auth, deploy hello-world | Auth pages, layout, design system | Use-case/ER/architecture diagrams; **everyone writes questions** |
-| 3 | Nov 23–29 | Feature pipeline, LR baseline | Subjects/concepts/questions API, seed loader | Onboarding + subject select | Test plan, API tests |
-| 4 | Nov 30–Dec 6 | GBM + BKT, comparison report | Sessions + attempts API | Quiz UI (diagnostic) | Question review; question bank ≥200 |
-| 5 | Dec 7–13 | Model selection, artifact, inference wrapper | ML service integration, mastery updates | Quiz UI (practice), feedback after answer | Integration tests, sequence/class diagrams |
-| 6 | Dec 14–20 | Recommendation + revision logic | Path/revision/analytics endpoints | Dashboard (charts) | Staging deploy, system tests |
-| 7 | Dec 21–27 | Simulate students to sanity-check the adaptive loop | Hardening: validation, logging, rate limits | Learning path + revision pages, mobile | Usability test with 3–5 friends |
-| 8 | Dec 28–Jan 3 | Live-evaluation queries | Streaks/goals, feedback API | Streaks, goals, polish | **Production deploy, start pilot** |
-| 9 | Jan 4–10 | Monitor predictions vs outcomes | Bug fixes, perf tests | Bug fixes from feedback | Recruit users, pre-test |
-| 10 | Jan 11–17 | Retrain v2 on pilot data | Stretch: achievements/2nd subject | Stretch features | Performance tests, testing report |
-| 11 | Jan 18–24 | Final ML report | Freeze features | Freeze features | Post-test, survey, pilot analysis |
-| 12 | Jan 25–31 | Viva prep | Deployment docs | Demo video | Final report, slides |
+```mermaid
+flowchart LR
+  M0[M0 Scaffold + CI] --> M1[M1 SRS + design]
+  M1 --> M2[M2 Question bank]
+  M1 --> M3[M3 Data + EDA] --> M4[M4 Models + eval]
+  M1 --> M5[M5 DB + auth + API]
+  M4 & M5 & M2 --> M6[M6 Adaptive quiz + ML]
+  M6 --> M7[M7 Path + revision]
+  M5 --> M8[M8 Frontend MVP]
+  M7 & M8 --> M9[M9 Deploy + harden]
+  M9 --> M10[M10 Engagement]
+  M9 --> M11[M11 Pilot + retrain]
+  M10 & M11 --> M12[M12 Report + viva]
+```
 
-Holidays (late December) and exams will eat into this. If time runs short, cut stretch goals, never the pilot or the tests.
+Parallel work by role:
+
+| Phase | ML (Member 1) | Backend (Member 2) | Frontend (Member 3) | Integration/QA/Docs (Member 4) |
+|---|---|---|---|---|
+| Foundation (M0–M1) | Dataset research, licences | Schema, FastAPI scaffold | Design system, wireframes | SRS, user stories, diagrams, CI |
+| Core (M2–M5) | Data pipeline, EDA, LR/GBM/BKT, comparison report | Migrations, auth, content + session APIs | Auth, onboarding, quiz UI | Question review, API tests, test plan |
+| Intelligence (M6–M7) | Inference wrapper, recommendation + revision logic, simulated-student checks | ML integration, mastery updates, path/revision endpoints | Dashboard, path, revision pages | Integration + system tests |
+| Release (M8–M9) | Live-evaluation queries | Hardening, logging, rate limits | Mobile, accessibility, polish | Production deploy, usability test |
+| Evidence (M10–M12) | Retrain v2, final ML report | Engagement APIs, perf fixes | Engagement UI | Pilot ops, testing report, final report |
 
 ### Team roles (as you proposed) plus shared duties
-- Everyone writes ~50–60 questions (each one reviewed by someone else).
-- Everyone reviews at least one PR per week outside their own area, so everyone understands the whole system for the viva.
+- Everyone writes ~60 questions (each one reviewed by someone else).
+- Everyone reviews PRs outside their own area regularly outside their own area, so everyone understands the whole system for the viva.
 
 ---
 
@@ -435,7 +445,7 @@ MENTORX/
 │  ├─ package.json  └─ .env.example
 ├─ question_bank/
 │  ├─ schema.json                 # validates question YAML
-│  └─ dbms/{concepts.yaml, questions/*.yaml}
+│  └─ machine_learning/{concepts.yaml, questions/*.yaml}
 ├─ docs/
 │  ├─ PROJECT_PLAN.md (this file)
 │  ├─ srs/  ├─ design/ (diagrams as Mermaid/PlantUML)  ├─ modules/
@@ -446,7 +456,7 @@ MENTORX/
 
 Conventions: branch per feature (`feat/quiz-engine`), PRs into `main` with at least one review, Conventional Commits (`feat:`, `fix:`, `docs:`, `test:`), and no secrets in git (`.env` is ignored; commit `.env.example` only).
 
-TypeScript is recommended for the frontend (catches API-shape bugs). Plain JS also works if the team prefers it.
+The frontend uses **TypeScript** in strict mode. API types are generated from FastAPI's OpenAPI schema, so frontend/backend contract mismatches fail at compile time.
 
 ---
 
@@ -491,9 +501,11 @@ python scripts/download.py --dataset assist2009
 
 ---
 
-## 10. Open decisions (team to confirm)
-1. MVP subject: **DBMS** (recommended) vs DSA vs OS?
-2. Real submission date, and whether the SE and ML submissions share one deadline.
-3. TypeScript or JavaScript for the frontend?
-4. Does the college require ethics approval for the pilot?
-5. Repo visibility: keep private until submission, or public for portfolios?
+## 10. Decisions log
+| Decision | Choice | Date |
+|---|---|---|
+| MVP subject | Machine Learning | 2026-11-08 |
+| Deadline | None fixed; quality first, milestone order | 2026-11-08 |
+| Frontend language | TypeScript (strict) | 2026-11-08 |
+| Ethics approval | Not required by college; consent + privacy kept | 2026-11-08 |
+| Repo visibility | Private for now (open) | — |

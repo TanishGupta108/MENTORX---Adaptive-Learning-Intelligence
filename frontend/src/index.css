@@ -1,0 +1,36 @@
+@import "tailwindcss";
+
+/* Design tokens. Components use these via Tailwind classes like bg-surface, text-ink. */
+@theme {
+  --color-canvas: #f7f7f5;
+  --color-surface: #ffffff;
+  --color-ink: #1c1c1a;
+  --color-ink-muted: #5f5f5a;
+  --color-line: #e4e4df;
+  --color-brand: #3b5bdb;
+  --color-brand-ink: #ffffff;
+  --color-success: #2b8a3e;
+  --color-danger: #c92a2a;
+
+  --font-sans: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-canvas: #141413;
+    --color-surface: #1e1e1c;
+    --color-ink: #ececea;
+    --color-ink-muted: #a3a39d;
+    --color-line: #33332f;
+    --color-brand: #748ffc;
+    --color-brand-ink: #10131f;
+    --color-success: #69db7c;
+    --color-danger: #ff8787;
+  }
+}
+
+body {
+  background: var(--color-canvas);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+}
