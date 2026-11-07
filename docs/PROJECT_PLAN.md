@@ -1,6 +1,6 @@
 # MENTORX — Project Plan (v0.1)
 
-> Status: **M0 (scaffold) in progress**. Every metric in this repo must come from a script that was actually run.
+> Status: **M0 done, M1 done** (requirements + design in [docs/srs](srs/) and [docs/design](design/)). Every metric in this repo must come from a script that was actually run.
 > Plan date: 2026-11-08 (v0.2). There's no fixed deadline: the goal is the best possible product, built in milestone order. Each milestone is finished, tested and deployed before the next one starts.
 >
 > **Decisions made:** MVP subject = **Machine Learning** · Frontend = **TypeScript** · No ethics approval required by the college (consent + privacy safeguards stay in place anyway).
@@ -165,6 +165,8 @@ sequenceDiagram
 ---
 
 ## 4. Database schema
+
+> **Superseded in detail by [design/database.md](design/database.md)**, the authoritative schema. M1 added refresh tokens, served-question state on sessions, `peak_mastery`, mastery snapshots, pilot fields and question flags. The summary below is kept for overview.
 
 PostgreSQL, managed by SQLAlchemy 2.x + Alembic migrations. The eight required tables plus four supporting ones (marked *).
 
