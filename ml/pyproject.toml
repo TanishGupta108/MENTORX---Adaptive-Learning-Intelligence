@@ -10,15 +10,16 @@ requires-python = ">=3.11"
 dependencies = [
   "numpy>=1.26",
   "pandas>=2.2",
-  "scikit-learn>=1.5",
+  # Exact pin: saved models (joblib) must be loaded by the same scikit-learn version.
+  "scikit-learn==1.9.1",
   "joblib>=1.4",
   "pyyaml>=6.0",
-  "pyarrow>=17",
-  "matplotlib>=3.9",
 ]
 
 [project.optional-dependencies]
 boost = ["xgboost>=2.1"]
+# Needed by the data/EDA/training scripts, not by the backend at serving time.
+analysis = ["pyarrow>=17", "matplotlib>=3.9"]
 dev = ["pytest>=8.2", "ruff>=0.5"]
 
 [tool.hatch.build.targets.wheel]
@@ -41,3 +42,4 @@ select = ["E", "F", "I", "B", "UP", "SIM"]
 "scripts/evaluate.py" = ["E501"]
 "scripts/compare.py" = ["E501"]
 "scripts/time_response.py" = ["E501"]
+"scripts/export_model.py" = ["E501"]

@@ -39,6 +39,15 @@ class Settings(BaseSettings):
     # --- pilot (FR-PILOT-01) ---
     pilot_active: bool = False
 
+    # --- learning engine (tunable; see docs/srs/SRS.md FR-QUIZ, FR-REV, FR-ENG) ---
+    model_artifacts_dir: str = "model_artifacts"
+    target_p_correct: float = Field(default=0.65, gt=0, lt=1)  # FR-QUIZ-02
+    selection_top_k: int = Field(default=3, ge=1)  # random choice among k closest to target
+    practice_length: int = Field(default=10, ge=1, le=50)  # FR-QUIZ-09
+    recent_correct_exclusion_days: int = Field(default=7, ge=0)  # FR-QUIZ-03
+    valid_answer_min_ms: int = Field(default=3000, ge=0)  # FR-ENG-02
+    mastery_threshold: float = Field(default=0.6, gt=0, lt=1)  # prerequisite "met" (FR-PATH-02)
+
     @property
     def cors_origin_list(self) -> list[str]:
         return [o.strip() for o in self.cors_origins.split(",") if o.strip()]

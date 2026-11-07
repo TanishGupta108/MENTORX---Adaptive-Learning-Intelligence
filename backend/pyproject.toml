@@ -19,6 +19,11 @@ dependencies = [
   "argon2-cffi>=23.1",
   "pyjwt>=2.9",
   "email-validator>=2.2",
+  # ML serving. The shared feature code (mentorx_ml) is installed from ../ml:
+  #   pip install -e ../ml -e ".[dev]"
+  "numpy>=1.26",
+  "joblib>=1.4",
+  "scikit-learn==1.9.1",  # must equal the version the model was saved with
 ]
 
 [project.optional-dependencies]

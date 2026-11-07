@@ -1,0 +1,87 @@
+{
+  "exported_at": "2026-11-07T21:55:18+00:00",
+  "experiment": "ednet",
+  "training_data": "ednet (sha256 2342b03dfebabdf8\u2026), 7000 training students",
+  "licence_note": "Trained on EdNet (CC BY-NC 4.0): non-commercial use only; attribute EdNet.",
+  "sklearn_version": "1.9.1",
+  "selected_at": "2026-11-07T21:19:44+00:00",
+  "models": [
+    {
+      "name": "ednet-gbm-v1",
+      "model_type": "gbm",
+      "role": "primary",
+      "file": "ednet-gbm-v1.joblib",
+      "sha256": "64e39c09058e5fc68cfdc7a079bd44f58ecab76df454758f119685600b819c83",
+      "features": [
+        "log_prior_concept",
+        "acc_concept",
+        "acc_concept_last3",
+        "prev_concept",
+        "is_first_concept",
+        "log_gap_concept",
+        "log_prior_overall",
+        "acc_overall",
+        "acc_overall_last10",
+        "log_prior_item",
+        "prev_item_correct",
+        "log_secs_since_concept",
+        "log_secs_since_any",
+        "item_logit",
+        "concept_logit",
+        "log_item_count"
+      ],
+      "use_time": true,
+      "validation": {
+        "auc": 0.7677179166747157,
+        "log_loss": 0.5280086105360395,
+        "ece": 0.008754206615558315
+      },
+      "test": {
+        "auc": 0.7714729271622077,
+        "log_loss": 0.5316661416534934,
+        "ece": 0.004242044311478276
+      }
+    },
+    {
+      "name": "ednet-logreg-v1",
+      "model_type": "logreg",
+      "role": "fallback",
+      "file": "ednet-logreg-v1.joblib",
+      "sha256": "569bc16373f9055fcf6c8888284551017f9942c635d7177a1675eb65627edcc4",
+      "features": [
+        "log_prior_concept",
+        "acc_concept",
+        "acc_concept_last3",
+        "prev_concept",
+        "is_first_concept",
+        "log_gap_concept",
+        "log_prior_overall",
+        "acc_overall",
+        "acc_overall_last10",
+        "log_prior_item",
+        "prev_item_correct",
+        "log_secs_since_concept",
+        "log_secs_since_any",
+        "item_logit",
+        "concept_logit",
+        "log_item_count"
+      ],
+      "use_time": true,
+      "validation": {
+        "auc": 0.7510251169078785,
+        "log_loss": 0.5444027113856982,
+        "ece": 0.006473431433690939
+      },
+      "test": {
+        "auc": 0.7520624715027361,
+        "log_loss": 0.5505618756723418,
+        "ece": 0.008746990680077957
+      }
+    }
+  ],
+  "prior": {
+    "name": "ednet-prior-v1",
+    "model_type": "prior",
+    "p": 0.648821046863564
+  }
+}

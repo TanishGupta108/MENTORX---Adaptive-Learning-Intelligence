@@ -2,7 +2,7 @@
 
 An ML-powered adaptive learning platform that teaches **Machine Learning**. It estimates each student's concept mastery from their real attempts, then uses those predictions to choose the next question, build a learning path and schedule revision.
 
-**Status:** M0 scaffold ✓ · M1 requirements & design ✓ · M2 question bank drafted (285 questions, awaiting review) · M3 data pipeline + EDA ✓ · M4 models ✓ ([ML report](docs/ml-report.md)) · M5 database, auth & core API ✓. See [docs/PROJECT_PLAN.md](docs/PROJECT_PLAN.md) for the feasibility analysis, scope, architecture, database schema, ML methodology and roadmap.
+**Status:** M0 scaffold ✓ · M1 requirements & design ✓ · M2 question bank drafted (285 questions, awaiting review) · M3 data pipeline + EDA ✓ · M4 models ✓ ([ML report](docs/ml-report.md)) · M5 database, auth & core API ✓ · M6 adaptive quiz engine ✓. See [docs/PROJECT_PLAN.md](docs/PROJECT_PLAN.md) for the feasibility analysis, scope, architecture, database schema, ML methodology and roadmap.
 
 | Part | Stack | Folder |
 |---|---|---|
@@ -23,7 +23,7 @@ docker compose up -d db
 cd backend
 python -m venv .venv
 .venv\Scripts\activate            # macOS/Linux: source .venv/bin/activate
-pip install -e ".[dev]"
+pip install -e ../ml -e ".[dev]"  # the backend shares the feature code in ml/
 copy .env.example .env            # macOS/Linux: cp .env.example .env
 alembic upgrade head
 python scripts/seed.py           # loads the question bank
@@ -35,11 +35,11 @@ npm install
 copy .env.example .env
 npm run dev
 
-# 4. ML package
+# 4. ML package (training, EDA, reports)
 cd ml
 python -m venv .venv
 .venv\Scripts\activate
-pip install -e ".[dev]"
+pip install -e ".[dev,analysis]"
 ```
 
 ## Checks (the same ones CI runs)

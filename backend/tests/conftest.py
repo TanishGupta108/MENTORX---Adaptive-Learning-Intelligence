@@ -67,9 +67,11 @@ def clean_tables(migrated_database):
             )
         ).all()
         conn.execute(text(f"TRUNCATE {', '.join(tables)} RESTART IDENTITY CASCADE"))
+    from app.ml.registry import reset_cache
     from app.services.auth import login_limiter
 
     login_limiter.reset()
+    reset_cache()
 
 
 @pytest.fixture
@@ -105,3 +107,11 @@ def register(client, email="student@example.com", password="correct horse 1", na
 
 def auth(token: str) -> dict:
     return {"Authorization": f"Bearer {token}"}
+
+
+@pytest.fixture
+def student(client, seeded):
+    """A registered student enrolled in ML. Returns auth headers."""
+    h = auth(register(client))
+    assert client.post("/api/v1/subjects/ML/enroll", headers=h).status_code == 200
+    return h
