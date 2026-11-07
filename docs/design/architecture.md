@@ -181,7 +181,8 @@ All endpoints are under `/api/v1`, JSON, documented at `/docs`. 🔒 = needs an 
 | IDOR (reading others' data) | Every repository query filters by the authenticated `user_id`; per-endpoint authorization tests |
 | Injection | Pydantic validation; ORM-parameterised queries only |
 | XSS | React escaping; question markdown rendered with a sanitiser; strict CSP on Vercel |
-| CSRF | Access token in header (not cookie); refresh endpoint is SameSite=Strict + origin check |
+| CSRF | Access token in header (not cookie); refresh cookie is SameSite=Strict and scoped to `/api/v1/auth` |
+| Cross-site cookies | In production the frontend proxies `/api/*` to the backend (Vercel rewrite), so the API is same-origin and the Strict refresh cookie is sent. Without the proxy, `COOKIE_SAMESITE=none` + `COOKIE_SECURE=true` would be needed. |
 | Secrets leakage | Env vars only; `.env` gitignored; CI secret scanning |
 | PII in ML data | Pseudonymised export with secret salt; consent-only |
 

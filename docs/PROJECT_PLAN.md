@@ -1,6 +1,6 @@
 # MENTORX — Project Plan (v0.1)
 
-> Status: **M0, M1, M3, M4 done · M2 drafted** (285 questions awaiting team review). ML results: [ml-report.md](ml-report.md).
+> Status: **M0, M1, M3, M4, M5 done · M2 drafted** (285 questions awaiting team review). ML results: [ml-report.md](ml-report.md).
 > Plan date: 2026-11-08 (v0.2). There's no fixed deadline: the goal is the best possible product, built in milestone order. Each milestone is finished, tested and deployed before the next one starts.
 >
 > **Decisions made:** MVP subject = **Machine Learning** · Frontend = **TypeScript** · No ethics approval required by the college (consent + privacy safeguards stay in place anyway).

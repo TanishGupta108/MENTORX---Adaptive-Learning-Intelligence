@@ -101,6 +101,7 @@ erDiagram
     boolean is_diagnostic
     varchar test_form "A | B | null"
     varchar status "active | retired"
+    char content_hash "sha256, detects edits"
     timestamptz created_at
   }
   STUDY_SESSIONS {
@@ -224,6 +225,7 @@ erDiagram
 - `test_form` marks pre/post-test questions (forms A and B). These are excluded from practice so test results aren't contaminated.
 - Index `(concept_id, status)`, `(is_diagnostic) WHERE status='active'`.
 - Never deleted, only retired (attempts reference them).
+- `content_hash` (SHA-256 of concept, difficulty, flags, stem, options, answer and explanation) lets the seed command detect edits and create a new version (FR-CONT-06). Implemented in `backend/app/content/seed.py`.
 
 ### study_sessions
 - The `current_*` columns hold the one served-but-unanswered question. Submitting an answer checks `question_id = current_question_id` (FR-QUIZ-07), computes `response_ms = now() - current_served_at` (FR-QUIZ-06), copies `current_predicted_p` and `current_model_version_id` into the attempt (FR-QUIZ-05), then clears them. This happens in **one transaction** with `SELECT … FOR UPDATE` on the session row, so a double-submit can't create two attempts.
