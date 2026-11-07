@@ -90,7 +90,7 @@ flowchart LR
 |---|---|
 | Actor | System (triggered by UC-03/04/07) |
 | Main flow | 1. Load the student's attempt history for the concept. 2. Build features with the shared feature builder. 3. Active model predicts P(correct) on a reference medium-difficulty item now. 4. Upsert `mastery` with the model version; append a `mastery_snapshots` row. |
-| Alternatives | 3a. Model unavailable → heuristic fallback (smoothed accuracy), flagged `model_version = heuristic`. |
+| Alternatives | 3a. Primary model unavailable → logistic-regression fallback; if that's unavailable too → constant prior, flagged `model_version = prior` (FR-KT-06). |
 | Requirements | FR-KT-01…06 |
 
 ### UC-06 View learning path

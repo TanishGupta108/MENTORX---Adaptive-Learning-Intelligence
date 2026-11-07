@@ -168,9 +168,14 @@ def write_report(
         "",
         f"- {s['students_with_lt_5_interactions']:,} students have fewer than 5 interactions (cold-start cases).",
         f"- {s['items_with_lt_5_interactions']:,} of {s['items']:,} items "
-        f"({s['items_with_lt_5_interactions'] / s['items']:.0%}) have fewer than 5 interactions, "
-        f"and the median item has only {ipi['p50']:.0f}. Raw per-item difficulty is therefore noisy: "
-        "it must be smoothed towards the concept average (and fitted on training students only).",
+        f"({s['items_with_lt_5_interactions'] / s['items']:.0%}) have fewer than 5 interactions; "
+        f"the median item has {ipi['p50']:.0f}. "
+        + (
+            "Raw per-item difficulty is noisy for many items, so it must be smoothed towards the concept average."
+            if s["items_with_lt_5_interactions"] / s["items"] >= 0.10
+            else "Most items have enough answers for a usable difficulty estimate; smoothing still protects the rare ones."
+        )
+        + " Difficulty is always fitted on training students only.",
         "",
         "![Interactions per student](students.png)",
         "",
@@ -214,8 +219,12 @@ def write_report(
         "",
         f"Answers faster than {rapid['threshold_ms'] / 1000:.0f} s make up {rapid['share_fast']:.1%} of responses "
         f"(n = {rapid['n_fast']:,}) and are correct only {rapid['p_correct_fast']:.1%} of the time, versus "
-        f"{rapid['p_correct_rest']:.1%} for slower answers. This supports MENTORX's rule that answers under 3 s don't "
-        "count towards streaks (SRS FR-ENG-02), and suggests response time is a useful model feature.",
+        f"{rapid['p_correct_rest']:.1%} for slower answers. "
+        + (
+            "This large gap is strong evidence of rapid guessing, and supports MENTORX's rule that answers under 3 s don't count towards streaks (SRS FR-ENG-02)."
+            if rapid["p_correct_rest"] - rapid["p_correct_fast"] >= 0.20
+            else "The gap is modest, so in this dataset many fast answers are genuine; a 3 s threshold alone would be a weak guessing detector here."
+        ),
         "",
         "![Response times](response_time.png)",
         "",

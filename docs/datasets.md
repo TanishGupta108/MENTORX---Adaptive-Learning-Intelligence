@@ -56,15 +56,33 @@ Row counts at each step are in the [cleaning table](../ml/reports/eda/assist2009
 3. **Mastery-mode stopping rule** (a student stops after 3 correct in a row) creates survivor bias in pooled learning curves. → See the EDA report; models must condition on individual history.
 4. **Collapsed multi-skill tags** are treated as their own concepts (e.g. `1_13`), which slightly inflates the concept count.
 
-## 2. EdNet KT1 (planned for M4)
+## 2. EdNet-KT1 (10,000-student sample)
 
 | | |
 |---|---|
 | Purpose | Second benchmark, and the only source of **real timestamps**, needed for time-since-last-practice features |
-| Source | https://github.com/riiid/ednet |
-| Licence | CC BY-NC 4.0 per the repository (non-commercial). **To be re-verified when downloaded.** |
-| Domain | TOEIC English test preparation (Santa app), multiple-choice questions |
-| Plan | Use a fixed random sample of students (e.g. 5,000–10,000) to keep training laptop-sized; same cleaning → canonical schema → EDA pipeline |
+| Source page | https://github.com/riiid/ednet (paper: https://arxiv.org/abs/1912.03072) |
+| Licence | **CC BY-NC 4.0** ("publicly released under Creative Commons Attribution-NonCommercial 4.0 International license for research purposes"), read 2026-11-08. Attribution required; no commercial use. MENTORX is a non-commercial academic project. |
+| Files | `EdNet-KT1.zip` (1,201,163,816 bytes, 784,309 student CSVs) · SHA-256 `0d13933f90201c5101c7fe8659e44474fa049e3fb93181a8ba6fb3e63267b535` |
+| | `EdNet-Contents.zip` (173,976 bytes; `contents/questions.csv` with answer keys and tags) · SHA-256 `aa910a0436d9dbac0ba232f55e27b37ad8d39da285fcf15f1c1eb5d064be98e7` |
+| Downloaded | 2026-11-08, from the README's links (`bit.ly/ednet_kt1`, `bit.ly/ednet-content`, which redirect to Google Drive) |
+| Domain | TOEIC English test preparation (Santa app); 4-option multiple choice (3 options for part 2) |
+| Commands | `python scripts/download.py --dataset ednet` → `python scripts/clean.py --dataset ednet` → `python scripts/eda.py --dataset ednet` |
+| EDA report | [ml/reports/eda/ednet/report.md](../ml/reports/eda/ednet/report.md) |
+
+### Sample and cleaning
+- **Sample:** 10,000 students drawn uniformly at random (seed 42) from the 784,309 student files, read directly from the zip. That gives 1.14 M answers, the same order of magnitude as published benchmarks, and it trains on a laptop. Change `--n-students` for a bigger sample.
+- `correct` = the student's answer letter equals `correct_answer` in `questions.csv`.
+- **Concept** = the question's full tag set (e.g. `179;53;183`) treated as one concept, consistent with the collapsed multi-skill tags used for ASSISTments. That gives 1,779 concepts in the sample.
+- Ordering: by timestamp, with the original file order breaking ties (questions in one bundle share a timestamp).
+- Dropped: rows with no submitted answer (269). Every question in the sample was found in `questions.csv`.
+- `elapsed_time ≤ 0` → missing response time.
+- Timestamps are shifted by the providers for privacy. Only **differences** are used (time since last practice), which shifting doesn't change.
+
+### Limitations
+1. Different domain (English test prep) and a population of self-motivated app users rather than a class.
+2. Questions come in bundles that are answered together, so "seconds since the previous interaction" is often 0 inside a bundle.
+3. Many tag-set concepts are small, so per-concept models like BKT have less data per concept than in ASSISTments.
 
 ## 3. MENTORX pilot data (M11)
 

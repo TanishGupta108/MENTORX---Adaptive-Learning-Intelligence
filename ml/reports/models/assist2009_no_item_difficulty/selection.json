@@ -1,0 +1,105 @@
+{
+  "selected_at": "2026-11-07T21:11:02+00:00",
+  "rule": {
+    "metric": "log_loss",
+    "max_ece": 0.05,
+    "max_latency_ms_50_candidates": 50,
+    "exclude": [
+      "prior"
+    ]
+  },
+  "chosen": "gradient_boosting",
+  "chosen_params": {
+    "learning_rate": 0.05,
+    "max_leaf_nodes": 63
+  },
+  "best_per_model": {
+    "prior": {
+      "params": {},
+      "auc": 0.5,
+      "accuracy": 0.6810961080222399,
+      "f1": 0.8103000236239074,
+      "log_loss": 0.6280008290862568,
+      "brier": 0.21808202812916486,
+      "ece": 0.029628170209576643,
+      "n": 40288,
+      "fit_seconds": 0.0,
+      "latency_ms_50": 0.00100000761449337
+    },
+    "heuristic": {
+      "params": {},
+      "auc": 0.6836946536698206,
+      "accuracy": 0.6912976568705321,
+      "f1": 0.7841435687383932,
+      "log_loss": 0.61322304377744,
+      "brier": 0.21262862637932273,
+      "ece": 0.12602482945640395,
+      "n": 40288,
+      "fit_seconds": 0.0,
+      "latency_ms_50": 0.008899980457499623
+    },
+    "logistic_regression": {
+      "params": {
+        "C": 10.0
+      },
+      "auc": 0.7377662550965948,
+      "accuracy": 0.7376638204924544,
+      "f1": 0.8235235185092421,
+      "log_loss": 0.541458508707522,
+      "brier": 0.18074085612088778,
+      "ece": 0.017670968109572957,
+      "n": 40288,
+      "fit_seconds": 0.2,
+      "latency_ms_50": 0.6265499978326261
+    },
+    "gradient_boosting": {
+      "params": {
+        "learning_rate": 0.05,
+        "max_leaf_nodes": 63
+      },
+      "auc": 0.7491691696748527,
+      "accuracy": 0.7439932486100079,
+      "f1": 0.8293965859468043,
+      "log_loss": 0.5309729578615092,
+      "brier": 0.17683522370979365,
+      "ece": 0.010396873162090531,
+      "n": 40288,
+      "fit_seconds": 2.5,
+      "latency_ms_50": 3.327400016132742
+    }
+  },
+  "eligible": [
+    "logistic_regression",
+    "gradient_boosting"
+  ],
+  "rejected": {
+    "heuristic": [
+      "ECE 0.126 > 0.05"
+    ]
+  },
+  "features": [
+    "log_prior_concept",
+    "acc_concept",
+    "acc_concept_last3",
+    "prev_concept",
+    "is_first_concept",
+    "log_gap_concept",
+    "log_prior_overall",
+    "acc_overall",
+    "acc_overall_last10",
+    "log_prior_item",
+    "prev_item_correct",
+    "concept_logit"
+  ],
+  "data_sha256": "d658615e842e4c59deec68eac4b749b1c53894fc1476bf6203c3da4c009b9d38",
+  "split_rows": {
+    "train": 178107,
+    "val": 40288,
+    "test": 40737
+  },
+  "split_students": {
+    "train": 2912,
+    "val": 624,
+    "test": 624
+  }
+}

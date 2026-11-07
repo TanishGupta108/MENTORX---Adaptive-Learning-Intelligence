@@ -38,3 +38,6 @@ select = ["E", "F", "I", "B", "UP", "SIM"]
 [tool.ruff.lint.per-file-ignores]
 # Report templates: long Markdown lines are clearer than split strings.
 "scripts/eda.py" = ["E501"]
+"scripts/evaluate.py" = ["E501"]
+"scripts/compare.py" = ["E501"]
+"scripts/time_response.py" = ["E501"]

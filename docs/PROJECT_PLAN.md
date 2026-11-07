@@ -1,6 +1,6 @@
 # MENTORX — Project Plan (v0.1)
 
-> Status: **M0, M1 done · M2 drafted** (285 questions awaiting team review, [guide](question-bank-guide.md)) **· M3 done for ASSISTments 2009** ([datasets](datasets.md), [EDA](../ml/reports/eda/assist2009/report.md)). Every metric in this repo must come from a script that was actually run.
+> Status: **M0, M1, M3, M4 done · M2 drafted** (285 questions awaiting team review). ML results: [ml-report.md](ml-report.md).
 > Plan date: 2026-11-08 (v0.2). There's no fixed deadline: the goal is the best possible product, built in milestone order. Each milestone is finished, tested and deployed before the next one starts.
 >
 > **Decisions made:** MVP subject = **Machine Learning** · Frontend = **TypeScript** · No ethics approval required by the college (consent + privacy safeguards stay in place anyway).
@@ -513,4 +513,6 @@ python scripts/download.py --dataset assist2009
 | Question bank v1 | 19 concepts × 15 questions (1 diagnostic, 12 practice, form A, form B), AI-drafted, peer review required before production | 2026-11-08 |
 | ASSISTments 2009 cleaning | Corrected/collapsed file; main problems only; drop untagged, open-response and test-mode rows | 2026-11-08 |
 | EdNet | Required (only source of timestamps) | 2026-11-08 |
+| Model for v1 | Gradient boosting trained on EdNet (history + time + difficulty features); LR fallback | 2026-11-08 |
+| Fallback (FR-KT-06) | Changed from heuristic to logistic regression, then constant prior (heuristic badly calibrated) | 2026-11-08 |
 | Repo visibility | Private for now (open) | — |

@@ -1,0 +1,33 @@
+# Ablation: the same EdNet sample WITHOUT time features, to measure what time adds.
+name: ednet_no_time
+description: >-
+  Ablation: EdNet without the two time features. Comparing with the `ednet` run
+  (same students, same split) shows how much knowing elapsed time improves prediction,
+  which is the basis for MENTORX's mastery decay and revision scheduling.
+dataset: ednet
+seed: 42
+split:
+  val_frac: 0.15
+  test_frac: 0.15
+features:
+  use_time: true
+  exclude: [log_secs_since_concept, log_secs_since_any]
+
+models:
+  prior: {}
+  heuristic: {}
+  logistic_regression:
+    C: [0.01, 0.1, 1.0, 10.0]
+  gradient_boosting:
+    learning_rate: [0.05, 0.1]
+    max_leaf_nodes: [15, 31, 63]
+
+selection:
+  metric: log_loss
+  max_ece: 0.05
+  max_latency_ms_50_candidates: 50
+  exclude: [prior]
+
+evaluation:
+  bootstrap_reps: 200
+  reference_model: heuristic

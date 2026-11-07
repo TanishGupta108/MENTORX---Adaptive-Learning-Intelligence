@@ -172,7 +172,7 @@ erDiagram
   MODEL_VERSIONS {
     int id PK
     varchar name UK
-    varchar model_type "logreg|gbm|bkt|heuristic"
+    varchar model_type "gbm|logreg|bkt|prior"
     varchar artifact_path
     char artifact_sha256
     jsonb feature_names
@@ -251,7 +251,7 @@ erDiagram
 ### model_versions
 - Partial unique index: only one row with `is_active = true` (FR-KT-05).
 - `metrics` copies the evaluation report's headline numbers; `artifact_sha256` guards against loading a different file than the one evaluated.
-- A built-in row `heuristic` exists for the fallback (FR-KT-06).
+- A built-in row `prior` (constant training-set average) exists as the last-resort fallback (FR-KT-06).
 
 ## 3. Key queries (and the index that serves each)
 

@@ -117,8 +117,8 @@ flowchart TB
 | AnalyticsService | Dashboard aggregates, trends, history | Return anything not derived from stored data |
 | EngagementService | Valid-answer rules, daily goal, streaks, weekly report | — |
 | PilotService | Group assignment, test forms, pilot metrics, pseudonymised export | Expose PII |
-| ModelRegistry | Load the active artifact, verify its hash and feature list, fall back to the heuristic | — |
-| KnowledgeModel | `predict(history, question, at_time) -> float` for LR/GBM/BKT/heuristic implementations | — |
+| ModelRegistry | Load the active artifact, verify its hash and feature list; fall back to the logistic-regression artifact, then to the constant prior (FR-KT-06) | — |
+| KnowledgeModel | `predict(history, question, at_time) -> float` for GBM/LR/BKT/prior implementations | — |
 | FeatureBuilder | Turn an attempt history into features using only past data. **Same code as training.** | Read future rows |
 
 ### Key design decisions
@@ -126,7 +126,7 @@ flowchart TB
 | # | Decision | Reason |
 |---|---|---|
 | D-1 | Modular monolith | Team size, single transaction per answer, free hosting |
-| D-2 | `KnowledgeModel` interface with swappable implementations | Lets LR/GBM/BKT be compared and swapped; a heuristic fallback keeps the app working if the artifact breaks |
+| D-2 | `KnowledgeModel` interface with swappable implementations | Lets LR/GBM/BKT be compared and swapped; a logistic-regression fallback (then a constant prior) keeps the app working if the main artifact breaks |
 | D-3 | Shared `mentorx_ml` package for features | Prevents train/serve skew, the most common bug in deployed ML |
 | D-4 | Predictions stored before answers | Enables honest live evaluation of the model on real users |
 | D-5 | Server holds the served-question state | Prevents cheating (no answer key on the client) and makes response time trustworthy |

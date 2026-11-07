@@ -11,7 +11,9 @@
 | [design/uml.md](design/uml.md) | Class, sequence (×4), activity (×2) and state diagrams | M1 |
 | [design/data-flow.md](design/data-flow.md) | DFD levels 0, 1 and 2 + data dictionary | M1 |
 | [datasets.md](datasets.md) | Public datasets: source, terms of use, checksum, cleaning rules, limitations | M3 |
-| [../ml/reports/eda/assist2009/report.md](../ml/reports/eda/assist2009/report.md) | EDA report for ASSISTments 2009 (generated) | M3 |
+| [../ml/reports/eda/](../ml/reports/eda/) | EDA reports for ASSISTments 2009 and EdNet (generated) | M3–M4 |
+| [../ml/reports/models/](../ml/reports/models/) | Model comparison, ablation and time-response reports (generated) | M4 |
+| [ml-report.md](ml-report.md) | **M4 ML report:** models, validation protocol, results, ablations, forgetting curve, decisions, limitations | M4 |
 | [question-bank-guide.md](question-bank-guide.md) | Question format, content standard, writing rules, review checklist and process | M2 |
 
 Diagrams are Mermaid: GitHub renders them, and the VS Code "Markdown Preview Mermaid Support" extension shows them locally.

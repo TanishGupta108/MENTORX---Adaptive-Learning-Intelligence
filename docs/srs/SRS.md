@@ -159,7 +159,7 @@ Priority uses **MoSCoW**: **M**ust (MVP), **S**hould (MVP if time allows), **C**
 | FR-KT-03 | After every attempt, the system shall recompute and store the mastery of the attempted concept, tagged with the model version. | M |
 | FR-KT-04 | Mastery shall decay with time without practice (via time-since-last-attempt features or an equivalent model mechanism). Displayed mastery shall be recomputed when it's read if it's older than 24 h. | M |
 | FR-KT-05 | Exactly one model version shall be active at a time. Admins can switch the active version without redeploying. | S |
-| FR-KT-06 | If the model artifact fails to load, the system shall fall back to a documented heuristic (smoothed per-concept accuracy), log an error and show no ML-based claims in the UI. | M |
+| FR-KT-06 | If the primary model fails to load, the system shall fall back to the logistic-regression model trained on the same data (shipped as a separate artifact); if that also fails, to the training-set average probability. It shall log an error, and when on the last fallback it shall show no ML-based claims in the UI. *(Changed in M4: the originally planned smoothed-accuracy heuristic was badly calibrated, with ECE 0.12 on both benchmarks, and on EdNet it was worse than the constant average; see ml/reports/models.)* | M |
 | FR-KT-07 | The offline pipeline shall train and compare at least Logistic Regression, a tree ensemble (Random Forest or gradient boosting) and BKT. Splits must be student-level and the training/evaluation reproducible from a config and seed. | M |
 | FR-KT-08 | The evaluation report shall include AUC-ROC, accuracy, F1, log loss, Brier score, a reliability diagram and bootstrap 95% CIs. | M |
 | FR-KT-09 | A DKT model shall be benchmarked on public data. | C |

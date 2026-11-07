@@ -1,0 +1,35 @@
+# Experiment config: ASSISTments 2009 (no timestamps, so no time features).
+# The selection rule below is fixed BEFORE any test-set result is seen.
+
+name: assist2009_no_item_difficulty
+description: >-
+  Ablation: no item-level difficulty (item_logit, log_item_count). This is the situation of a brand-new question bank such as MENTORX's at launch, where only concept-level difficulty can be estimated.
+dataset: assist2009
+seed: 42
+split:
+  val_frac: 0.15
+  test_frac: 0.15
+features:
+  use_time: false
+  exclude: [item_logit, log_item_count]
+
+models:
+  prior: {}
+  heuristic: {}
+  logistic_regression:
+    C: [0.01, 0.1, 1.0, 10.0]
+  gradient_boosting:
+    learning_rate: [0.05, 0.1]
+    max_leaf_nodes: [15, 31, 63]
+
+selection:
+  # Pre-registered (docs/PROJECT_PLAN.md §5.6): lowest validation log loss among models
+  # that are calibrated well enough and fast enough for live question selection.
+  metric: log_loss
+  max_ece: 0.05
+  max_latency_ms_50_candidates: 50
+  exclude: [prior]  # the constant baseline is a reference, never a candidate
+
+evaluation:
+  bootstrap_reps: 200
+  reference_model: heuristic

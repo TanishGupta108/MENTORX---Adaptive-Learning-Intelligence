@@ -9,11 +9,14 @@ import argparse
 import logging
 from pathlib import Path
 
-from mentorx_ml.data import assist2009
+from mentorx_ml.data import assist2009, ednet
 from mentorx_ml.data.download import fetch
 
 ML_DIR = Path(__file__).resolve().parents[1]
-DATASETS = {assist2009.NAME: assist2009.REMOTE}
+DATASETS = {
+    assist2009.NAME: [assist2009.REMOTE],
+    ednet.NAME: [ednet.CONTENTS, ednet.KT1],  # KT1 is 1.2 GB
+}
 
 
 def main() -> None:
@@ -25,9 +28,10 @@ def main() -> None:
 
     print(
         "Before using this data, read its terms in docs/datasets.md "
-        "(no redistribution; cite the source)."
+        "(licence, redistribution and citation rules)."
     )
-    fetch(DATASETS[args.dataset], ML_DIR / "data" / "raw" / args.dataset, force=args.force)
+    for remote in DATASETS[args.dataset]:
+        fetch(remote, ML_DIR / "data" / "raw" / args.dataset, force=args.force)
 
 
 if __name__ == "__main__":

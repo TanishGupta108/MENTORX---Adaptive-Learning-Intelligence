@@ -110,8 +110,8 @@ classDiagram
   class BayesianKT {
     +dict params_per_concept
   }
-  class HeuristicKT {
-    +smoothed concept accuracy
+  class PriorKT {
+    +training-set average
   }
   class FeatureBuilder {
     +build(history, question, at) FeatureVector
@@ -148,7 +148,7 @@ classDiagram
   KnowledgeModel <|.. LogisticKT
   KnowledgeModel <|.. GradientBoostingKT
   KnowledgeModel <|.. BayesianKT
-  KnowledgeModel <|.. HeuristicKT
+  KnowledgeModel <|.. PriorKT
   LogisticKT ..> FeatureBuilder
   GradientBoostingKT ..> FeatureBuilder
   ModelRegistry o-- KnowledgeModel
