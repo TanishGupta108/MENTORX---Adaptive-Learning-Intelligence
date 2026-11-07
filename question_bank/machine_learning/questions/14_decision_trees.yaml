@@ -1,0 +1,183 @@
+questions:
+  - id: tree-001
+    concept: ml.decision_trees
+    difficulty: 2
+    diagnostic: true
+    stem: A node contains examples from two classes in a 50% / 50% split. What is its entropy (in bits)?
+    options:
+      A: "0"
+      B: "0.5"
+      C: "1"
+      D: "2"
+    answer: C
+    explanation: Entropy = −Σ p log₂ p = −(0.5 log₂ 0.5 + 0.5 log₂ 0.5) = 1 bit, the maximum for two classes. A pure node has entropy 0.
+
+  - id: tree-002
+    concept: ml.decision_trees
+    difficulty: 1
+    stem: In a classification tree, what does a leaf node do?
+    options:
+      A: It outputs a prediction, such as the majority class of the training examples that reach it
+      B: It splits the data on another feature
+      C: It stores the learning rate
+      D: It removes outliers
+    answer: A
+    explanation: Internal nodes test features and route examples. Leaves hold the final prediction for every example that ends up there.
+
+  - id: tree-003
+    concept: ml.decision_trees
+    difficulty: 1
+    stem: When building a decision tree, how is each split chosen?
+    options:
+      A: At random
+      B: Always on the first feature
+      C: So that the child nodes contain as many classes as possible
+      D: So that the child nodes are as pure as possible, each mostly one class
+    answer: D
+    explanation: Splits are chosen to reduce impurity (Gini or entropy) as much as possible, making the children more homogeneous.
+
+  - id: tree-004
+    concept: ml.decision_trees
+    difficulty: 1
+    stem: What is a key advantage of a small decision tree?
+    options:
+      A: It never overfits
+      B: It's easy to interpret, because its decisions can be read as if-then rules
+      C: It always beats every other model
+      D: It needs feature scaling
+    answer: B
+    explanation: A shallow tree can be drawn and explained. Large unpruned trees do overfit, and trees don't need scaled features.
+
+  - id: tree-005
+    concept: ml.decision_trees
+    difficulty: 1
+    stem: What is the entropy of a node in which every example has the same class?
+    options:
+      A: "1"
+      B: "0.5"
+      C: "0"
+      D: It's undefined
+    answer: C
+    explanation: A pure node has no uncertainty. With p = 1, −1 × log₂ 1 = 0.
+
+  - id: tree-006
+    concept: ml.decision_trees
+    difficulty: 2
+    stem: What is the Gini impurity of a node whose two classes are split 50% / 50%?
+    options:
+      A: "0.5"
+      B: "1"
+      C: "0.25"
+      D: "0"
+    answer: A
+    explanation: Gini = 1 − Σ pᵢ² = 1 − (0.25 + 0.25) = 0.5, the maximum for two classes. 0.25 is a single pᵢ².
+
+  - id: tree-007
+    concept: ml.decision_trees
+    difficulty: 2
+    stem: How is the information gain of a split defined?
+    options:
+      A: The number of child nodes created
+      B: The parent's entropy minus the weighted average entropy of the children
+      C: The children's entropy minus the parent's entropy
+      D: The depth of the tree after the split
+    answer: B
+    explanation: Information gain measures how much the split reduces uncertainty, weighting each child by its share of the examples. The tree picks the split with the largest gain.
+
+  - id: tree-008
+    concept: ml.decision_trees
+    difficulty: 2
+    stem: A decision tree is grown with no depth limit and no minimum leaf size. What is the likely result?
+    options:
+      A: Underfitting
+      B: The tree stops after one split
+      C: It generalises perfectly
+      D: It overfits, ending up with tiny leaves that memorise individual training examples
+    answer: D
+    explanation: An unrestricted tree keeps splitting until the leaves are pure, often one example per leaf. That fits the noise. Depth limits, minimum leaf sizes or pruning control it.
+
+  - id: tree-009
+    concept: ml.decision_trees
+    difficulty: 2
+    stem: What does pruning a decision tree do?
+    options:
+      A: It adds more branches to fit the data better
+      B: It removes features from the dataset
+      C: It removes branches that add little predictive value, reducing overfitting
+      D: It sorts the training data
+    answer: C
+    explanation: Pruning simplifies the tree, either by growing it fully and cutting back (post-pruning) or by stopping early (pre-pruning). It trades a little training fit for better generalisation.
+
+  - id: tree-010
+    concept: ml.decision_trees
+    difficulty: 2
+    stem: How does a regression tree make a prediction for a new example?
+    options:
+      A: It returns the mean target value of the training examples in its leaf
+      B: It returns the majority class in its leaf
+      C: It fits a neural network inside each leaf
+      D: It returns the largest target value in the training set
+    answer: A
+    explanation: Regression trees split to reduce squared error, and each leaf predicts the average target of its training examples, giving a piecewise-constant function.
+
+  - id: tree-011
+    concept: ml.decision_trees
+    difficulty: 3
+    stem: A node contains 80% class A and 20% class B. What is its Gini impurity?
+    options:
+      A: "0.20"
+      B: "0.32"
+      C: "0.68"
+      D: "0.80"
+    answer: B
+    explanation: Gini = 1 − (0.8² + 0.2²) = 1 − (0.64 + 0.04) = 0.32. 0.68 is the sum of squares, before subtracting from 1.
+
+  - id: tree-012
+    concept: ml.decision_trees
+    difficulty: 3
+    stem: Why can plain information gain be misleading for a feature like "customer ID"?
+    options:
+      A: IDs are always missing
+      B: Information gain can't handle numbers
+      C: IDs reduce the number of leaves
+      D: Features with many unique values can split the data into tiny pure groups, so they get high gain without generalising; the gain ratio corrects for this
+    answer: D
+    explanation: Splitting on a unique ID gives one pure leaf per example, which is maximum gain and zero generalisation. C4.5's gain ratio divides by the split's own entropy to penalise this.
+
+  - id: tree-013
+    concept: ml.decision_trees
+    difficulty: 3
+    stem: Why are single decision trees described as unstable?
+    options:
+      A: Small changes in the training data can produce a very different tree, so they have high variance
+      B: They crash on large datasets
+      C: Their predictions change every time you run them on the same input
+      D: They can't handle categorical data
+    answer: A
+    explanation: An early split that changes slightly affects everything below it. That high variance is exactly what bagging and random forests reduce. For a fixed tree, the predictions themselves are deterministic.
+
+  - id: tree-014
+    concept: ml.decision_trees
+    difficulty: 2
+    test_form: A
+    stem: A node contains 10 examples, 7 of class A and 3 of class B. What is its Gini impurity?
+    options:
+      A: "0.42"
+      B: "0.58"
+      C: "0.30"
+      D: "0.21"
+    answer: A
+    explanation: Gini = 1 − (0.7² + 0.3²) = 1 − (0.49 + 0.09) = 0.42. 0.58 is the sum of squares, before subtracting from 1.
+
+  - id: tree-015
+    concept: ml.decision_trees
+    difficulty: 2
+    test_form: B
+    stem: A node contains 10 examples, 6 of class A and 4 of class B. What is its Gini impurity?
+    options:
+      A: "0.52"
+      B: "0.40"
+      C: "0.48"
+      D: "0.24"
+    answer: C
+    explanation: Gini = 1 − (0.6² + 0.4²) = 1 − (0.36 + 0.16) = 0.48. 0.52 is the sum of squares, before subtracting from 1.

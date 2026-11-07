@@ -1,0 +1,183 @@
+questions:
+  - id: bv-001
+    concept: ml.bias_variance
+    difficulty: 2
+    diagnostic: true
+    stem: A model has 99% training accuracy but 70% validation accuracy. Which change is most likely to help?
+    options:
+      A: Increase the model's complexity
+      B: Train for many more epochs
+      C: Add regularisation or collect more training data
+      D: Remove the validation set
+    answer: C
+    explanation: The large gap between training and validation accuracy indicates overfitting (high variance). Regularisation and more data reduce variance; more complexity or longer training would usually make it worse.
+
+  - id: bv-002
+    concept: ml.bias_variance
+    difficulty: 1
+    stem: What is overfitting?
+    options:
+      A: Fitting the training data very well but performing poorly on new data
+      B: Performing poorly on both training and test data
+      C: Training a model for too few epochs
+      D: Using too little memory during training
+    answer: A
+    explanation: An overfit model has memorised noise and quirks of the training set, so it doesn't generalise. Poor performance on both training and test data is underfitting.
+
+  - id: bv-003
+    concept: ml.bias_variance
+    difficulty: 1
+    stem: What does underfitting look like?
+    options:
+      A: Very low training error and high test error
+      B: Zero error everywhere
+      C: Low test error but high training error
+      D: High error on both the training and the test data, because the model is too simple
+    answer: D
+    explanation: An underfit model can't even capture the patterns in the training data, so both errors are high. Low training error with high test error is overfitting.
+
+  - id: bv-004
+    concept: ml.bias_variance
+    difficulty: 1
+    stem: You fit a degree-15 polynomial to 20 noisy data points. What is the most likely outcome?
+    options:
+      A: Underfitting
+      B: Overfitting
+      C: A perfectly general model
+      D: The model can't be fitted
+    answer: B
+    explanation: A degree-15 polynomial has 16 parameters, enough to pass through almost every one of the 20 points, including the noise. It will wiggle wildly between points and generalise badly.
+
+  - id: bv-005
+    concept: ml.bias_variance
+    difficulty: 1
+    stem: Which of these usually helps reduce overfitting?
+    options:
+      A: Adding more model parameters
+      B: Removing the validation set
+      C: Collecting more training data
+      D: Training for longer with no stopping rule
+    answer: C
+    explanation: More data makes it harder for a model to memorise noise, which reduces variance. The other options increase the risk of overfitting or remove the means of detecting it.
+
+  - id: bv-006
+    concept: ml.bias_variance
+    difficulty: 2
+    stem: A model with high bias is most likely to be doing what?
+    options:
+      A: Underfitting
+      B: Overfitting
+      C: Leaking test data
+      D: Fitting perfectly
+    answer: A
+    explanation: High bias means the model's assumptions are too strong or simple to capture the true pattern, which is underfitting. High variance corresponds to overfitting.
+
+  - id: bv-007
+    concept: ml.bias_variance
+    difficulty: 2
+    stem: On a learning curve, training error stays low while validation error is much higher, and the gap shrinks as the training set grows. What does this suggest?
+    options:
+      A: High bias, so more data won't help
+      B: The model is perfect
+      C: The validation set is broken
+      D: High variance, so more data is likely to help
+    answer: D
+    explanation: A large train-validation gap that narrows with more data is the classic sign of high variance. If the curves had already converged at a high error, that would indicate high bias, where more data wouldn't help.
+
+  - id: bv-008
+    concept: ml.bias_variance
+    difficulty: 2
+    stem: Training error is 30% and validation error is 31%, but a better model is known to reach 5%. What should you try?
+    options:
+      A: Add strong regularisation
+      B: Use less training data
+      C: Increase model complexity or add more informative features
+      D: Stop training earlier
+    answer: C
+    explanation: Both errors are high and close together, which indicates high bias (underfitting). The model needs more capacity or better features; regularisation and early stopping would make it simpler still.
+
+  - id: bv-009
+    concept: ml.bias_variance
+    difficulty: 2
+    stem: In k-nearest neighbours, what happens as you increase k?
+    options:
+      A: Bias decreases and variance increases
+      B: Bias increases and variance decreases
+      C: Both bias and variance increase
+      D: Neither changes
+    answer: B
+    explanation: A larger k averages over more neighbours, which gives smoother predictions that are less sensitive to individual points (lower variance) but can blur real structure (higher bias). k = 1 is the extreme low-bias, high-variance case.
+
+  - id: bv-010
+    concept: ml.bias_variance
+    difficulty: 2
+    stem: For squared-error loss, how does the expected test error decompose?
+    options:
+      A: Bias² + variance + irreducible noise
+      B: Bias + variance − noise
+      C: Training error + validation error
+      D: Variance only
+    answer: A
+    explanation: Expected squared error = bias² + variance + irreducible error. Model choices trade bias against variance; the noise term can't be reduced by any model.
+
+  - id: bv-011
+    concept: ml.bias_variance
+    difficulty: 3
+    stem: How does increasing a decision tree's maximum depth affect bias and variance?
+    options:
+      A: Bias increases, variance decreases
+      B: Both decrease
+      C: Bias decreases, variance increases
+      D: Neither changes
+    answer: C
+    explanation: Deeper trees can carve the feature space more finely, fitting the training data more closely (lower bias). They also become more sensitive to the particular training sample (higher variance).
+
+  - id: bv-012
+    concept: ml.bias_variance
+    difficulty: 3
+    stem: What is irreducible error?
+    options:
+      A: Error caused by a bad learning rate
+      B: Error that more training data always removes
+      C: Error from using too few features in the current model
+      D: Error due to noise in the data itself, which no model can remove
+    answer: D
+    explanation: Even the true underlying function can't predict noise such as measurement error or unobserved factors. It sets a floor on achievable error. Missing features can be added, so that error isn't irreducible in this sense.
+
+  - id: bv-013
+    concept: ml.bias_variance
+    difficulty: 3
+    stem: Which component of the error does bagging (bootstrap aggregating) mainly reduce?
+    options:
+      A: Bias
+      B: Variance
+      C: Irreducible noise
+      D: Training time
+    answer: B
+    explanation: Averaging many models trained on different bootstrap samples smooths out their individual fluctuations, which reduces variance. Bias stays about the same as that of a single model.
+
+  - id: bv-014
+    concept: ml.bias_variance
+    difficulty: 2
+    test_form: A
+    stem: A model achieves 98% training accuracy and 65% validation accuracy. What is the most likely diagnosis?
+    options:
+      A: High bias (underfitting)
+      B: A well-fitted model
+      C: Only irreducible error
+      D: High variance (overfitting)
+    answer: D
+    explanation: Excellent training performance combined with much worse validation performance means the model has fitted the training data's noise. That's high variance.
+
+  - id: bv-015
+    concept: ml.bias_variance
+    difficulty: 2
+    test_form: B
+    stem: A model achieves 62% training accuracy and 60% validation accuracy, while 90% is known to be achievable. What is the most likely diagnosis?
+    options:
+      A: High variance (overfitting)
+      B: High bias (underfitting)
+      C: Data leakage
+      D: A well-fitted model
+    answer: B
+    explanation: Both accuracies are low and close together, so the model is too simple to capture the pattern. That's high bias.

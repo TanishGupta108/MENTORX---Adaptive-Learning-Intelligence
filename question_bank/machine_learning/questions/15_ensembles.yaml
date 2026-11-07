@@ -1,0 +1,183 @@
+questions:
+  - id: ens-001
+    concept: ml.ensembles
+    difficulty: 2
+    diagnostic: true
+    stem: Which description best fits a random forest?
+    options:
+      A: One very deep decision tree
+      B: Decision trees trained one after another, each fixing the previous one's errors
+      C: A neural network with tree-shaped layers
+      D: Many decision trees, each trained on a bootstrap sample with random feature subsets at each split, with their predictions combined by voting or averaging
+    answer: D
+    explanation: Random forests combine bagging (bootstrap samples) with random feature selection at each split, then aggregate the trees. Training trees sequentially to fix errors is boosting.
+
+  - id: ens-002
+    concept: ml.ensembles
+    difficulty: 1
+    stem: What is an ensemble method?
+    options:
+      A: A method that combines the predictions of several models
+      B: A method for cleaning data
+      C: A single model with many features
+      D: A way of splitting data into folds
+    answer: A
+    explanation: An ensemble aggregates several models, for example by voting or averaging, so that their individual errors partly cancel out.
+
+  - id: ens-003
+    concept: ml.ensembles
+    difficulty: 1
+    stem: What does "bagging" stand for?
+    options:
+      A: Batch gradient gathering
+      B: Backward aggregation
+      C: Bootstrap aggregating
+      D: Bayesian aggregation
+    answer: C
+    explanation: Bagging trains each model on a bootstrap sample (drawn with replacement) and aggregates their predictions.
+
+  - id: ens-004
+    concept: ml.ensembles
+    difficulty: 1
+    stem: How does a random forest classifier combine its trees' predictions?
+    options:
+      A: It uses only the best tree
+      B: Majority vote (or averaging the trees' class probabilities)
+      C: It multiplies the predictions together
+      D: It uses the first tree's prediction
+    answer: B
+    explanation: Each tree votes for a class and the most common class wins. Implementations such as scikit-learn average the predicted probabilities, which is a soft vote.
+
+  - id: ens-005
+    concept: ml.ensembles
+    difficulty: 1
+    stem: How does boosting build its models?
+    options:
+      A: All models are trained independently in parallel
+      B: It trains just one model
+      C: It trains on the test set
+      D: Sequentially, with each new model focusing on the mistakes of the ones before it
+    answer: D
+    explanation: Boosting adds models one at a time, giving more attention to examples the current ensemble gets wrong. Training models independently in parallel is bagging.
+
+  - id: ens-006
+    concept: ml.ensembles
+    difficulty: 2
+    stem: How is a bootstrap sample of a dataset with n examples created?
+    options:
+      A: By drawing n examples at random with replacement
+      B: By taking the first half of the data
+      C: By drawing n examples without replacement
+      D: By sorting the data and taking every other row
+    answer: A
+    explanation: Sampling with replacement means some examples appear several times and others not at all. Drawing n without replacement would just reproduce the original dataset.
+
+  - id: ens-007
+    concept: ml.ensembles
+    difficulty: 2
+    stem: Why does a random forest consider only a random subset of features at each split?
+    options:
+      A: To make each tree deeper
+      B: To use less memory
+      C: To decorrelate the trees, so that averaging them reduces variance more
+      D: To guarantee that every feature is used equally
+    answer: C
+    explanation: If one feature is very strong, every bagged tree would split on it first and the trees would be highly correlated. Random feature subsets make the trees differ, and averaging different trees cancels more errors.
+
+  - id: ens-008
+    concept: ml.ensembles
+    difficulty: 2
+    stem: What are out-of-bag (OOB) examples in a random forest?
+    options:
+      A: Examples with missing values
+      B: Training examples that weren't drawn into a given tree's bootstrap sample, which can be used to validate that tree
+      C: Examples from the test set
+      D: Outliers removed before training
+    answer: B
+    explanation: Each bootstrap sample leaves out about 37% of the examples. Predicting each example only with the trees that didn't see it gives a validation estimate for free.
+
+  - id: ens-009
+    concept: ml.ensembles
+    difficulty: 2
+    stem: In gradient boosting, what does each new tree learn to predict?
+    options:
+      A: The original labels, independently of the earlier trees
+      B: Random noise
+      C: The test-set labels
+      D: The residual errors (the negative gradient of the loss) of the current ensemble
+    answer: D
+    explanation: Each tree fits what the ensemble still gets wrong; for squared error, that's literally the residuals. Its output is then added, scaled by the learning rate.
+
+  - id: ens-010
+    concept: ml.ensembles
+    difficulty: 2
+    stem: In AdaBoost, what happens to the training examples misclassified by the current model?
+    options:
+      A: Their weights are increased, so the next model focuses on them
+      B: They're deleted from the dataset
+      C: Their weights are decreased
+      D: Their labels are flipped
+    answer: A
+    explanation: AdaBoost re-weights the training examples after each round so that hard examples get more attention from the next weak learner.
+
+  - id: ens-011
+    concept: ml.ensembles
+    difficulty: 3
+    stem: Which statement about bagging and boosting is generally true?
+    options:
+      A: Both mainly reduce bias
+      B: Bagging mainly reduces bias, and boosting mainly reduces variance
+      C: Bagging mainly reduces variance, and boosting mainly reduces bias
+      D: Neither changes the bias or the variance
+    answer: C
+    explanation: Bagging averages many high-variance models, such as deep trees, to cut variance. Boosting builds a strong model out of weak, high-bias learners such as shallow trees, which cuts bias.
+
+  - id: ens-012
+    concept: ml.ensembles
+    difficulty: 3
+    stem: A gradient boosting model with 5,000 trees and a learning rate of 1.0 has much worse validation error than training error. What is the best fix?
+    options:
+      A: Add more trees
+      B: Use a smaller learning rate with early stopping on a validation set
+      C: Remove the validation set
+      D: Make each tree deeper
+    answer: B
+    explanation: Boosting can overfit as it keeps fitting residuals. A small learning rate (shrinkage) combined with early stopping, and possibly shallower trees, is the standard remedy. More or deeper trees would make it worse.
+
+  - id: ens-013
+    concept: ml.ensembles
+    difficulty: 3
+    stem: When does averaging several models help the most?
+    options:
+      A: When all the models are identical
+      B: When the models are all very biased in the same direction
+      C: When only one model is used
+      D: When the models are individually reasonable and their errors are not strongly correlated
+    answer: D
+    explanation: Averaging cancels errors that point in different directions. Identical models make identical errors, so averaging them gains nothing, and shared bias doesn't cancel either.
+
+  - id: ens-014
+    concept: ml.ensembles
+    difficulty: 2
+    test_form: A
+    stem: A random forest with 5 trees predicts yes, no, yes, yes, no for one example. What is the forest's prediction, using majority voting?
+    options:
+      A: "no"
+      B: "yes"
+      C: A tie
+      D: The first tree's answer
+    answer: B
+    explanation: Yes gets 3 votes and no gets 2, so the forest predicts yes. With an odd number of trees and two classes, a tie can't happen.
+
+  - id: ens-015
+    concept: ml.ensembles
+    difficulty: 2
+    test_form: B
+    stem: A random forest with 7 trees predicts cat, dog, dog, cat, dog, dog, cat for one example. What is the forest's prediction, using majority voting?
+    options:
+      A: cat
+      B: A tie
+      C: dog
+      D: The first tree's answer, cat
+    answer: C
+    explanation: Dog gets 4 votes and cat gets 3, so the forest predicts dog. With an odd number of trees and two classes, a tie can't happen.

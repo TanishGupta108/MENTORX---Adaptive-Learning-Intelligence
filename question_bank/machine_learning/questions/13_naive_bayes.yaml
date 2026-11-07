@@ -1,0 +1,183 @@
+questions:
+  - id: nb-001
+    concept: ml.naive_bayes
+    difficulty: 2
+    diagnostic: true
+    stem: What is the "naive" assumption in Naive Bayes?
+    options:
+      A: All classes are equally likely
+      B: The features are conditionally independent of each other given the class
+      C: Every feature is normally distributed
+      D: The data is linearly separable
+    answer: B
+    explanation: Naive Bayes assumes P(x₁, …, x_d | y) = Π P(xᵢ | y). Equal class priors aren't assumed; they're estimated from the data.
+
+  - id: nb-002
+    concept: ml.naive_bayes
+    difficulty: 1
+    stem: Which rule are Naive Bayes classifiers built on?
+    options:
+      A: The chain rule of calculus
+      B: Gradient descent
+      C: Bayes' theorem
+      D: Pythagoras' theorem
+    answer: C
+    explanation: Naive Bayes computes P(class | features) ∝ P(features | class) × P(class), which is Bayes' theorem combined with the independence assumption.
+
+  - id: nb-003
+    concept: ml.naive_bayes
+    difficulty: 1
+    stem: Which is a classic application of Naive Bayes?
+    options:
+      A: Spam filtering and text classification
+      B: Image generation
+      C: Forecasting stock prices with time series
+      D: Clustering customers
+    answer: A
+    explanation: Naive Bayes is fast and works well with high-dimensional word-count features, so it became a standard baseline for spam and text classification.
+
+  - id: nb-004
+    concept: ml.naive_bayes
+    difficulty: 1
+    stem: Which class does a Naive Bayes classifier predict?
+    options:
+      A: The class with the most training examples, always
+      B: The first class in alphabetical order
+      C: The class with the lowest likelihood
+      D: The class with the highest posterior probability P(class | features)
+    answer: D
+    explanation: It combines the prior and the likelihoods for each class and picks the class with the highest posterior. The prior alone (the most common class) is only one part of that.
+
+  - id: nb-005
+    concept: ml.naive_bayes
+    difficulty: 1
+    stem: How is the prior P(class) usually estimated in Naive Bayes?
+    options:
+      A: It's always set to 0.5
+      B: As the fraction of training examples that belong to that class
+      C: By gradient descent
+      D: From the test set
+    answer: B
+    explanation: The maximum-likelihood estimate of a class prior is simply its frequency in the training data.
+
+  - id: nb-006
+    concept: ml.naive_bayes
+    difficulty: 2
+    stem: Why is Laplace (add-one) smoothing used in Naive Bayes?
+    options:
+      A: So that a word never seen with a class doesn't make that class's probability exactly zero
+      B: To make training faster
+      C: To remove stop words
+      D: To make the features independent
+    answer: A
+    explanation: Without smoothing, one unseen word gives P(word | class) = 0, and the whole product becomes 0 regardless of the other evidence. Adding a small count avoids this.
+
+  - id: nb-007
+    concept: ml.naive_bayes
+    difficulty: 2
+    stem: How does Gaussian Naive Bayes model continuous features?
+    options:
+      A: It turns them into word counts
+      B: It ignores them
+      C: It models each feature within each class as a normal distribution with its own mean and variance
+      D: It uses a single normal distribution for all classes
+    answer: C
+    explanation: For each class, Gaussian NB estimates a mean and variance for every feature and uses the normal density as P(xᵢ | y).
+
+  - id: nb-008
+    concept: ml.naive_bayes
+    difficulty: 2
+    stem: P(spam) = 0.4, P("offer" | spam) = 0.5 and P("offer" | not spam) = 0.1. An email contains "offer". What is P(spam | "offer")?
+    options:
+      A: "0.50"
+      B: "0.20"
+      C: "0.40"
+      D: "0.77"
+    answer: D
+    explanation: P(spam | offer) = 0.5×0.4 / (0.5×0.4 + 0.1×0.6) = 0.20 / 0.26 ≈ 0.77. 0.20 is only the numerator, before dividing by P(offer).
+
+  - id: nb-009
+    concept: ml.naive_bayes
+    difficulty: 2
+    stem: Which Naive Bayes variant suits features that are word counts in documents?
+    options:
+      A: Gaussian Naive Bayes
+      B: Multinomial Naive Bayes
+      C: Linear Naive Bayes
+      D: Polynomial Naive Bayes
+    answer: B
+    explanation: Multinomial NB models how often each word occurs, which matches bag-of-words count features. Gaussian NB is for continuous features.
+
+  - id: nb-010
+    concept: ml.naive_bayes
+    difficulty: 2
+    stem: Why do Naive Bayes implementations add log-probabilities instead of multiplying probabilities?
+    options:
+      A: Multiplying many small probabilities can underflow to 0 on a computer
+      B: Logarithms make the model more accurate in theory
+      C: Probabilities can't be multiplied
+      D: To make the features independent
+    answer: A
+    explanation: The product of hundreds of values like 0.001 is too small to represent in floating point. Summing their logs gives the same ranking of classes without underflow.
+
+  - id: nb-011
+    concept: ml.naive_bayes
+    difficulty: 3
+    stem: You accidentally include the same feature twice in a Naive Bayes model. What is the likely effect?
+    options:
+      A: No effect, because Naive Bayes removes duplicates
+      B: The model can't be trained
+      C: That feature's evidence is counted twice, making predictions over-confident
+      D: The priors become uniform
+    answer: C
+    explanation: Naive Bayes treats the two copies as independent evidence and multiplies their likelihoods, which double-counts the same information. This is why its probabilities are often poorly calibrated when features are correlated.
+
+  - id: nb-012
+    concept: ml.naive_bayes
+    difficulty: 3
+    stem: How does Naive Bayes differ from logistic regression in modelling approach?
+    options:
+      A: Both model P(y | x) directly
+      B: Naive Bayes is discriminative, and logistic regression is generative
+      C: Neither is a probabilistic model
+      D: Naive Bayes is generative (it models P(x | y) and P(y)), while logistic regression is discriminative (it models P(y | x) directly)
+    answer: D
+    explanation: Generative models learn how the features are produced for each class. Discriminative models learn the decision rule directly. Naive Bayes often does better with very little data, and logistic regression with more.
+
+  - id: nb-013
+    concept: ml.naive_bayes
+    difficulty: 3
+    stem: In multinomial Naive Bayes with Laplace smoothing (α = 1), the spam class contains 100 word occurrences in total, the vocabulary has 50 words, and the word "lottery" never appears in spam. What is P("lottery" | spam)?
+    options:
+      A: "0"
+      B: 1/100
+      C: 1/150
+      D: 1/50
+    answer: C
+    explanation: Smoothed estimate = (count + α) / (total + α × vocabulary size) = (0 + 1) / (100 + 50) = 1/150. Without smoothing it would be 0.
+
+  - id: nb-014
+    concept: ml.naive_bayes
+    difficulty: 2
+    test_form: A
+    stem: P(A) = 0.5 and P(B) = 0.5 are the class priors. A word has P(word | A) = 0.6 and P(word | B) = 0.2. A document contains the word. What is P(A | word)?
+    options:
+      A: "0.75"
+      B: "0.60"
+      C: "0.30"
+      D: "0.50"
+    answer: A
+    explanation: P(A | word) = 0.6×0.5 / (0.6×0.5 + 0.2×0.5) = 0.30 / 0.40 = 0.75. 0.60 confuses P(word | A) with P(A | word).
+
+  - id: nb-015
+    concept: ml.naive_bayes
+    difficulty: 2
+    test_form: B
+    stem: P(A) = 0.2 and P(B) = 0.8 are the class priors. A word has P(word | A) = 0.5 and P(word | B) = 0.1. A document contains the word. What is P(A | word)?
+    options:
+      A: "0.10"
+      B: "0.20"
+      C: "0.50"
+      D: "0.56"
+    answer: D
+    explanation: P(A | word) = 0.5×0.2 / (0.5×0.2 + 0.1×0.8) = 0.10 / 0.18 ≈ 0.56. 0.50 confuses P(word | A) with P(A | word).

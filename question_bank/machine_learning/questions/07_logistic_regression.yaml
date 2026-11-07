@@ -1,0 +1,183 @@
+questions:
+  - id: logreg-001
+    concept: ml.logistic_regression
+    difficulty: 2
+    diagnostic: true
+    stem: For one example, a logistic regression model computes z = w·x + b = 0. What probability does it output for the positive class?
+    options:
+      A: "0"
+      B: "1"
+      C: It's undefined
+      D: "0.5"
+    answer: D
+    explanation: The model outputs σ(z) = 1 / (1 + e^(−z)), and σ(0) = 1 / (1 + 1) = 0.5. The example lies exactly on the decision boundary.
+
+  - id: logreg-002
+    concept: ml.logistic_regression
+    difficulty: 1
+    stem: Despite its name, what is logistic regression mainly used for?
+    options:
+      A: Classification
+      B: Predicting continuous values such as prices
+      C: Clustering
+      D: Dimensionality reduction
+    answer: A
+    explanation: Logistic regression models the probability of a class and is used for (usually binary) classification. "Regression" refers to how it's fitted, not to predicting continuous targets.
+
+  - id: logreg-003
+    concept: ml.logistic_regression
+    difficulty: 1
+    stem: Which function does logistic regression apply to the linear score z?
+    options:
+      A: ReLU, max(0, z)
+      B: The identity, z
+      C: The square, z²
+      D: The sigmoid, 1 / (1 + e^(−z))
+    answer: D
+    explanation: The sigmoid squashes any real z into (0, 1), so the output can be read as a probability.
+
+  - id: logreg-004
+    concept: ml.logistic_regression
+    difficulty: 1
+    stem: What range are the outputs of a logistic regression model in?
+    options:
+      A: Any real number
+      B: Between 0 and 1
+      C: Between −1 and 1
+      D: Only exactly 0 or 1
+    answer: B
+    explanation: The sigmoid output is strictly between 0 and 1 and represents P(y = 1 | x). Hard labels of 0 or 1 come only after applying a threshold.
+
+  - id: logreg-005
+    concept: ml.logistic_regression
+    difficulty: 1
+    stem: A model predicts P(y = 1) = 0.7 and the threshold is 0.5. Which class is predicted?
+    options:
+      A: Class 0
+      B: Neither, because the model is unsure
+      C: Class 1
+      D: Both
+    answer: C
+    explanation: 0.7 is above the 0.5 threshold, so the model predicts class 1. The threshold can be changed to trade off precision against recall.
+
+  - id: logreg-006
+    concept: ml.logistic_regression
+    difficulty: 2
+    stem: Which loss function is used to train logistic regression?
+    options:
+      A: Log loss (binary cross-entropy)
+      B: Mean squared error
+      C: Hinge loss
+      D: Mean absolute error
+    answer: A
+    explanation: Log loss is the negative log-likelihood of a Bernoulli model, so minimising it is maximum likelihood estimation. Combined with the sigmoid, it gives a convex optimisation problem.
+
+  - id: logreg-007
+    concept: ml.logistic_regression
+    difficulty: 2
+    stem: What shape is the decision boundary of logistic regression on the original features (with no feature transformations)?
+    options:
+      A: A circle
+      B: Any arbitrary curve
+      C: A set of axis-aligned rectangles
+      D: A straight line or hyperplane
+    answer: D
+    explanation: The boundary is where w·x + b = 0, which is linear in x. A curved boundary needs extra features such as x² or interaction terms.
+
+  - id: logreg-008
+    concept: ml.logistic_regression
+    difficulty: 2
+    stem: In logistic regression, a feature has weight w = 0.7. What happens when that feature increases by 1, with the others fixed?
+    options:
+      A: The probability increases by exactly 0.7
+      B: The odds of the positive class are multiplied by e^0.7 (about 2.0)
+      C: The predicted class always flips
+      D: The log loss increases by 0.7
+    answer: B
+    explanation: Logistic regression is linear in the log-odds, so +1 in the feature adds w to the log-odds, which multiplies the odds by e^w. The change in probability itself depends on where you start.
+
+  - id: logreg-009
+    concept: ml.logistic_regression
+    difficulty: 2
+    stem: Why is log loss preferred over mean squared error for training logistic regression?
+    options:
+      A: MSE can't be computed for probabilities
+      B: Log loss is always smaller than MSE
+      C: MSE combined with the sigmoid gives a non-convex loss, while log loss gives a convex one
+      D: Log loss doesn't need gradients
+    answer: C
+    explanation: With the sigmoid, MSE produces a non-convex surface with flat regions, so gradient descent can stall. Log loss is convex in the weights and heavily penalises confident wrong predictions.
+
+  - id: logreg-010
+    concept: ml.logistic_regression
+    difficulty: 2
+    stem: How is logistic regression usually extended to more than two classes?
+    options:
+      A: With softmax (multinomial) regression or one-vs-rest
+      B: By rounding the sigmoid output to the nearest class number
+      C: It can't be extended
+      D: By using MSE loss on the class numbers
+    answer: A
+    explanation: Softmax generalises the sigmoid to K classes, giving probabilities that sum to 1. One-vs-rest trains one binary classifier per class. Rounding to class numbers would impose a false order.
+
+  - id: logreg-011
+    concept: ml.logistic_regression
+    difficulty: 3
+    stem: The true label is 1 and the model predicts p = 0.9. What is the log loss for this example (natural log)?
+    options:
+      A: "0.9"
+      B: "0.105"
+      C: "2.303"
+      D: "0.01"
+    answer: B
+    explanation: Log loss = −[y ln p + (1 − y) ln(1 − p)] = −ln 0.9 ≈ 0.105. 2.303 = −ln 0.1 would be the loss if the true label were 0.
+
+  - id: logreg-012
+    concept: ml.logistic_regression
+    difficulty: 3
+    stem: You train an unregularised logistic regression on data that is perfectly linearly separable. What happens to the weights?
+    options:
+      A: They converge to small values
+      B: They all become zero
+      C: They become negative
+      D: They keep growing without bound, because the loss keeps decreasing as predictions become more confident
+    answer: D
+    explanation: On separable data, scaling the weights up always lowers the log loss, so there's no finite optimum. Regularisation (L2) keeps the weights finite.
+
+  - id: logreg-013
+    concept: ml.logistic_regression
+    difficulty: 3
+    stem: For a single example, what is the gradient of the log loss with respect to the weights w?
+    options:
+      A: (σ(w·x) − y) x
+      B: (y − w·x)²
+      C: σ(w·x) x
+      D: y x
+    answer: A
+    explanation: The derivative works out to (prediction − label) × input. It has the same form as the linear-regression gradient, but with σ(w·x) as the prediction.
+
+  - id: logreg-014
+    concept: ml.logistic_regression
+    difficulty: 2
+    test_form: A
+    stem: A logistic regression model computes z = 2 for one example. Approximately what probability does it output?
+    options:
+      A: "0.12"
+      B: "2"
+      C: "0.5"
+      D: "0.88"
+    answer: D
+    explanation: σ(2) = 1 / (1 + e^(−2)) ≈ 1 / 1.135 ≈ 0.88. A probability can't be 2, and 0.12 is σ(−2).
+
+  - id: logreg-015
+    concept: ml.logistic_regression
+    difficulty: 2
+    test_form: B
+    stem: A logistic regression model computes z = −2 for one example. Approximately what probability does it output?
+    options:
+      A: "0.88"
+      B: "-2"
+      C: "0.5"
+      D: "0.12"
+    answer: D
+    explanation: σ(−2) = 1 / (1 + e²) ≈ 1 / 8.39 ≈ 0.12. A negative score gives a probability below 0.5; 0.88 is σ(2).

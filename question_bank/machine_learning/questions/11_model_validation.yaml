@@ -1,0 +1,183 @@
+questions:
+  - id: val-001
+    concept: ml.model_validation
+    difficulty: 2
+    diagnostic: true
+    stem: What happens in 5-fold cross-validation?
+    options:
+      A: The model is trained once and tested on 5 separate test sets
+      B: The model is trained 5 times, each time validated on a different fifth of the data
+      C: The model is trained on 5% of the data
+      D: The model is trained 5 times on the full dataset
+    answer: B
+    explanation: The data is split into 5 folds. Each fold serves once as the validation set while the other 4 are used for training, and the 5 scores are averaged.
+
+  - id: val-002
+    concept: ml.model_validation
+    difficulty: 1
+    stem: What is a validation set used for?
+    options:
+      A: Choosing hyperparameters and comparing models without touching the test set
+      B: Training the model's weights
+      C: Reporting the final performance in a paper
+      D: Storing backup copies of the data
+    answer: A
+    explanation: The validation set guides model choices, so it gets used repeatedly. The test set is kept aside for one final, unbiased estimate.
+
+  - id: val-003
+    concept: ml.model_validation
+    difficulty: 1
+    stem: Which of these is a hyperparameter rather than a learned parameter?
+    options:
+      A: The weights of a linear regression
+      B: The bias term learned during training
+      C: The number of neighbours k in k-NN
+      D: The coefficients of a logistic regression
+    answer: C
+    explanation: Hyperparameters are set before training and tuned with validation data. Weights, biases and coefficients are learned from the training data.
+
+  - id: val-004
+    concept: ml.model_validation
+    difficulty: 1
+    stem: When should the test set be used?
+    options:
+      A: After every epoch, to decide when to stop
+      B: To choose between candidate models
+      C: To tune the learning rate
+      D: Once, at the end, to estimate the final model's performance
+    answer: D
+    explanation: Every time the test set influences a decision, it becomes partly training data and its estimate becomes optimistic. Model selection belongs on the validation set.
+
+  - id: val-005
+    concept: ml.model_validation
+    difficulty: 1
+    stem: What does a stratified train/test split guarantee?
+    options:
+      A: The training set is larger than the test set
+      B: Each split has roughly the same class proportions as the full dataset
+      C: The data is sorted by time
+      D: No feature has missing values
+    answer: B
+    explanation: Stratification preserves the class balance in each split. That matters most for imbalanced data, where a random split might leave very few positives in the test set.
+
+  - id: val-006
+    concept: ml.model_validation
+    difficulty: 2
+    stem: What does grid search do?
+    options:
+      A: It evaluates every combination of the hyperparameter values you list
+      B: It randomly samples hyperparameter values
+      C: It trains on a grid of images
+      D: It removes features one at a time
+    answer: A
+    explanation: Grid search tries the full Cartesian product of the candidate values, usually scoring each combination with cross-validation. Sampling values at random is random search.
+
+  - id: val-007
+    concept: ml.model_validation
+    difficulty: 2
+    stem: A dataset has many rows per patient. Patients in the real deployment will be new. How should you split for cross-validation?
+    options:
+      A: Shuffle all rows randomly
+      B: Put the first half of each patient's rows in training
+      C: Use the same patients in every fold
+      D: Use grouped cross-validation, so each patient's rows all fall in the same fold
+    answer: D
+    explanation: Random row splits put the same patient in training and validation, so the model is scored partly on people it has already seen and the estimate is too optimistic. Grouping by patient mirrors deployment. MENTORX splits by student for the same reason.
+
+  - id: val-008
+    concept: ml.model_validation
+    difficulty: 2
+    stem: You're forecasting next month's sales. How should the data be split for validation?
+    options:
+      A: Randomly, like any other dataset
+      B: By product name in alphabetical order
+      C: Train on earlier time periods and validate on later ones
+      D: Validate on the oldest data and train on the newest
+    answer: C
+    explanation: In deployment, the model always predicts the future from the past. A random split lets it learn from future data, which leaks information and inflates the scores.
+
+  - id: val-009
+    concept: ml.model_validation
+    difficulty: 2
+    stem: A team tunes its model dozens of times, checking the test-set score after each change. What is the problem?
+    options:
+      A: Testing is too slow
+      B: The test score becomes an optimistic estimate, because the model has been tuned to the test set
+      C: The model will underfit
+      D: There is no problem
+    answer: B
+    explanation: Repeatedly choosing whatever does best on the test set turns it into a validation set, so the test set has been overfitted. A truly untouched test set is needed for an honest estimate.
+
+  - id: val-010
+    concept: ml.model_validation
+    difficulty: 2
+    stem: How many models does leave-one-out cross-validation train on a dataset of n examples?
+    options:
+      A: n
+      B: "1"
+      C: "2"
+      D: n / 2
+    answer: A
+    explanation: Each example is held out once while the other n − 1 are used for training, so n models are trained. That's accurate but expensive for large n.
+
+  - id: val-011
+    concept: ml.model_validation
+    difficulty: 3
+    stem: You pick the 20 features most correlated with the label using the whole dataset, then run cross-validation on those features. What is wrong?
+    options:
+      A: Nothing, because feature selection is just preprocessing
+      B: 20 features are too many
+      C: Feature selection saw the validation folds' labels, so the CV score is optimistic; selection must happen inside each training fold
+      D: Correlation can't be computed for labels
+    answer: C
+    explanation: Any step that looks at labels is part of training. Selecting features on all the data leaks validation information, which famously produces "good" CV scores even on pure noise.
+
+  - id: val-012
+    concept: ml.model_validation
+    difficulty: 3
+    stem: What is nested cross-validation for?
+    options:
+      A: Making training faster
+      B: Training neural networks with more layers
+      C: Combining several datasets
+      D: Getting an unbiased performance estimate when hyperparameter tuning is part of the procedure
+    answer: D
+    explanation: An inner CV loop tunes the hyperparameters and an outer loop evaluates the whole tuning procedure on folds it never saw. Reporting the inner loop's best score would be optimistic.
+
+  - id: val-013
+    concept: ml.model_validation
+    difficulty: 3
+    stem: Why does random search often beat grid search for the same number of trials?
+    options:
+      A: Random search uses gradients
+      B: When only a few hyperparameters really matter, random search tries more distinct values of those ones
+      C: Grid search can't use cross-validation
+      D: Random search always finds the global optimum
+    answer: B
+    explanation: A 5 × 5 grid tests only 5 values of each hyperparameter. 25 random trials test 25 different values of each, which helps when one hyperparameter dominates performance.
+
+  - id: val-014
+    concept: ml.model_validation
+    difficulty: 2
+    test_form: A
+    stem: You run 10-fold cross-validation on 1,000 examples. How many times is the model trained, and how large is each validation fold?
+    options:
+      A: Trained 10 times, each validation fold has 100 examples
+      B: Trained once, each validation fold has 10 examples
+      C: Trained 100 times, each validation fold has 10 examples
+      D: Trained 10 times, each validation fold has 900 examples
+    answer: A
+    explanation: 10 folds of 1,000 / 10 = 100 examples each. Each model trains on the other 900 and is validated on 100. Option D confuses the training size with the validation size.
+
+  - id: val-015
+    concept: ml.model_validation
+    difficulty: 2
+    test_form: B
+    stem: You run 4-fold cross-validation on 800 examples. How many times is the model trained, and how large is each validation fold?
+    options:
+      A: Trained 4 times, each validation fold has 600 examples
+      B: Trained 4 times, each validation fold has 200 examples
+      C: Trained 200 times, each validation fold has 4 examples
+      D: Trained once, the validation fold has 200 examples
+    answer: B
+    explanation: 4 folds of 800 / 4 = 200 examples each. Each model trains on the other 600 and is validated on 200. Option A confuses the training size with the validation size.

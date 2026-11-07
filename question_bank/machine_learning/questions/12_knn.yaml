@@ -1,0 +1,183 @@
+questions:
+  - id: knn-001
+    concept: ml.knn
+    difficulty: 2
+    diagnostic: true
+    stem: A k-NN classifier with k = 3 finds that the 3 nearest neighbours of a new point are labelled cat, dog and dog. What does it predict?
+    options:
+      A: cat
+      B: It depends on the learning rate
+      C: dog
+      D: Nothing, because k-NN must be trained first
+    answer: C
+    explanation: With majority voting, dog wins 2 to 1. k-NN has no learning rate, and its "training" is simply storing the data.
+
+  - id: knn-002
+    concept: ml.knn
+    difficulty: 1
+    stem: What happens during the training phase of k-NN?
+    options:
+      A: It stores the training data, and the real work happens at prediction time
+      B: It learns a weight for every feature
+      C: It builds a decision tree
+      D: It runs gradient descent
+    answer: A
+    explanation: k-NN is a lazy learner. Training just stores the examples, and prediction searches them for the nearest neighbours.
+
+  - id: knn-003
+    concept: ml.knn
+    difficulty: 1
+    stem: What is the Euclidean distance between the points (0, 0) and (3, 4)?
+    options:
+      A: "7"
+      B: "12"
+      C: "25"
+      D: "5"
+    answer: D
+    explanation: √((3 − 0)² + (4 − 0)²) = √25 = 5. 7 is the Manhattan distance, and 25 is the squared distance.
+
+  - id: knn-004
+    concept: ml.knn
+    difficulty: 1
+    stem: How does k-NN regression make a prediction?
+    options:
+      A: It takes a majority vote of the neighbours' classes
+      B: It averages the target values of the k nearest neighbours
+      C: It fits a straight line through all the data
+      D: It returns the largest target value in the dataset
+    answer: B
+    explanation: For regression, the prediction is the mean (or a distance-weighted mean) of the neighbours' targets. Majority voting is used for classification.
+
+  - id: knn-005
+    concept: ml.knn
+    difficulty: 1
+    stem: Why is an odd value of k often chosen for binary classification?
+    options:
+      A: Odd numbers make training faster
+      B: Even values of k aren't allowed
+      C: It avoids tied votes between the two classes
+      D: It makes the distances smaller
+    answer: C
+    explanation: With two classes and an odd k, one class always has a strict majority, so no tie-breaking rule is needed.
+
+  - id: knn-006
+    concept: ml.knn
+    difficulty: 2
+    stem: What is typically true of a 1-nearest-neighbour classifier?
+    options:
+      A: Its training accuracy is 100% (with no duplicate points), but it has high variance
+      B: It has high bias and low variance
+      C: It's immune to noise in the labels
+      D: It needs feature weights to be learned first
+    answer: A
+    explanation: Each training point is its own nearest neighbour, so training accuracy is perfect. But one mislabelled neighbour changes the prediction, which makes the classifier high-variance.
+
+  - id: knn-007
+    concept: ml.knn
+    difficulty: 2
+    stem: You use k-NN with features "age" (20–60 years) and "income" (₹10,000–₹10,00,000) without scaling. What happens?
+    options:
+      A: Age dominates the distance
+      B: Both features contribute equally
+      C: k-NN ignores the units automatically
+      D: Income dominates the distance, so age barely matters
+    answer: D
+    explanation: Differences in income are in the lakhs while differences in age are at most 40, so income dominates the squared distance. Standardising both features fixes this.
+
+  - id: knn-008
+    concept: ml.knn
+    difficulty: 2
+    stem: What is the main computational drawback of plain k-NN?
+    options:
+      A: Training takes a very long time
+      B: Prediction is slow, because it compares the query with every training point
+      C: It can't handle more than two classes
+      D: It needs a GPU
+    answer: B
+    explanation: Brute-force prediction costs O(n × d) per query. Training is nearly free, since it only stores the data.
+
+  - id: knn-009
+    concept: ml.knn
+    difficulty: 2
+    stem: What is the Manhattan (L1) distance between (1, 2) and (4, 6)?
+    options:
+      A: "5"
+      B: "25"
+      C: "7"
+      D: "12"
+    answer: C
+    explanation: Manhattan distance = |1 − 4| + |2 − 6| = 3 + 4 = 7. 5 is the Euclidean distance between the same points.
+
+  - id: knn-010
+    concept: ml.knn
+    difficulty: 2
+    stem: In distance-weighted k-NN, how much does each neighbour count?
+    options:
+      A: Closer neighbours count more, for example with weight 1 / distance
+      B: Farther neighbours count more
+      C: All neighbours count equally
+      D: Only the farthest neighbour counts
+    answer: A
+    explanation: Weighting by inverse distance lets very close neighbours outweigh borderline ones. It also reduces the impact of choosing k slightly too large.
+
+  - id: knn-011
+    concept: ml.knn
+    difficulty: 3
+    stem: Why does k-NN often perform poorly with hundreds of features?
+    options:
+      A: It can only use two features
+      B: Distance computations overflow
+      C: Training becomes slower than predicting
+      D: In high dimensions, distances between points become very similar, so "nearest" carries little information
+    answer: D
+    explanation: This is the curse of dimensionality. As dimensions grow, the nearest and farthest points end up at almost the same distance, so neighbourhoods stop being meaningful.
+
+  - id: knn-012
+    concept: ml.knn
+    difficulty: 3
+    stem: Which technique speeds up nearest-neighbour search on large datasets?
+    options:
+      A: Increasing k
+      B: Using a higher learning rate
+      C: Using an index structure such as a KD-tree or ball tree, or approximate nearest-neighbour search
+      D: Adding more features
+    answer: C
+    explanation: Spatial indexes prune most points without computing their distances, and approximate methods trade a little accuracy for large speed-ups. Increasing k does more work, not less.
+
+  - id: knn-013
+    concept: ml.knn
+    difficulty: 3
+    stem: 95% of your training examples belong to class A. What happens as you make k very large in k-NN?
+    options:
+      A: The minority class is predicted more often
+      B: Predictions are increasingly dominated by the majority class A
+      C: Accuracy on class B improves
+      D: Nothing, because k doesn't matter with imbalanced data
+    answer: B
+    explanation: A large neighbourhood mostly contains class-A points, so the majority vote almost always picks A. Distance weighting or rebalancing can help.
+
+  - id: knn-014
+    concept: ml.knn
+    difficulty: 2
+    test_form: A
+    stem: A k-NN classifier with k = 5 finds 3 neighbours labelled spam and 2 labelled not spam. What does it predict, using simple majority voting?
+    options:
+      A: not spam
+      B: spam
+      C: A tie
+      D: It can't decide without the exact distances
+    answer: B
+    explanation: Spam has a majority of 3 to 2. Simple voting doesn't need distances, although weighted k-NN would use them.
+
+  - id: knn-015
+    concept: ml.knn
+    difficulty: 2
+    test_form: B
+    stem: A k-NN classifier with k = 5 finds 1 neighbour labelled cat and 4 labelled dog. What does it predict, using simple majority voting?
+    options:
+      A: cat
+      B: A tie
+      C: It can't decide without the exact distances
+      D: dog
+    answer: D
+    explanation: Dog has a majority of 4 to 1. Simple voting doesn't need distances, although weighted k-NN would use them.

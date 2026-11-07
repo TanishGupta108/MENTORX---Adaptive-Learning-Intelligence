@@ -1,0 +1,183 @@
+questions:
+  - id: metrics-001
+    concept: ml.evaluation_metrics
+    difficulty: 2
+    diagnostic: true
+    stem: In a dataset, 99% of transactions are legitimate and 1% are fraud. A model predicts "legitimate" for every transaction. What are its accuracy and its recall for the fraud class?
+    options:
+      A: Accuracy 99%, recall 0%
+      B: Accuracy 99%, recall 99%
+      C: Accuracy 1%, recall 100%
+      D: Accuracy 50%, recall 50%
+    answer: A
+    explanation: It's right on the 99% of legitimate cases, so accuracy is 99%, but it never catches a single fraud case, so fraud recall is 0%. This is why accuracy is misleading on imbalanced data.
+
+  - id: metrics-002
+    concept: ml.evaluation_metrics
+    difficulty: 1
+    stem: How is precision calculated?
+    options:
+      A: TP / (TP + FN)
+      B: TP / (TP + FP)
+      C: (TP + TN) / total
+      D: TN / (TN + FP)
+    answer: B
+    explanation: Precision asks "of everything predicted positive, how much really was positive?", which is TP / (TP + FP). TP / (TP + FN) is recall.
+
+  - id: metrics-003
+    concept: ml.evaluation_metrics
+    difficulty: 1
+    stem: How is recall (sensitivity) calculated?
+    options:
+      A: TP / (TP + FP)
+      B: TN / (TN + FN)
+      C: TP / (TP + FN)
+      D: FP / (FP + TN)
+    answer: C
+    explanation: Recall asks "of all actual positives, how many did we catch?", which is TP / (TP + FN). TP / (TP + FP) is precision.
+
+  - id: metrics-004
+    concept: ml.evaluation_metrics
+    difficulty: 1
+    stem: In a confusion matrix, what is a false positive?
+    options:
+      A: Predicted negative, actually positive
+      B: Predicted positive, actually positive
+      C: Predicted negative, actually negative
+      D: Predicted positive, actually negative
+    answer: D
+    explanation: The word "false" means the prediction was wrong and "positive" is what was predicted, so a false positive was predicted positive but is actually negative. Predicted negative but actually positive is a false negative.
+
+  - id: metrics-005
+    concept: ml.evaluation_metrics
+    difficulty: 1
+    stem: How is accuracy calculated from a confusion matrix?
+    options:
+      A: (TP + TN) / (TP + TN + FP + FN)
+      B: TP / (TP + FP)
+      C: TP / (TP + FN)
+      D: (FP + FN) / total
+    answer: A
+    explanation: Accuracy is the fraction of all predictions that are correct. (FP + FN) / total is the error rate.
+
+  - id: metrics-006
+    concept: ml.evaluation_metrics
+    difficulty: 2
+    stem: A classifier has TP = 40, FP = 10 and FN = 20. What are its precision and recall?
+    options:
+      A: Precision 0.67, recall 0.8
+      B: Precision 0.8, recall 0.8
+      C: Precision 0.8, recall 0.67
+      D: Precision 0.4, recall 0.2
+    answer: C
+    explanation: Precision = 40 / (40 + 10) = 0.8. Recall = 40 / (40 + 20) ≈ 0.67. Option A swaps the two.
+
+  - id: metrics-007
+    concept: ml.evaluation_metrics
+    difficulty: 2
+    stem: What is the F1 score?
+    options:
+      A: The arithmetic mean of precision and recall
+      B: The harmonic mean of precision and recall
+      C: Accuracy multiplied by recall
+      D: The area under the ROC curve
+    answer: B
+    explanation: F1 = 2PR / (P + R). The harmonic mean is pulled towards the smaller value, so a model can't get a high F1 by being good at only one of the two.
+
+  - id: metrics-008
+    concept: ml.evaluation_metrics
+    difficulty: 2
+    stem: A classifier has ROC-AUC = 0.5. What does that mean?
+    options:
+      A: It ranks positives above negatives no better than random guessing
+      B: It's correct 50% of the time on every dataset
+      C: It's a perfect classifier
+      D: Its precision is 0.5
+    answer: A
+    explanation: An AUC of 0.5 corresponds to the diagonal ROC line, the performance of random scores. An AUC of 1.0 means perfect ranking. AUC isn't the same as accuracy.
+
+  - id: metrics-009
+    concept: ml.evaluation_metrics
+    difficulty: 2
+    stem: In cancer screening, missing a real cancer is far worse than a false alarm that leads to a follow-up test. Which metric should you prioritise?
+    options:
+      A: Precision
+      B: Accuracy
+      C: Specificity
+      D: Recall
+    answer: D
+    explanation: Recall measures how many actual positives (cancers) are caught. When false negatives are very costly, high recall matters most, even at the cost of more false positives.
+
+  - id: metrics-010
+    concept: ml.evaluation_metrics
+    difficulty: 2
+    stem: Which statement about RMSE (root mean squared error) is true?
+    options:
+      A: It always equals MAE
+      B: It's unitless, so it can't be compared to the target
+      C: It's in the same units as the target and penalises large errors more than MAE does
+      D: It can be negative
+    answer: C
+    explanation: Taking the square root of MSE brings it back to the target's units. Because errors are squared before averaging, large errors weigh more than in MAE. RMSE is always ≥ MAE and never negative.
+
+  - id: metrics-011
+    concept: ml.evaluation_metrics
+    difficulty: 3
+    stem: What does it mean for a classifier's probabilities to be well calibrated?
+    options:
+      A: Its accuracy is above 90%
+      B: Among examples given a predicted probability of 0.7, about 70% are actually positive
+      C: Its ROC-AUC is 1
+      D: It always predicts exactly 0 or 1
+    answer: B
+    explanation: Calibration means predicted probabilities match observed frequencies. A model can rank well (high AUC) but be badly calibrated, for example if it's systematically over-confident. MENTORX's quiz engine depends on calibrated probabilities.
+
+  - id: metrics-012
+    concept: ml.evaluation_metrics
+    difficulty: 3
+    stem: What is the probabilistic interpretation of ROC-AUC?
+    options:
+      A: The probability that a randomly chosen positive gets a higher score than a randomly chosen negative
+      B: The probability that the model is correct
+      C: The fraction of positives in the dataset
+      D: The precision at a threshold of 0.5
+    answer: A
+    explanation: AUC equals the probability that the model ranks a random positive above a random negative. That's why it's independent of the threshold and of how the scores are scaled.
+
+  - id: metrics-013
+    concept: ml.evaluation_metrics
+    difficulty: 3
+    stem: You lower a classifier's decision threshold from 0.5 to 0.3. What usually happens?
+    options:
+      A: Both precision and recall increase
+      B: Recall decreases and precision increases
+      C: Nothing changes, because the model is the same
+      D: Recall increases (or stays the same), and precision usually decreases
+    answer: D
+    explanation: A lower threshold labels more examples as positive. That catches more true positives (higher recall) but usually adds false positives too (lower precision).
+
+  - id: metrics-014
+    concept: ml.evaluation_metrics
+    difficulty: 2
+    test_form: A
+    stem: A classifier has TP = 30, FP = 10 and FN = 30. What are its precision and recall?
+    options:
+      A: Precision 0.5, recall 0.75
+      B: Precision 0.3, recall 0.3
+      C: Precision 0.75, recall 0.75
+      D: Precision 0.75, recall 0.5
+    answer: D
+    explanation: Precision = 30 / (30 + 10) = 0.75. Recall = 30 / (30 + 30) = 0.5. Option A swaps the two.
+
+  - id: metrics-015
+    concept: ml.evaluation_metrics
+    difficulty: 2
+    test_form: B
+    stem: A classifier has TP = 20, FP = 20 and FN = 5. What are its precision and recall?
+    options:
+      A: Precision 0.8, recall 0.5
+      B: Precision 0.5, recall 0.8
+      C: Precision 0.5, recall 0.5
+      D: Precision 0.2, recall 0.2
+    answer: B
+    explanation: Precision = 20 / (20 + 20) = 0.5. Recall = 20 / (20 + 5) = 0.8. Option A swaps the two.

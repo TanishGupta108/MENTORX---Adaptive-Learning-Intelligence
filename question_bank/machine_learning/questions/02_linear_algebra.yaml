@@ -1,0 +1,183 @@
+questions:
+  - id: linalg-001
+    concept: ml.linear_algebra
+    difficulty: 1
+    diagnostic: true
+    stem: What is the dot product of the vectors [1, 2, 3] and [4, 5, 6]?
+    options:
+      A: "32"
+      B: "21"
+      C: "[4, 10, 18]"
+      D: "77"
+    answer: A
+    explanation: Multiply matching entries and add them up, 1×4 + 2×5 + 3×6 = 4 + 10 + 18 = 32. The vector [4, 10, 18] is the element-wise product, which still has to be summed.
+
+  - id: linalg-002
+    concept: ml.linear_algebra
+    difficulty: 1
+    stem: You multiply a 3 × 2 matrix by a 2 × 4 matrix. What is the shape of the result?
+    options:
+      A: 3 × 4
+      B: 2 × 2
+      C: 3 × 2
+      D: The product is undefined
+    answer: A
+    explanation: An (m × n) matrix times an (n × p) matrix gives an (m × p) matrix. The inner dimensions (2 and 2) match, and the result takes the outer dimensions, 3 × 4.
+
+  - id: linalg-003
+    concept: ml.linear_algebra
+    difficulty: 1
+    stem: What is the Euclidean (L2) norm of the vector [3, 4]?
+    options:
+      A: "7"
+      B: "12"
+      C: "5"
+      D: "25"
+    answer: C
+    explanation: The L2 norm is the square root of the sum of squares, √(3² + 4²) = √25 = 5. 25 is the squared norm, and 7 is the L1 norm (sum of absolute values).
+
+  - id: linalg-004
+    concept: ml.linear_algebra
+    difficulty: 1
+    stem: A matrix has shape 2 × 5. What is the shape of its transpose?
+    options:
+      A: 2 × 5
+      B: 10 × 1
+      C: 5 × 5
+      D: 5 × 2
+    answer: D
+    explanation: Transposing swaps rows and columns, so a 2 × 5 matrix becomes 5 × 2.
+
+  - id: linalg-005
+    concept: ml.linear_algebra
+    difficulty: 1
+    stem: A dataset is stored as a matrix X with n rows and d columns, using the usual ML convention. What does each row represent?
+    options:
+      A: One training example
+      B: One feature across all examples
+      C: One model parameter
+      D: One class label
+    answer: A
+    explanation: By convention each row is one example (a d-dimensional feature vector) and each column is one feature across all n examples.
+
+  - id: linalg-006
+    concept: ml.linear_algebra
+    difficulty: 2
+    stem: Two non-zero vectors have a dot product of 0. What does that tell you?
+    options:
+      A: They point in the same direction
+      B: They have the same length
+      C: They are orthogonal (perpendicular)
+      D: At least one of them must be the zero vector
+    answer: C
+    explanation: a·b = |a||b|cos θ. For non-zero vectors, a dot product of 0 means cos θ = 0, so the angle is 90°.
+
+  - id: linalg-007
+    concept: ml.linear_algebra
+    difficulty: 2
+    stem: X is an n × d data matrix and w is a d × 1 weight vector. How do you compute a linear model's predictions for all n examples at once?
+    options:
+      A: w X
+      B: Xᵀ w
+      C: X + w
+      D: X w, giving an n × 1 vector
+    answer: D
+    explanation: X w multiplies each row (example) by the weights, giving one prediction per example (n × 1). w X and Xᵀ w have mismatched inner dimensions unless n = d, and adding them isn't defined.
+
+  - id: linalg-008
+    concept: ml.linear_algebra
+    difficulty: 2
+    stem: For any square matrix A and the identity matrix I of the same size, what is A I?
+    options:
+      A: I
+      B: A
+      C: The zero matrix
+      D: Aᵀ
+    answer: B
+    explanation: The identity matrix leaves any matrix unchanged under multiplication, in the same way as multiplying a number by 1.
+
+  - id: linalg-009
+    concept: ml.linear_algebra
+    difficulty: 2
+    stem: What is the cosine similarity between the vectors [1, 1] and [2, 2]?
+    options:
+      A: "0"
+      B: "0.5"
+      C: "1"
+      D: "2"
+    answer: C
+    explanation: Cosine similarity = a·b / (|a||b|) = 4 / (√2 × √8) = 4 / 4 = 1. The vectors point in exactly the same direction; the length difference doesn't matter.
+
+  - id: linalg-010
+    concept: ml.linear_algebra
+    difficulty: 2
+    stem: What is the matrix [[2, 0], [0, 3]] multiplied by the vector [1, 1]?
+    options:
+      A: "[2, 0]"
+      B: "[5, 5]"
+      C: "[1, 1]"
+      D: "[2, 3]"
+    answer: D
+    explanation: Each output entry is a row of the matrix dotted with the vector, giving [2×1 + 0×1, 0×1 + 3×1] = [2, 3]. A diagonal matrix simply scales each coordinate.
+
+  - id: linalg-011
+    concept: ml.linear_algebra
+    difficulty: 3
+    stem: What makes a non-zero vector v an eigenvector of a square matrix A?
+    options:
+      A: A v = λ v for some scalar λ
+      B: A v = 0
+      C: v is a row of A
+      D: vᵀ A = I
+    answer: A
+    explanation: An eigenvector keeps its direction when multiplied by A; it's only scaled by the eigenvalue λ. PCA uses the eigenvectors of the covariance matrix.
+
+  - id: linalg-012
+    concept: ml.linear_algebra
+    difficulty: 3
+    stem: The normal equation for linear regression needs (XᵀX)⁻¹. If one feature column is exactly twice another, what happens?
+    options:
+      A: Nothing, because the inverse always exists
+      B: The model becomes non-linear
+      C: XᵀX becomes singular, so its inverse doesn't exist
+      D: The number of examples doubles
+    answer: C
+    explanation: A column that's an exact multiple of another makes the columns linearly dependent. XᵀX is then singular (determinant 0) and can't be inverted. Regularisation (adding λI) or removing the duplicate fixes this.
+
+  - id: linalg-013
+    concept: ml.linear_algebra
+    difficulty: 3
+    stem: What is the rank of the matrix [[1, 2], [2, 4]]?
+    options:
+      A: "0"
+      B: "1"
+      C: "2"
+      D: "4"
+    answer: B
+    explanation: The second row is twice the first, so only one row is linearly independent and the rank is 1. A 2 × 2 matrix has rank 2 only if its rows are independent.
+
+  - id: linalg-014
+    concept: ml.linear_algebra
+    difficulty: 2
+    test_form: A
+    stem: What is the dot product of [2, -1, 0] and [1, 3, 5]?
+    options:
+      A: "5"
+      B: "1"
+      C: "[2, -3, 0]"
+      D: "-1"
+    answer: D
+    explanation: 2×1 + (−1)×3 + 0×5 = 2 − 3 + 0 = −1. [2, −3, 0] is the element-wise product before summing.
+
+  - id: linalg-015
+    concept: ml.linear_algebra
+    difficulty: 2
+    test_form: B
+    stem: What is the dot product of [1, 0, -2] and [3, 4, 1]?
+    options:
+      A: "1"
+      B: "-1"
+      C: "5"
+      D: "[3, 0, -2]"
+    answer: A
+    explanation: 1×3 + 0×4 + (−2)×1 = 3 + 0 − 2 = 1. [3, 0, −2] is the element-wise product before summing.

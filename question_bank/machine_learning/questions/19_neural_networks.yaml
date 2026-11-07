@@ -1,0 +1,183 @@
+questions:
+  - id: nn-001
+    concept: ml.neural_networks
+    difficulty: 2
+    diagnostic: true
+    stem: A network has several hidden layers, but every layer uses a linear (identity) activation. What can it represent?
+    options:
+      A: Any non-linear function
+      B: Only functions of exactly two inputs
+      C: Only linear functions, the same as a single linear layer
+      D: Nothing, because it can't be trained
+    answer: C
+    explanation: A composition of linear maps is still a linear map (W₃W₂W₁x = Wx). Non-linear activations such as ReLU are what let depth add expressive power.
+
+  - id: nn-002
+    concept: ml.neural_networks
+    difficulty: 1
+    stem: What does a single perceptron (artificial neuron) compute?
+    options:
+      A: A weighted sum of its inputs plus a bias, passed through an activation function
+      B: The average of its inputs, always
+      C: A decision tree
+      D: The distance to the nearest training point
+    answer: A
+    explanation: A neuron computes a = f(w·x + b). The original perceptron used a step function as f.
+
+  - id: nn-003
+    concept: ml.neural_networks
+    difficulty: 1
+    stem: How is the ReLU activation function defined?
+    options:
+      A: 1 / (1 + e^(−x))
+      B: x²
+      C: tanh(x)
+      D: max(0, x)
+    answer: D
+    explanation: ReLU passes positive inputs through unchanged and outputs 0 for negative ones. 1 / (1 + e^(−x)) is the sigmoid.
+
+  - id: nn-004
+    concept: ml.neural_networks
+    difficulty: 1
+    stem: What is ReLU(−3)?
+    options:
+      A: "-3"
+      B: "3"
+      C: "0"
+      D: "1"
+    answer: C
+    explanation: ReLU(x) = max(0, x), so any negative input becomes 0. It doesn't take the absolute value, so the answer isn't 3.
+
+  - id: nn-005
+    concept: ml.neural_networks
+    difficulty: 1
+    stem: What does backpropagation compute?
+    options:
+      A: The network's predictions on the test set
+      B: The gradient of the loss with respect to every weight, using the chain rule
+      C: The best number of layers
+      D: The learning rate
+    answer: B
+    explanation: Backpropagation efficiently applies the chain rule backwards from the loss through each layer. An optimiser such as SGD or Adam then uses the gradients to update the weights.
+
+  - id: nn-006
+    concept: ml.neural_networks
+    difficulty: 2
+    stem: What do hidden layers allow a neural network to do?
+    options:
+      A: Learn intermediate features (representations) that make non-linear patterns easier to model
+      B: Store the training data
+      C: Skip the training process
+      D: Avoid needing a loss function
+    answer: A
+    explanation: Each hidden layer transforms its inputs into new features, so later layers can combine simple patterns into complex ones. That's what makes deep networks more expressive than linear models.
+
+  - id: nn-007
+    concept: ml.neural_networks
+    difficulty: 2
+    stem: A network classifies handwritten digits into 10 classes. Which output activation and loss fit best?
+    options:
+      A: ReLU with mean squared error
+      B: Sigmoid on a single output with binary cross-entropy
+      C: No activation with hinge loss
+      D: Softmax with categorical cross-entropy
+    answer: D
+    explanation: Softmax turns 10 scores into probabilities that sum to 1, and categorical cross-entropy is the matching loss. A single sigmoid output suits only binary classification.
+
+  - id: nn-008
+    concept: ml.neural_networks
+    difficulty: 2
+    stem: What does dropout do during training?
+    options:
+      A: It removes training examples with errors
+      B: It lowers the learning rate
+      C: It randomly sets a fraction of units' outputs to zero at each training step, which reduces overfitting
+      D: It deletes layers permanently
+    answer: C
+    explanation: Dropout stops units from relying too much on specific other units, which acts like training an ensemble of thinned networks. It's turned off at prediction time.
+
+  - id: nn-009
+    concept: ml.neural_networks
+    difficulty: 2
+    stem: A fully connected layer maps 4 inputs to 3 units. How many trainable parameters does it have, including biases?
+    options:
+      A: "12"
+      B: "15"
+      C: "7"
+      D: "16"
+    answer: B
+    explanation: There are 4 × 3 = 12 weights plus one bias per unit (3), so 15 in total. 12 forgets the biases.
+
+  - id: nn-010
+    concept: ml.neural_networks
+    difficulty: 2
+    stem: Why do deep networks with sigmoid activations often train slowly in their early layers?
+    options:
+      A: The gradients get multiplied by small sigmoid derivatives at every layer and shrink towards zero (vanishing gradients)
+      B: Sigmoid outputs are too large
+      C: Sigmoid can't be differentiated
+      D: Early layers have no weights
+    answer: A
+    explanation: The sigmoid's derivative is at most 0.25, so the gradient shrinks layer after layer during backpropagation. ReLU, careful initialisation and residual connections help.
+
+  - id: nn-011
+    concept: ml.neural_networks
+    difficulty: 3
+    stem: What goes wrong if you initialise all the weights of a network to zero?
+    options:
+      A: Nothing, because training will find the right weights
+      B: The network immediately overfits
+      C: The loss becomes negative
+      D: All units in a layer receive identical gradients and stay identical, so the layer acts like a single unit
+    answer: D
+    explanation: Identical weights mean identical outputs and identical updates, so the symmetry never breaks. Random initialisation, such as Xavier or He, gives units different starting points.
+
+  - id: nn-012
+    concept: ml.neural_networks
+    difficulty: 3
+    stem: Let y = σ(z) with z = w x, where σ is the sigmoid. What is dy/dw?
+    options:
+      A: σ(z)
+      B: x
+      C: σ(z)(1 − σ(z)) x
+      D: w x
+    answer: C
+    explanation: By the chain rule, dy/dw = dy/dz × dz/dw = σ(z)(1 − σ(z)) × x. This is exactly the step backpropagation repeats at every layer.
+
+  - id: nn-013
+    concept: ml.neural_networks
+    difficulty: 3
+    stem: What does batch normalisation do?
+    options:
+      A: It removes outliers from the dataset
+      B: It normalises each layer's inputs using mini-batch statistics, then applies a learned scale and shift, which usually makes training faster and more stable
+      C: It splits the data into batches of equal size
+      D: It normalises the final predictions to sum to 1
+    answer: B
+    explanation: Batch norm keeps each layer's input distribution in a stable range, which allows higher learning rates. Making the outputs sum to 1 is what softmax does.
+
+  - id: nn-014
+    concept: ml.neural_networks
+    difficulty: 2
+    test_form: A
+    stem: A ReLU neuron has weights w = [2, −1] and bias b = 1. What does it output for the input x = [1, 3]?
+    options:
+      A: "0"
+      B: "6"
+      C: "-1"
+      D: "1"
+    answer: A
+    explanation: w·x + b = 2×1 + (−1)×3 + 1 = 2 − 3 + 1 = 0, and ReLU(0) = 0.
+
+  - id: nn-015
+    concept: ml.neural_networks
+    difficulty: 2
+    test_form: B
+    stem: A ReLU neuron has weights w = [1, 2] and bias b = −1. What does it output for the input x = [2, 1]?
+    options:
+      A: "0"
+      B: "4"
+      C: "3"
+      D: "5"
+    answer: C
+    explanation: w·x + b = 1×2 + 2×1 − 1 = 3, and ReLU(3) = 3. 4 forgets the bias.

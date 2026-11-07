@@ -1,0 +1,183 @@
+questions:
+  - id: found-001
+    concept: ml.foundations
+    difficulty: 1
+    diagnostic: true
+    stem: A model is trained on emails labelled "spam" or "not spam". What type of learning is this?
+    options:
+      A: Supervised learning
+      B: Unsupervised learning
+      C: Reinforcement learning
+      D: Self-supervised learning
+    answer: A
+    explanation: Every training example has a known label (spam / not spam), which is the defining feature of supervised learning. Unsupervised learning has no labels at all.
+
+  - id: found-002
+    concept: ml.foundations
+    difficulty: 1
+    stem: Which of these is a regression task?
+    options:
+      A: Classifying a photo as a cat or a dog
+      B: Predicting tomorrow's temperature in °C
+      C: Grouping customers into segments without labels
+      D: Deciding whether a transaction is fraudulent
+    answer: B
+    explanation: Regression predicts a continuous number, and temperature is continuous. Cat/dog and fraud/not-fraud are classification (discrete categories); grouping without labels is clustering.
+
+  - id: found-003
+    concept: ml.foundations
+    difficulty: 1
+    stem: In supervised learning, what is a "label"?
+    options:
+      A: A column used as an input feature
+      B: The name of the algorithm being trained
+      C: The known output value for each training example
+      D: A cluster number assigned by the model
+    answer: C
+    explanation: The label is the target the model learns to predict, such as the price of a house or the class of an image. Features are the inputs, not the label.
+
+  - id: found-004
+    concept: ml.foundations
+    difficulty: 1
+    stem: Why do we keep a separate test set that the model never sees during training?
+    options:
+      A: To give the model more data to learn from
+      B: To choose the learning rate
+      C: To make the training loss lower
+      D: To estimate how well the model generalises to unseen data
+    answer: D
+    explanation: Performance on data the model has never seen is an honest estimate of real-world performance. Training-set performance is optimistic because the model has already fitted those examples.
+
+  - id: found-005
+    concept: ml.foundations
+    difficulty: 1
+    stem: What kind of output does a classification model produce?
+    options:
+      A: A category from a fixed set of classes
+      B: An unbounded real number
+      C: A new set of input features
+      D: A grouping of examples without any labels
+    answer: A
+    explanation: Classification assigns each input to one of a fixed set of classes (possibly with a probability for each). Predicting an unbounded real number is regression.
+
+  - id: found-006
+    concept: ml.foundations
+    difficulty: 2
+    stem: An online store wants to discover groups of similar customers from purchase history, but has no predefined customer categories. Which approach fits?
+    options:
+      A: Supervised regression
+      B: Unsupervised learning (clustering)
+      C: Reinforcement learning
+      D: Supervised classification
+    answer: B
+    explanation: There are no labels, and the goal is to find structure (groups) in the data, which is clustering, a form of unsupervised learning. Classification would need known categories to learn from.
+
+  - id: found-007
+    concept: ml.foundations
+    difficulty: 2
+    stem: A program learns to play a video game by trying actions and receiving points for winning and penalties for losing. What kind of learning is this?
+    options:
+      A: Supervised learning
+      B: Unsupervised learning
+      C: Reinforcement learning
+      D: Semi-supervised learning
+    answer: C
+    explanation: Learning from rewards and penalties received after taking actions in an environment is reinforcement learning. There is no labelled "correct action" for each state, so it isn't supervised.
+
+  - id: found-008
+    concept: ml.foundations
+    difficulty: 2
+    stem: What does it mean for a model to "generalise" well?
+    options:
+      A: It performs well on new, unseen data from the same distribution as the training data
+      B: It reaches 100% accuracy on the training data
+      C: It uses as many features as possible
+      D: It was trained on every available example, including the test set
+    answer: A
+    explanation: Generalisation is about performance on new data. A model can reach 100% training accuracy by memorising and still generalise badly.
+
+  - id: found-009
+    concept: ml.foundations
+    difficulty: 2
+    stem: You're building a model to predict a student's exam score. Which of these is a valid input feature?
+    options:
+      A: The exam score itself
+      B: The model's own previous prediction for this exam
+      C: The model's accuracy on the test set
+      D: Hours studied per week before the exam
+    answer: D
+    explanation: Hours studied is known before the exam and plausibly related to the score. Using the exam score itself as an input would be target leakage, since it's the thing being predicted.
+
+  - id: found-010
+    concept: ml.foundations
+    difficulty: 2
+    stem: A model scored 92% on its test set in 2023. Deployed in 2026 on new customers, its accuracy drops to 70%, although the code is unchanged. What is the most likely explanation?
+    options:
+      A: The model underfits the training data
+      B: The data distribution has shifted since training
+      C: The learning rate was too small
+      D: The test set in 2023 was too large
+    answer: B
+    explanation: When the data a model sees in production differs from the training data (new customer behaviour, new products), performance drops. This is dataset or distribution shift. Underfitting would have shown up as poor test accuracy in 2023 too.
+
+  - id: found-011
+    concept: ml.foundations
+    difficulty: 3
+    stem: You have 1,000,000 unlabelled images and only 1,000 labelled ones. Which approach is designed to learn from both?
+    options:
+      A: Pure supervised learning on the 1,000 labelled images
+      B: Reinforcement learning
+      C: Semi-supervised learning
+      D: Clustering the labelled images only
+    answer: C
+    explanation: Semi-supervised learning combines a small labelled set with a large unlabelled set, for example by using the unlabelled data to learn structure or pseudo-labels. Pure supervised learning ignores the unlabelled data.
+
+  - id: found-012
+    concept: ml.foundations
+    difficulty: 3
+    stem: What does the "no free lunch" theorem imply for machine learning?
+    options:
+      A: Training a model always costs money
+      B: Deep learning beats every other method on tabular data
+      C: More data always improves every model
+      D: No single learning algorithm is best for every possible problem
+    answer: D
+    explanation: Averaged over all possible problems, no algorithm outperforms any other. An algorithm does well only when its assumptions match the problem, so methods must be compared on the task at hand.
+
+  - id: found-013
+    concept: ml.foundations
+    difficulty: 3
+    stem: What is the "inductive bias" of a learning algorithm?
+    options:
+      A: The assumptions it uses to generalise from training data to unseen inputs
+      B: A bug that makes it favour one class
+      C: The intercept term in a linear model
+      D: The error caused by noisy labels
+    answer: A
+    explanation: Every learner needs assumptions to predict beyond the examples it has seen; for example, linear regression assumes a linear relationship and k-NN assumes nearby points have similar labels. These assumptions are its inductive bias.
+
+  - id: found-014
+    concept: ml.foundations
+    difficulty: 2
+    test_form: A
+    stem: Which of these is an unsupervised learning task?
+    options:
+      A: Predicting a movie's rating from reviews that are labelled with ratings
+      B: Classifying tumours as benign or malignant from labelled scans
+      C: Grouping news articles into topics when no topic labels exist
+      D: Predicting monthly sales from past labelled sales figures
+    answer: C
+    explanation: Grouping articles without any topic labels means discovering structure in unlabelled data, which is unsupervised. The other three learn from labelled examples, so they're supervised.
+
+  - id: found-015
+    concept: ml.foundations
+    difficulty: 2
+    test_form: B
+    stem: Which of these is a supervised regression task?
+    options:
+      A: Predicting a used car's price from past sales with known prices
+      B: Teaching a robot to balance through trial-and-error rewards
+      C: Grouping songs by similarity with no labels
+      D: Compressing images by finding common patterns
+    answer: A
+    explanation: Price is a continuous number and past sales provide labelled examples, so this is supervised regression. Grouping songs is unsupervised, and learning from rewards is reinforcement learning.

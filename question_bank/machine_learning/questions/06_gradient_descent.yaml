@@ -1,0 +1,183 @@
+questions:
+  - id: gd-001
+    concept: ml.gradient_descent
+    difficulty: 2
+    diagnostic: true
+    stem: During gradient descent, the training loss gets larger and oscillates from one iteration to the next. What is the most likely cause?
+    options:
+      A: The learning rate is too small
+      B: The learning rate is too large
+      C: The model has too few features
+      D: The training set is too large
+    answer: B
+    explanation: A learning rate that's too large makes each step overshoot the minimum, so the loss bounces around or diverges. A learning rate that's too small makes progress slow but steady.
+
+  - id: gd-002
+    concept: ml.gradient_descent
+    difficulty: 1
+    stem: In which direction does gradient descent move the parameters at each step?
+    options:
+      A: In the direction of the negative gradient
+      B: In the direction of the gradient
+      C: In a random direction
+      D: Towards the largest parameter
+    answer: A
+    explanation: The gradient points in the direction of steepest increase of the loss, so stepping along the negative gradient decreases the loss fastest locally.
+
+  - id: gd-003
+    concept: ml.gradient_descent
+    difficulty: 1
+    stem: What does the learning rate control in gradient descent?
+    options:
+      A: The number of features
+      B: The size of the training set
+      C: The size of each parameter update step
+      D: The number of classes
+    answer: C
+    explanation: The update is w ← w − η∇L, and the learning rate η scales how far each step moves along the negative gradient.
+
+  - id: gd-004
+    concept: ml.gradient_descent
+    difficulty: 1
+    stem: What is one "epoch" in training?
+    options:
+      A: One parameter update
+      B: One minute of training
+      C: One mini-batch
+      D: One complete pass over the whole training set
+    answer: D
+    explanation: An epoch means every training example has been used once. With mini-batches, one epoch contains many updates (training-set size ÷ batch size).
+
+  - id: gd-005
+    concept: ml.gradient_descent
+    difficulty: 1
+    stem: For the loss L(w) = w², what is the gradient at w = 3?
+    options:
+      A: "3"
+      B: "6"
+      C: "9"
+      D: "-6"
+    answer: B
+    explanation: dL/dw = 2w, so at w = 3 the gradient is 6. 9 is the loss value itself, not its gradient.
+
+  - id: gd-006
+    concept: ml.gradient_descent
+    difficulty: 2
+    stem: The current weight is w = 2, the gradient is 4 and the learning rate is 0.1. What is w after one gradient descent step?
+    options:
+      A: "2.4"
+      B: "0.4"
+      C: "1.6"
+      D: "-2"
+    answer: C
+    explanation: w ← w − η × gradient = 2 − 0.1 × 4 = 2 − 0.4 = 1.6. 2.4 comes from adding instead of subtracting, which is gradient ascent.
+
+  - id: gd-007
+    concept: ml.gradient_descent
+    difficulty: 2
+    stem: How does stochastic gradient descent (SGD) differ from full-batch gradient descent?
+    options:
+      A: SGD updates using one example (or a small batch) at a time, so updates are cheaper but noisier
+      B: SGD always reaches a lower loss
+      C: SGD doesn't use gradients
+      D: SGD uses the whole dataset for every update
+    answer: A
+    explanation: Full-batch GD computes the exact gradient over all examples before each update. SGD estimates it from one or a few examples, which makes updates much faster but noisier.
+
+  - id: gd-008
+    concept: ml.gradient_descent
+    difficulty: 2
+    stem: The training loss decreases steadily but extremely slowly, and after 1,000 epochs it's still far from converging. What is the most likely cause?
+    options:
+      A: The learning rate is too large
+      B: The model is overfitting
+      C: The test set is too small
+      D: The learning rate is too small
+    answer: D
+    explanation: Tiny steps make steady but slow progress. A learning rate that's too large would make the loss oscillate or diverge instead.
+
+  - id: gd-009
+    concept: ml.gradient_descent
+    difficulty: 2
+    stem: Why does feature scaling usually make gradient descent converge faster?
+    options:
+      A: It reduces the number of parameters
+      B: It makes the loss surface less elongated, so the gradient points more directly at the minimum
+      C: It changes the location of the minimum
+      D: It removes the need for a learning rate
+    answer: B
+    explanation: With features on very different scales, the loss contours are long, narrow valleys and GD zig-zags across them. Similar scales give rounder contours and a more direct path.
+
+  - id: gd-010
+    concept: ml.gradient_descent
+    difficulty: 2
+    stem: The loss function of linear regression with MSE is convex. What does that guarantee?
+    options:
+      A: Gradient descent converges in one step
+      B: Any learning rate works
+      C: Any local minimum is also the global minimum
+      D: The minimum loss is zero
+    answer: C
+    explanation: A convex function has no separate local minima, so if gradient descent converges (with a suitable learning rate), it reaches the global minimum.
+
+  - id: gd-011
+    concept: ml.gradient_descent
+    difficulty: 3
+    stem: What does adding momentum to gradient descent do?
+    options:
+      A: It keeps a running average of past gradients, which damps oscillations and speeds progress along consistent directions
+      B: It increases the learning rate every step
+      C: It removes the need to compute gradients
+      D: It adds noise to escape the global minimum
+    answer: A
+    explanation: Momentum accumulates a decaying sum of past gradients. Components that keep flipping sign cancel out, and consistent ones build up, giving faster and smoother convergence.
+
+  - id: gd-012
+    concept: ml.gradient_descent
+    difficulty: 3
+    stem: You increase the mini-batch size from 32 to 1,024 while keeping the dataset the same. What happens?
+    options:
+      A: Each gradient estimate becomes noisier
+      B: The number of epochs needed always drops to 1
+      C: The loss function changes
+      D: Each gradient estimate becomes less noisy, but there are fewer updates per epoch
+    answer: D
+    explanation: Averaging over more examples reduces the variance of each gradient estimate, but one epoch now contains 32 times fewer updates.
+
+  - id: gd-013
+    concept: ml.gradient_descent
+    difficulty: 3
+    stem: Why can training the same neural network twice give different final losses?
+    options:
+      A: Gradient descent always finds the global minimum
+      B: The loss is non-convex, so the result depends on random initialisation and data order
+      C: Neural networks don't use gradients
+      D: The learning rate changes randomly by itself
+    answer: B
+    explanation: Neural network losses are non-convex, with many local minima and saddle points. Different starting points and shuffling lead gradient descent to different solutions.
+
+  - id: gd-014
+    concept: ml.gradient_descent
+    difficulty: 2
+    test_form: A
+    stem: The current weight is w = 5, the gradient is 10 and the learning rate is 0.2. What is w after one gradient descent step?
+    options:
+      A: "7"
+      B: "2"
+      C: "3"
+      D: "-5"
+    answer: C
+    explanation: w ← 5 − 0.2 × 10 = 5 − 2 = 3. 7 comes from adding the step instead of subtracting it.
+
+  - id: gd-015
+    concept: ml.gradient_descent
+    difficulty: 2
+    test_form: B
+    stem: The current weight is w = 1, the gradient is −4 and the learning rate is 0.5. What is w after one gradient descent step?
+    options:
+      A: "-1"
+      B: "3"
+      C: "0.5"
+      D: "-3"
+    answer: B
+    explanation: w ← 1 − 0.5 × (−4) = 1 + 2 = 3. A negative gradient means the loss decreases as w increases, so the step moves w up.

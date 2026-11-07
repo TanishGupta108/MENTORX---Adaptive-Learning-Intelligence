@@ -1,6 +1,6 @@
 # MENTORX — Project Plan (v0.1)
 
-> Status: **M0 done, M1 done** (requirements + design in [docs/srs](srs/) and [docs/design](design/)). Every metric in this repo must come from a script that was actually run.
+> Status: **M0 done, M1 done, M2 drafted**: 285 questions written and validated, awaiting team review ([guide](question-bank-guide.md)). Every metric in this repo must come from a script that was actually run.
 > Plan date: 2026-11-08 (v0.2). There's no fixed deadline: the goal is the best possible product, built in milestone order. Each milestone is finished, tested and deployed before the next one starts.
 >
 > **Decisions made:** MVP subject = **Machine Learning** · Frontend = **TypeScript** · No ethics approval required by the college (consent + privacy safeguards stay in place anyway).
@@ -510,4 +510,5 @@ python scripts/download.py --dataset assist2009
 | Deadline | None fixed; quality first, milestone order | 2026-11-08 |
 | Frontend language | TypeScript (strict) | 2026-11-08 |
 | Ethics approval | Not required by college; consent + privacy kept | 2026-11-08 |
+| Question bank v1 | 19 concepts × 15 questions (1 diagnostic, 12 practice, form A, form B), AI-drafted, peer review required before production | 2026-11-08 |
 | Repo visibility | Private for now (open) | — |

@@ -1,0 +1,183 @@
+questions:
+  - id: clust-001
+    concept: ml.clustering
+    difficulty: 2
+    diagnostic: true
+    stem: Which two steps does the k-means algorithm repeat until it converges?
+    options:
+      A: Split the data on the best feature, then prune
+      B: Compute gradients, then update weights
+      C: Assign each point to its nearest centroid, then move each centroid to the mean of its assigned points
+      D: Merge the two closest clusters, then recompute distances
+    answer: C
+    explanation: k-means alternates assignment and update steps, and each step can only decrease the within-cluster sum of squares. Merging the closest clusters describes agglomerative hierarchical clustering.
+
+  - id: clust-002
+    concept: ml.clustering
+    difficulty: 1
+    stem: What kind of learning is clustering?
+    options:
+      A: Unsupervised learning
+      B: Supervised learning
+      C: Reinforcement learning
+      D: Regression
+    answer: A
+    explanation: Clustering finds groups in data without any labels, which makes it unsupervised.
+
+  - id: clust-003
+    concept: ml.clustering
+    difficulty: 1
+    stem: In k-means, what does k represent?
+    options:
+      A: The number of features
+      B: The number of iterations
+      C: The number of nearest neighbours
+      D: The number of clusters
+    answer: D
+    explanation: k is the number of clusters (and centroids) you ask for. k-NN also uses a "k", but there it's the number of neighbours.
+
+  - id: clust-004
+    concept: ml.clustering
+    difficulty: 1
+    stem: In k-means, what is a cluster's centroid?
+    options:
+      A: The point farthest from the others
+      B: The mean of all the points assigned to the cluster
+      C: A randomly chosen point that never changes
+      D: The median of the whole dataset
+    answer: B
+    explanation: After each assignment step, a centroid is recomputed as the average position of its cluster's points. Only its starting position is random.
+
+  - id: clust-005
+    concept: ml.clustering
+    difficulty: 1
+    stem: Which of these is a typical clustering task?
+    options:
+      A: Predicting house prices from labelled sales
+      B: Classifying emails as spam using labelled examples
+      C: Segmenting customers into groups with similar buying behaviour, with no predefined groups
+      D: Predicting tomorrow's temperature
+    answer: C
+    explanation: Customer segmentation without predefined categories is the textbook use of clustering. The other tasks have labels, so they're supervised.
+
+  - id: clust-006
+    concept: ml.clustering
+    difficulty: 2
+    stem: What objective does k-means minimise?
+    options:
+      A: The total squared distance from each point to its cluster's centroid (the within-cluster sum of squares)
+      B: The number of clusters
+      C: The distance between centroids
+      D: Classification error
+    answer: A
+    explanation: This quantity is also called inertia. k-means doesn't try to push the centroids apart; that's only a side effect of tight clusters.
+
+  - id: clust-007
+    concept: ml.clustering
+    difficulty: 2
+    stem: How does the elbow method help choose k for k-means?
+    options:
+      A: It always picks k = 2
+      B: It picks the k with the lowest inertia
+      C: It uses the class labels to pick k
+      D: You plot inertia against k and pick the point where adding more clusters stops giving a big improvement
+    answer: D
+    explanation: Inertia always decreases as k grows, reaching 0 when every point is its own cluster, so the lowest inertia is meaningless. The "elbow" is where the curve flattens.
+
+  - id: clust-008
+    concept: ml.clustering
+    difficulty: 2
+    stem: You run k-means twice on the same data and get different clusters. Why, and what helps?
+    options:
+      A: k-means is broken, so switch algorithms
+      B: The result depends on the initial centroids, so use smarter initialisation (k-means++) and several restarts, keeping the best
+      C: The data changed between runs
+      D: k-means uses labels randomly
+    answer: B
+    explanation: k-means converges to a local optimum that depends on where it starts. k-means++ spreads out the initial centroids, and multiple restarts (n_init) keep the lowest-inertia result.
+
+  - id: clust-009
+    concept: ml.clustering
+    difficulty: 2
+    stem: A cluster contains the points (1, 2), (3, 4) and (5, 6). Where is its centroid?
+    options:
+      A: (3, 4)
+      B: (9, 12)
+      C: (1, 2)
+      D: (4, 5)
+    answer: A
+    explanation: Average each coordinate, giving ((1 + 3 + 5) / 3, (2 + 4 + 6) / 3) = (3, 4). (9, 12) is the sum before dividing by 3.
+
+  - id: clust-010
+    concept: ml.clustering
+    difficulty: 2
+    stem: What does agglomerative hierarchical clustering produce?
+    options:
+      A: Exactly two clusters
+      B: A decision tree for classification
+      C: A dendrogram, a tree of nested merges that can be cut at any level to get a chosen number of clusters
+      D: A set of principal components
+    answer: C
+    explanation: It starts with every point as its own cluster and repeatedly merges the closest pair. The full merge history forms a dendrogram, so k doesn't have to be chosen up front.
+
+  - id: clust-011
+    concept: ml.clustering
+    difficulty: 3
+    stem: Your data forms two interleaving crescent ("moon") shapes. k-means with k = 2 splits them badly. Which algorithm is better suited?
+    options:
+      A: k-means with more iterations
+      B: k-means with k = 1
+      C: Linear regression
+      D: DBSCAN, which groups points by density and can find arbitrarily shaped clusters
+    answer: D
+    explanation: k-means assumes compact, roughly spherical clusters around centroids. Density-based methods like DBSCAN follow the shape of dense regions.
+
+  - id: clust-012
+    concept: ml.clustering
+    difficulty: 3
+    stem: What does DBSCAN do with a point that has too few neighbours within distance ε and isn't near any core point?
+    options:
+      A: It assigns the point to the nearest centroid
+      B: It labels the point as noise (an outlier)
+      C: It starts a new cluster for that point alone
+      D: It removes the point from the dataset before clustering
+    answer: B
+    explanation: DBSCAN distinguishes core points, border points and noise. Points in sparse regions don't belong to any cluster, which makes DBSCAN useful for detecting outliers.
+
+  - id: clust-013
+    concept: ml.clustering
+    difficulty: 3
+    stem: What does a silhouette score close to +1 indicate for a point?
+    options:
+      A: It's much closer to points in its own cluster than to points in the nearest other cluster
+      B: It lies between two clusters
+      C: It's probably in the wrong cluster
+      D: It's the cluster's centroid
+    answer: A
+    explanation: Silhouette = (b − a) / max(a, b), where a is the mean distance within the point's own cluster and b is the mean distance to the nearest other cluster. Values near 0 mean the point is on a border; negative values suggest the wrong cluster.
+
+  - id: clust-014
+    concept: ml.clustering
+    difficulty: 2
+    test_form: A
+    stem: A cluster contains the points (2, 0), (4, 2) and (6, 4). Where is its centroid?
+    options:
+      A: (12, 6)
+      B: (4, 2)
+      C: (2, 0)
+      D: (3, 3)
+    answer: B
+    explanation: ((2 + 4 + 6) / 3, (0 + 2 + 4) / 3) = (4, 2). (12, 6) is the sum before dividing by 3.
+
+  - id: clust-015
+    concept: ml.clustering
+    difficulty: 2
+    test_form: B
+    stem: A cluster contains the points (0, 1), (2, 3) and (4, 5). Where is its centroid?
+    options:
+      A: (6, 9)
+      B: (0, 1)
+      C: (3, 2)
+      D: (2, 3)
+    answer: D
+    explanation: ((0 + 2 + 4) / 3, (1 + 3 + 5) / 3) = (2, 3). (6, 9) is the sum before dividing by 3, and (3, 2) swaps the coordinates.

@@ -1,0 +1,183 @@
+questions:
+  - id: linreg-001
+    concept: ml.linear_regression
+    difficulty: 1
+    diagnostic: true
+    stem: Which loss function is minimised by ordinary least squares linear regression?
+    options:
+      A: Mean absolute error
+      B: Cross-entropy (log loss)
+      C: Hinge loss
+      D: Mean squared error
+    answer: D
+    explanation: Ordinary least squares minimises the sum (equivalently, the mean) of squared residuals. Cross-entropy is the loss used for logistic regression, and hinge loss is used by SVMs.
+
+  - id: linreg-002
+    concept: ml.linear_regression
+    difficulty: 1
+    stem: In the model y = w x + b with a single feature, what does w represent?
+    options:
+      A: The predicted value when x = 0
+      B: The slope, meaning how much y changes when x increases by 1
+      C: The average error of the model
+      D: The number of training examples
+    answer: B
+    explanation: w is the slope. b is the intercept, the prediction when x = 0.
+
+  - id: linreg-003
+    concept: ml.linear_regression
+    difficulty: 1
+    stem: A fitted model is y = 3x + 2. What does it predict for x = 4?
+    options:
+      A: "12"
+      B: "9"
+      C: "20"
+      D: "14"
+    answer: D
+    explanation: y = 3 × 4 + 2 = 12 + 2 = 14. 12 forgets the intercept.
+
+  - id: linreg-004
+    concept: ml.linear_regression
+    difficulty: 1
+    stem: In linear regression, what is a residual?
+    options:
+      A: The actual value minus the predicted value
+      B: The slope of the line
+      C: The squared feature value
+      D: The number of features
+    answer: A
+    explanation: The residual is the error for one example, y − ŷ. Least squares chooses the line that minimises the sum of squared residuals.
+
+  - id: linreg-005
+    concept: ml.linear_regression
+    difficulty: 1
+    stem: What type of output does a linear regression model predict?
+    options:
+      A: A class label such as "yes" or "no"
+      B: A probability between 0 and 1
+      C: A continuous numeric value
+      D: A cluster assignment
+    answer: C
+    explanation: Linear regression outputs a real number, such as a price or a temperature. Predicting probabilities between 0 and 1 is what logistic regression does.
+
+  - id: linreg-006
+    concept: ml.linear_regression
+    difficulty: 2
+    stem: In a house-price model, the coefficient for "number of bedrooms" is 5,000 (in rupees). How should you interpret it?
+    options:
+      A: Every house costs at least ₹5,000
+      B: Bedrooms explain 5,000% of the price
+      C: The model is wrong by ₹5,000 on average
+      D: With the other features held constant, one extra bedroom raises the predicted price by ₹5,000
+    answer: D
+    explanation: In a multiple regression, each coefficient is the change in the prediction per unit increase in that feature, with all other features held fixed.
+
+  - id: linreg-007
+    concept: ml.linear_regression
+    difficulty: 2
+    stem: What is the closed-form (normal equation) solution for linear regression weights?
+    options:
+      A: w = X y
+      B: w = (XᵀX)⁻¹ Xᵀ y
+      C: w = (X Xᵀ) y
+      D: w = Xᵀ y / n
+    answer: B
+    explanation: Setting the gradient of the squared error to zero gives XᵀX w = Xᵀ y, so w = (XᵀX)⁻¹ Xᵀ y when XᵀX is invertible.
+
+  - id: linreg-008
+    concept: ml.linear_regression
+    difficulty: 2
+    stem: A regression model has R² = 0.8 on test data. What does that mean?
+    options:
+      A: The model explains 80% of the variance in the target
+      B: 80% of predictions are exactly correct
+      C: The model's average error is 0.8
+      D: The model has 80% accuracy
+    answer: A
+    explanation: R² = 1 − SS_res / SS_tot, the fraction of the target's variance that the model accounts for. It doesn't count exactly-correct predictions; that idea doesn't really apply to continuous outputs.
+
+  - id: linreg-009
+    concept: ml.linear_regression
+    difficulty: 2
+    stem: Compared with mean absolute error (MAE), what is mean squared error (MSE) more sensitive to?
+    options:
+      A: The number of features
+      B: The units of the input features
+      C: Large errors, such as those caused by outliers
+      D: The order of the training examples
+    answer: C
+    explanation: Squaring makes large errors count disproportionately. An error of 10 adds 100 to MSE but only 10 to MAE, so a few outliers can dominate MSE.
+
+  - id: linreg-010
+    concept: ml.linear_regression
+    difficulty: 2
+    stem: The true relationship in your data is y = x². Can linear regression model it?
+    options:
+      A: No, linear regression can only fit straight lines in the original feature
+      B: Only if you use gradient descent instead of the normal equation
+      C: No, you must switch to logistic regression
+      D: Yes, if you add x² as a feature, because the model only has to be linear in its parameters
+    answer: D
+    explanation: The word "linear" refers to the weights, not the features. With the features [x, x²], the model w₁x + w₂x² + b can fit the curve exactly. This is polynomial regression.
+
+  - id: linreg-011
+    concept: ml.linear_regression
+    difficulty: 3
+    stem: Two features in a regression are almost perfectly correlated (multicollinearity). What is the typical effect?
+    options:
+      A: The model can't make predictions at all
+      B: Individual coefficients become unstable and hard to interpret, though predictions may still be reasonable
+      C: R² drops to zero
+      D: The residuals become exactly zero
+    answer: B
+    explanation: With near-duplicate features, many combinations of weights fit equally well, so small data changes can swing the coefficients wildly. Predictions on similar data can still be fine. Ridge regularisation stabilises the coefficients.
+
+  - id: linreg-012
+    concept: ml.linear_regression
+    difficulty: 3
+    stem: A plot of residuals against predicted values shows a clear U-shaped curve. What does this suggest?
+    options:
+      A: The relationship is non-linear, so the model is missing a curved pattern
+      B: The model is perfectly specified
+      C: The dataset is too large
+      D: The learning rate was too high
+    answer: A
+    explanation: For a well-specified model, residuals should look like random noise around zero. A systematic U-shape means the model consistently over- and under-predicts in different ranges, which is a sign of a missing non-linear term.
+
+  - id: linreg-013
+    concept: ml.linear_regression
+    difficulty: 3
+    stem: Which assumption do the standard OLS confidence intervals for coefficients rely on?
+    options:
+      A: Each feature is normally distributed
+      B: The target lies between 0 and 1
+      C: The errors are independent with constant variance
+      D: There are more features than examples
+    answer: C
+    explanation: Standard OLS inference assumes independent errors with constant variance (homoscedasticity), plus normal errors for exact small-sample intervals. The features themselves don't need to be normal.
+
+  - id: linreg-014
+    concept: ml.linear_regression
+    difficulty: 2
+    test_form: A
+    stem: A model is y = 2x − 1. For an example with x = 5, the actual value is 12. What is the residual?
+    options:
+      A: "-3"
+      B: "9"
+      C: "3"
+      D: "21"
+    answer: C
+    explanation: The prediction is 2 × 5 − 1 = 9, so the residual is actual − predicted = 12 − 9 = 3. 9 is the prediction, not the residual.
+
+  - id: linreg-015
+    concept: ml.linear_regression
+    difficulty: 2
+    test_form: B
+    stem: A model is y = 4x + 1. For an example with x = 2, the actual value is 6. What is the residual?
+    options:
+      A: "-3"
+      B: "9"
+      C: "15"
+      D: "3"
+    answer: A
+    explanation: The prediction is 4 × 2 + 1 = 9, so the residual is 6 − 9 = −3. It's negative because the model over-predicts.

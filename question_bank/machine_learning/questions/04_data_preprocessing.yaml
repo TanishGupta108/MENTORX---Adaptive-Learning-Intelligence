@@ -1,0 +1,183 @@
+questions:
+  - id: prep-001
+    concept: ml.data_preprocessing
+    difficulty: 2
+    diagnostic: true
+    stem: You standardise features (subtract the mean, divide by the standard deviation) before training. Which approach avoids data leakage?
+    options:
+      A: Compute the mean and standard deviation on the full dataset, then split into train and test
+      B: Standardisation can never cause leakage, so the order doesn't matter
+      C: Compute separate means and standard deviations for the train and test sets
+      D: Split first, compute the mean and standard deviation on the training set only, and apply them to both sets
+    answer: D
+    explanation: Statistics must be learned from training data only and then reused on the test set. Computing them on the full dataset (A) lets information about the test set influence training.
+
+  - id: prep-002
+    concept: ml.data_preprocessing
+    difficulty: 1
+    stem: After min-max scaling, what range do a feature's training values fall into?
+    options:
+      A: "[0, 1]"
+      B: "[-1, 1] always"
+      C: Mean 0 and standard deviation 1
+      D: "[0, 100]"
+    answer: A
+    explanation: Min-max scaling computes (x − min) / (max − min), which maps the training minimum to 0 and the maximum to 1. Mean 0 and standard deviation 1 is standardisation (z-scores).
+
+  - id: prep-003
+    concept: ml.data_preprocessing
+    difficulty: 1
+    stem: A feature "colour" takes the values red, green and blue. How many binary columns does one-hot encoding create (without dropping any)?
+    options:
+      A: "1"
+      B: "2"
+      C: "3"
+      D: "6"
+    answer: C
+    explanation: One-hot encoding creates one 0/1 column per category, so 3 columns. Exactly one of them is 1 for each row. Some setups drop one column to avoid redundancy, but by default there's one per category.
+
+  - id: prep-004
+    concept: ml.data_preprocessing
+    difficulty: 1
+    stem: A numeric feature has a few missing values. What is a simple, reasonable way to fill them?
+    options:
+      A: Replace them with a random number
+      B: Replace them with the largest value in the column
+      C: Delete the whole feature
+      D: Replace them with the median computed on the training data
+    answer: D
+    explanation: Median imputation is simple and robust to outliers. It must be computed from the training data only. Random or maximum values add noise or bias, and dropping the feature throws away useful information.
+
+  - id: prep-005
+    concept: ml.data_preprocessing
+    difficulty: 1
+    stem: Why is feature scaling important for k-nearest neighbours?
+    options:
+      A: It removes the need for a test set
+      B: Features with large ranges would otherwise dominate the distance calculation
+      C: It turns categorical features into numbers
+      D: It guarantees 100% accuracy
+    answer: B
+    explanation: k-NN compares examples by distance. A feature measured in lakhs of rupees would overwhelm one measured in years unless both are put on similar scales.
+
+  - id: prep-006
+    concept: ml.data_preprocessing
+    difficulty: 2
+    stem: A "city" feature with 500 cities is encoded as the integers 1 to 500 and fed into linear regression. What is the main problem?
+    options:
+      A: The model treats the cities as ordered numbers, implying for example that city 400 is "more" than city 2
+      B: Linear regression can't accept integer inputs
+      C: It creates too many columns
+      D: There's no problem, because integer encoding is always fine
+    answer: A
+    explanation: Integer codes impose a fake order and spacing that a linear model will use. One-hot or target encoding avoids this. Creating too many columns is a concern with one-hot encoding, not integer codes.
+
+  - id: prep-007
+    concept: ml.data_preprocessing
+    difficulty: 2
+    stem: A feature has a few extreme outliers. Which statistic is most robust to them?
+    options:
+      A: Mean
+      B: Standard deviation
+      C: Median
+      D: Range (max − min)
+    answer: C
+    explanation: The median depends only on the middle value, so a few extreme points barely move it. The mean, standard deviation and range can all be pulled strongly by outliers.
+
+  - id: prep-008
+    concept: ml.data_preprocessing
+    difficulty: 2
+    stem: A feature has mean 50 and standard deviation 10 on the training set. What is the standardised value of 70?
+    options:
+      A: "20"
+      B: "0.2"
+      C: "7"
+      D: "2"
+    answer: D
+    explanation: z = (x − μ) / σ = (70 − 50) / 10 = 2. The value is 2 standard deviations above the mean. 20 is the raw difference before dividing by σ.
+
+  - id: prep-009
+    concept: ml.data_preprocessing
+    difficulty: 2
+    stem: Which model is LEAST affected by whether features are scaled?
+    options:
+      A: k-nearest neighbours
+      B: Decision tree
+      C: SVM with an RBF kernel
+      D: Logistic regression trained with gradient descent
+    answer: B
+    explanation: A decision tree splits on thresholds of one feature at a time, and rescaling a feature doesn't change which threshold gives the best split. Distance-based and gradient-based models are sensitive to scale.
+
+  - id: prep-010
+    concept: ml.data_preprocessing
+    difficulty: 2
+    stem: A feature "T-shirt size" takes the values small, medium and large. Which encoding fits best?
+    options:
+      A: One-hot encoding, because order never matters
+      B: Drop the feature, because text can't be used
+      C: Ordinal encoding (small = 0, medium = 1, large = 2), because the categories have a natural order
+      D: Random integers for each category
+    answer: C
+    explanation: Ordinal categories have a meaningful order, and ordinal encoding preserves it. One-hot would also work but throws away the order. Random integers would invent a meaningless order.
+
+  - id: prep-011
+    concept: ml.data_preprocessing
+    difficulty: 3
+    stem: You fill missing values with the mean of the whole dataset, then run 5-fold cross-validation. What is wrong, and how do you fix it?
+    options:
+      A: Nothing is wrong, because imputation can't leak information
+      B: Use the mode instead of the mean
+      C: Cross-validation should use 10 folds
+      D: The mean includes the validation folds; fit the imputer inside each training fold (for example in a pipeline)
+    answer: D
+    explanation: Any statistic learned from data (means, scalers, encoders) must be fitted on the training fold only. Putting preprocessing inside a pipeline that's refitted per fold prevents this leakage.
+
+  - id: prep-012
+    concept: ml.data_preprocessing
+    difficulty: 3
+    stem: A feature such as "annual income" is heavily right-skewed (a few very large values). Which transformation often helps linear models?
+    options:
+      A: A log transform, such as log(1 + x)
+      B: Squaring the feature
+      C: Multiplying by 100
+      D: Replacing it with its rank in reverse order
+    answer: A
+    explanation: A log transform compresses large values and makes a right-skewed distribution more symmetric, which often makes relationships more linear. Squaring would make the skew worse, and multiplying by a constant doesn't change the shape.
+
+  - id: prep-013
+    concept: ml.data_preprocessing
+    difficulty: 3
+    stem: In a loan dataset, applicants who skip the "monthly debt" field default much more often. What is a good way to handle the missing values?
+    options:
+      A: Drop every row with a missing value
+      B: Impute the median and also add a binary "debt_missing" indicator feature
+      C: Fill them with 0 and say nothing
+      D: Fill them with the test-set mean
+    answer: B
+    explanation: Here the fact that the value is missing carries information. An indicator feature lets the model use that signal, while the imputed median keeps the numeric column usable. Using test-set statistics would leak.
+
+  - id: prep-014
+    concept: ml.data_preprocessing
+    difficulty: 2
+    test_form: A
+    stem: A feature has mean 20 and standard deviation 5 on the training set. What is the standardised value of 35?
+    options:
+      A: "7"
+      B: "15"
+      C: "3"
+      D: "0.33"
+    answer: C
+    explanation: z = (35 − 20) / 5 = 3. 15 is the raw difference before dividing by σ.
+
+  - id: prep-015
+    concept: ml.data_preprocessing
+    difficulty: 2
+    test_form: B
+    stem: A feature has mean 20 and standard deviation 4 on the training set. What is the standardised value of 12?
+    options:
+      A: "-2"
+      B: "-8"
+      C: "2"
+      D: "0.5"
+    answer: A
+    explanation: z = (12 − 20) / 4 = −2. The value is 2 standard deviations below the mean, so the sign is negative. −8 is the raw difference before dividing by σ.

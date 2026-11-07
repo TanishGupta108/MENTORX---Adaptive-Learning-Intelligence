@@ -1,0 +1,183 @@
+questions:
+  - id: dimred-001
+    concept: ml.dimensionality_reduction
+    difficulty: 2
+    diagnostic: true
+    stem: Which direction does PCA's first principal component point along?
+    options:
+      A: The direction that best separates the classes
+      B: The direction of maximum variance in the data
+      C: The axis of the first feature
+      D: A random direction
+    answer: B
+    explanation: PC1 is the unit direction along which the projected data has the largest variance. PCA ignores labels, so it isn't trying to separate classes; that's what LDA does.
+
+  - id: dimred-002
+    concept: ml.dimensionality_reduction
+    difficulty: 1
+    stem: What is the main goal of dimensionality reduction?
+    options:
+      A: To represent the data with fewer features while keeping most of the important information
+      B: To add more features to the data
+      C: To label the data automatically
+      D: To increase the number of training examples
+    answer: A
+    explanation: Fewer dimensions can mean faster training, less overfitting, easier visualisation and less noise, as long as the key structure is preserved.
+
+  - id: dimred-003
+    concept: ml.dimensionality_reduction
+    difficulty: 1
+    stem: Does PCA use the class labels?
+    options:
+      A: Yes, it needs labels to find its components
+      B: Only for classification problems
+      C: No, PCA is unsupervised and uses only the features
+      D: Only the test-set labels
+    answer: C
+    explanation: PCA works only with the features, through their covariance. Supervised methods such as LDA do use labels.
+
+  - id: dimred-004
+    concept: ml.dimensionality_reduction
+    difficulty: 1
+    stem: How are the principal components found by PCA related to each other?
+    options:
+      A: They are all parallel
+      B: They are identical
+      C: They each contain only one original feature
+      D: They are orthogonal (perpendicular) to each other
+    answer: D
+    explanation: Each component is the direction of maximum remaining variance, subject to being orthogonal to all previous components, so the projected features are uncorrelated.
+
+  - id: dimred-005
+    concept: ml.dimensionality_reduction
+    difficulty: 1
+    stem: What is a common use of reducing data to 2 or 3 dimensions?
+    options:
+      A: Increasing the number of classes
+      B: Visualising high-dimensional data in a plot
+      C: Encrypting the data
+      D: Removing the need for a test set
+    answer: B
+    explanation: Projecting onto 2 or 3 components lets you plot the data and look for clusters or outliers that are impossible to see in hundreds of dimensions.
+
+  - id: dimred-006
+    concept: ml.dimensionality_reduction
+    difficulty: 2
+    stem: Why should features usually be standardised before PCA?
+    options:
+      A: PCA follows variance, so a feature with a large scale would dominate the components just because of its units
+      B: PCA can't run on unscaled data
+      C: Standardising adds more components
+      D: It makes PCA use the labels
+    answer: A
+    explanation: If income is in rupees and age in years, income's huge variance would make PC1 point almost entirely along income. Standardising puts the features on equal footing.
+
+  - id: dimred-007
+    concept: ml.dimensionality_reduction
+    difficulty: 2
+    stem: The first principal component has an explained variance ratio of 0.6. What does that mean?
+    options:
+      A: 60% of the features were removed
+      B: The model has 60% accuracy
+      C: PC1 captures 60% of the total variance in the data
+      D: PC1 is made of 60% of the examples
+    answer: C
+    explanation: The explained variance ratio is the component's eigenvalue divided by the sum of all eigenvalues, the share of the total variance it captures.
+
+  - id: dimred-008
+    concept: ml.dimensionality_reduction
+    difficulty: 2
+    stem: What is a common way to choose how many principal components to keep?
+    options:
+      A: Always keep exactly 2
+      B: Keep as many as there are classes
+      C: Keep all of them
+      D: Keep enough components to explain a target share of the variance, for example 95%
+    answer: D
+    explanation: The cumulative explained variance shows how much information is kept. A threshold such as 95%, or an elbow in the scree plot, balances compression against information loss.
+
+  - id: dimred-009
+    concept: ml.dimensionality_reduction
+    difficulty: 2
+    stem: Mathematically, what are the principal components?
+    options:
+      A: The rows of the data matrix
+      B: The eigenvectors of the data's covariance matrix
+      C: The class means
+      D: Random projections
+    answer: B
+    explanation: The eigenvectors of the covariance matrix give the component directions, and their eigenvalues give the variance along each one. They can also be computed with the SVD of the centred data.
+
+  - id: dimred-010
+    concept: ml.dimensionality_reduction
+    difficulty: 2
+    stem: PCA is a linear method. What does that mean in practice?
+    options:
+      A: Each component is a linear combination (weighted sum) of the original features
+      B: It only works on linear regression problems
+      C: It can only produce one component
+      D: It needs the data to lie on a straight line
+    answer: A
+    explanation: Each component is Σ wᵢxᵢ. That's why PCA can't unfold curved structures; non-linear methods like kernel PCA, t-SNE or UMAP are needed for those.
+
+  - id: dimred-011
+    concept: ml.dimensionality_reduction
+    difficulty: 3
+    stem: The covariance matrix of some data has eigenvalues 5, 3, 1 and 1. What fraction of the variance do the first two principal components explain?
+    options:
+      A: 50%
+      B: 62.5%
+      C: 80%
+      D: 100%
+    answer: C
+    explanation: (5 + 3) / (5 + 3 + 1 + 1) = 8 / 10 = 80%. 50% is PC1 alone.
+
+  - id: dimred-012
+    concept: ml.dimensionality_reduction
+    difficulty: 3
+    stem: You apply PCA before a classifier, keep only the top components, and accuracy drops sharply. What could explain this?
+    options:
+      A: PCA always improves accuracy, so the code must be wrong
+      B: PCA changed the labels
+      C: Too many components were kept
+      D: The direction that separates the classes may have low variance, so PCA discarded it
+    answer: D
+    explanation: PCA keeps high-variance directions without looking at labels, but high variance doesn't mean useful for prediction. A supervised method, or keeping more components, may be needed.
+
+  - id: dimred-013
+    concept: ml.dimensionality_reduction
+    difficulty: 3
+    stem: Which statement about t-SNE is true?
+    options:
+      A: It's a linear method like PCA
+      B: It's a non-linear method used mainly for visualisation, and distances between clusters in its plots are often not meaningful
+      C: It uses the class labels
+      D: Its components can be reused to transform new data, just like PCA
+    answer: B
+    explanation: t-SNE preserves local neighbourhoods, so the gaps between clusters and their sizes can mislead. Standard t-SNE has no transform for new points, so it's a visualisation tool rather than a preprocessing step.
+
+  - id: dimred-014
+    concept: ml.dimensionality_reduction
+    difficulty: 2
+    test_form: A
+    stem: The covariance matrix of some data has eigenvalues 6, 2 and 2. What fraction of the variance does the first principal component explain?
+    options:
+      A: 60%
+      B: 33%
+      C: 80%
+      D: 6%
+    answer: A
+    explanation: 6 / (6 + 2 + 2) = 6 / 10 = 60%. 33% would be right only if all three eigenvalues were equal.
+
+  - id: dimred-015
+    concept: ml.dimensionality_reduction
+    difficulty: 2
+    test_form: B
+    stem: The covariance matrix of some data has eigenvalues 4, 3, 2 and 1. What fraction of the variance do the first two principal components explain?
+    options:
+      A: 40%
+      B: 30%
+      C: 70%
+      D: 90%
+    answer: C
+    explanation: (4 + 3) / (4 + 3 + 2 + 1) = 7 / 10 = 70%. 40% is PC1 alone.

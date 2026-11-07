@@ -1,0 +1,183 @@
+questions:
+  - id: svm-001
+    concept: ml.svm
+    difficulty: 2
+    diagnostic: true
+    stem: Out of all the lines that separate two classes perfectly, which one does a linear SVM choose?
+    options:
+      A: The one with the largest margin, the distance to the closest points of either class
+      B: The one passing through the mean of the data
+      C: The first one found by gradient descent
+      D: The one closest to the most points
+    answer: A
+    explanation: An SVM maximises the margin, which tends to generalise better. Logistic regression doesn't explicitly maximise the margin.
+
+  - id: svm-002
+    concept: ml.svm
+    difficulty: 1
+    stem: In an SVM, what are support vectors?
+    options:
+      A: The weights of the model
+      B: All the points in the training set
+      C: The training points closest to the decision boundary, which define the margin
+      D: The points farthest from the boundary
+    answer: C
+    explanation: Only the points on or inside the margin determine where the boundary goes. Moving points far from the boundary doesn't change it.
+
+  - id: svm-003
+    concept: ml.svm
+    difficulty: 1
+    stem: In SVM terminology, what is the margin?
+    options:
+      A: The number of misclassified points
+      B: The distance between the decision boundary and the nearest training points
+      C: The learning rate
+      D: The number of support vectors
+    answer: B
+    explanation: The margin is the gap between the boundary and the closest points of each class, and a hard-margin SVM makes it as wide as possible.
+
+  - id: svm-004
+    concept: ml.svm
+    difficulty: 1
+    stem: What does the kernel trick allow an SVM to do?
+    options:
+      A: Train without any data
+      B: Skip the optimisation step
+      C: Work only with categorical features
+      D: Learn non-linear decision boundaries without explicitly computing high-dimensional feature vectors
+    answer: D
+    explanation: A kernel computes inner products in a transformed feature space directly, so the SVM can find a linear boundary there, which is non-linear in the original space, cheaply.
+
+  - id: svm-005
+    concept: ml.svm
+    difficulty: 1
+    stem: What does the decision boundary of a linear SVM look like?
+    options:
+      A: A straight line or hyperplane
+      B: A circle
+      C: A staircase of axis-aligned splits
+      D: Any curve
+    answer: A
+    explanation: A linear SVM separates classes with w·x + b = 0, which is a hyperplane. Curved boundaries need a non-linear kernel.
+
+  - id: svm-006
+    concept: ml.svm
+    difficulty: 2
+    stem: In a soft-margin SVM, what does a very large C do?
+    options:
+      A: It allows many misclassifications in exchange for a wide margin
+      B: It removes the kernel
+      C: It penalises misclassifications heavily, giving a narrower margin and a higher risk of overfitting
+      D: It has no effect on the margin
+    answer: C
+    explanation: C sets the cost of margin violations. A large C tries hard to classify every training point correctly, which is low bias but high variance. A small C allows violations for a wider, smoother margin.
+
+  - id: svm-007
+    concept: ml.svm
+    difficulty: 2
+    stem: With an RBF kernel, what happens if gamma is set very large?
+    options:
+      A: The boundary becomes a straight line
+      B: Each training point influences only a tiny region, giving a very wiggly boundary that tends to overfit
+      C: The SVM ignores the data
+      D: The SVM trains with no support vectors
+    answer: B
+    explanation: Gamma controls how quickly a point's influence decays with distance. A large gamma means very local influence, so the boundary bends around individual points.
+
+  - id: svm-008
+    concept: ml.svm
+    difficulty: 2
+    stem: Which formula is the hinge loss used by SVMs, for a label y ∈ {−1, +1} and score f(x)?
+    options:
+      A: (y − f(x))²
+      B: −y log f(x)
+      C: max(0, y − f(x))
+      D: max(0, 1 − y f(x))
+    answer: D
+    explanation: The loss is zero when y f(x) ≥ 1, meaning correct and outside the margin, and grows linearly otherwise. (y − f(x))² is squared error.
+
+  - id: svm-009
+    concept: ml.svm
+    difficulty: 2
+    stem: You remove a training point that is far from the boundary and not a support vector, then retrain. What happens to the SVM's decision boundary?
+    options:
+      A: It stays exactly the same
+      B: It moves towards the removed point
+      C: It flips orientation
+      D: The model can no longer be trained
+    answer: A
+    explanation: The solution depends only on the support vectors. Points safely outside the margin have zero weight in the dual solution.
+
+  - id: svm-010
+    concept: ml.svm
+    difficulty: 2
+    stem: Should features be scaled before training an SVM?
+    options:
+      A: No, SVMs are scale-invariant
+      B: Only for linear kernels
+      C: Yes, because margins and kernels depend on distances, so large-range features would dominate
+      D: Only when there are more than 100 features
+    answer: C
+    explanation: Distances drive both the margin and kernels like RBF. Without scaling, a feature measured in thousands dominates one measured in single digits.
+
+  - id: svm-011
+    concept: ml.svm
+    difficulty: 3
+    stem: For an example with true label y = +1, the SVM score is f(x) = 0.3. What is its hinge loss?
+    options:
+      A: "0"
+      B: "0.3"
+      C: "1.3"
+      D: "0.7"
+    answer: D
+    explanation: max(0, 1 − y f(x)) = max(0, 1 − 0.3) = 0.7. The point is on the correct side but inside the margin, so it's still penalised. 0 would apply only if f(x) ≥ 1.
+
+  - id: svm-012
+    concept: ml.svm
+    difficulty: 3
+    stem: You need well-calibrated probabilities from an SVM. What is the usual approach?
+    options:
+      A: Use the raw scores directly as probabilities
+      B: Fit a calibration step such as Platt scaling (a sigmoid on the scores) on held-out data
+      C: Increase C until the scores fall between 0 and 1
+      D: SVMs output calibrated probabilities by default
+    answer: B
+    explanation: SVM scores are distances from the boundary, not probabilities. Platt scaling or isotonic regression maps them to calibrated probabilities using validation data.
+
+  - id: svm-013
+    concept: ml.svm
+    difficulty: 3
+    stem: For a hard-margin linear SVM with weight vector w, how wide is the margin (the distance between the two margin hyperplanes)?
+    options:
+      A: 2 / ‖w‖
+      B: ‖w‖
+      C: 1 / ‖w‖²
+      D: ‖w‖ / 2
+    answer: A
+    explanation: The margin hyperplanes are w·x + b = ±1, which are 2 / ‖w‖ apart. Maximising the margin is therefore the same as minimising ‖w‖ (or ‖w‖² / 2).
+
+  - id: svm-014
+    concept: ml.svm
+    difficulty: 2
+    test_form: A
+    stem: For an example with true label y = +1, the SVM score is f(x) = −0.5. What is its hinge loss?
+    options:
+      A: "0"
+      B: "1.5"
+      C: "0.5"
+      D: "-0.5"
+    answer: B
+    explanation: max(0, 1 − (+1)(−0.5)) = max(0, 1.5) = 1.5. The point is on the wrong side of the boundary, so the loss is more than 1.
+
+  - id: svm-015
+    concept: ml.svm
+    difficulty: 2
+    test_form: B
+    stem: For an example with true label y = −1, the SVM score is f(x) = 0.5. What is its hinge loss?
+    options:
+      A: "0"
+      B: "0.5"
+      C: "1.5"
+      D: "-0.5"
+    answer: C
+    explanation: max(0, 1 − (−1)(0.5)) = max(0, 1.5) = 1.5. A positive score for a negative example is on the wrong side, so the loss is more than 1.
