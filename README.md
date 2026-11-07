@@ -2,7 +2,7 @@
 
 An ML-powered adaptive learning platform that teaches **Machine Learning**. It estimates each student's concept mastery from their real attempts, then uses those predictions to choose the next question, build a learning path and schedule revision.
 
-**Status:** M0 scaffold ✓ · M1 requirements & design ✓ · M2 question bank drafted (285 questions, awaiting review). See [docs/PROJECT_PLAN.md](docs/PROJECT_PLAN.md) for the feasibility analysis, scope, architecture, database schema, ML methodology and roadmap.
+**Status:** M0 scaffold ✓ · M1 requirements & design ✓ · M2 question bank drafted (285 questions, awaiting review) · M3 data pipeline + EDA (ASSISTments 2009) ✓. See [docs/PROJECT_PLAN.md](docs/PROJECT_PLAN.md) for the feasibility analysis, scope, architecture, database schema, ML methodology and roadmap.
 
 | Part | Stack | Folder |
 |---|---|---|

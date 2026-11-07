@@ -1,6 +1,6 @@
 # MENTORX — Project Plan (v0.1)
 
-> Status: **M0 done, M1 done, M2 drafted**: 285 questions written and validated, awaiting team review ([guide](question-bank-guide.md)). Every metric in this repo must come from a script that was actually run.
+> Status: **M0, M1 done · M2 drafted** (285 questions awaiting team review, [guide](question-bank-guide.md)) **· M3 done for ASSISTments 2009** ([datasets](datasets.md), [EDA](../ml/reports/eda/assist2009/report.md)). Every metric in this repo must come from a script that was actually run.
 > Plan date: 2026-11-08 (v0.2). There's no fixed deadline: the goal is the best possible product, built in milestone order. Each milestone is finished, tested and deployed before the next one starts.
 >
 > **Decisions made:** MVP subject = **Machine Learning** · Frontend = **TypeScript** · No ethics approval required by the college (consent + privacy safeguards stay in place anyway).
@@ -286,7 +286,7 @@ Gamification (streaks, goals) is **computed from attempts**, not stored as count
 | **EdNet (KT1)** | TOEIC English | ~780k students, ~95M interactions | **CC BY-NC 4.0** (non-commercial). Check the repo README. | ⚠️ Huge; use a sample of students. Includes elapsed-time features |
 | pyKT toolkit | Loaders + DKT/SAKT etc. baselines | — | MIT (check the repo) | ✅ Useful for DKT and standard preprocessing |
 
-**Recommendation:** use ASSISTments 2009 as the primary benchmark, plus a 5–10k-student sample of EdNet as a second benchmark that has timing. Neither covers Machine Learning content. Their role is **method validation and pre-training of concept-agnostic models**, not proof of performance on MENTORX's ML questions. Say this explicitly in the report.
+**Recommendation:** use ASSISTments 2009 as the primary benchmark, plus a 5–10k-student sample of EdNet as a second benchmark that has timing. **Update (M3):** ASSISTments 2009 turned out to have no timestamps at all (order only), so EdNet is *required*, not optional, for the time-since-last-practice features. See [datasets.md](datasets.md). Neither covers Machine Learning content. Their role is **method validation and pre-training of concept-agnostic models**, not proof of performance on MENTORX's ML questions. Say this explicitly in the report.
 
 Before choosing a dataset, record in `docs/datasets.md`: source URL, download date, licence text, columns, row/student/skill counts (computed by `ml/src/eda.py`), known issues (e.g. duplicate rows in ASSISTments 2009 and multi-skill rows), and why it is suitable.
 
@@ -511,4 +511,6 @@ python scripts/download.py --dataset assist2009
 | Frontend language | TypeScript (strict) | 2026-11-08 |
 | Ethics approval | Not required by college; consent + privacy kept | 2026-11-08 |
 | Question bank v1 | 19 concepts × 15 questions (1 diagnostic, 12 practice, form A, form B), AI-drafted, peer review required before production | 2026-11-08 |
+| ASSISTments 2009 cleaning | Corrected/collapsed file; main problems only; drop untagged, open-response and test-mode rows | 2026-11-08 |
+| EdNet | Required (only source of timestamps) | 2026-11-08 |
 | Repo visibility | Private for now (open) | — |

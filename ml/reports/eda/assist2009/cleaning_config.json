@@ -1,0 +1,9 @@
+{
+  "include_scaffolding": false,
+  "drop_answer_types": [
+    "open_response"
+  ],
+  "keep_tutor_modes": [
+    "tutor"
+  ]
+}
