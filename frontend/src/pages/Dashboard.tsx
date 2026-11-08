@@ -1,9 +1,10 @@
 import { Link } from "react-router";
-import { dashboard, engagement, learning } from "../api/endpoints";
+import { dashboard, engagement, learning, pilot } from "../api/endpoints";
 import type { Dashboard, Streak, Weekly } from "../api/types";
 import { useAuth } from "../auth/AuthContext";
 import { ActivityHeatmap, TrendChart } from "../components/charts";
 import { ReasonBadge } from "../components/ReasonBadge";
+import { pretestPending, StudyCard } from "../components/StudyCard";
 import {
   Button,
   ButtonLink,
@@ -19,7 +20,13 @@ import {
 import { useApi } from "../hooks/useApi";
 import { useStartSession } from "../hooks/useStartSession";
 
-const SESSION_LABEL = { diagnostic: "diagnostic", practice: "practice session", revision: "revision" };
+const SESSION_LABEL = {
+  diagnostic: "diagnostic",
+  practice: "practice session",
+  revision: "revision",
+  pretest: "pre-test",
+  posttest: "post-test",
+};
 
 export function DashboardPage() {
   const { user } = useAuth();
@@ -30,6 +37,7 @@ export function DashboardPage() {
   const activity = useApi((s) => dashboard.activity(12, s));
   const streak = useApi((s) => engagement.streak(s));
   const weekly = useApi((s) => engagement.weekly(s));
+  const study = useApi((s) => pilot.status(s));
   const starter = useStartSession();
 
   if (summary.loading && !summary.data) return <Spinner />;
@@ -60,7 +68,11 @@ export function DashboardPage() {
         </div>
       ))}
 
-      {!d.diagnostic_completed && !d.active_sessions.some((s) => s.type === "diagnostic") && (
+      {study.data && <StudyCard s={study.data} onChange={study.reload} />}
+
+      {!d.diagnostic_completed &&
+        !pretestPending(study.data) &&
+        !d.active_sessions.some((s) => s.type === "diagnostic") && (
         <Card className="mb-6 border-brand/40">
           <h2 className="font-semibold">Take the diagnostic to get your starting profile</h2>
           <p className="mt-1 text-sm text-ink-muted">

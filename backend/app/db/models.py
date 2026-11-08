@@ -387,6 +387,19 @@ class GoalDay(Base):
     met_at: Mapped[datetime] = _now()
 
 
+class SusResponse(Base):
+    """System Usability Scale answers after the post-test (FR-PILOT-04). One per student."""
+
+    __tablename__ = "sus_responses"
+    __table_args__ = (CheckConstraint("score BETWEEN 0 AND 100", name="score"),)
+
+    user_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), user_fk(), primary_key=True)
+    answers: Mapped[list[int]] = mapped_column(JSONB, nullable=False)  # 10 items, each 1-5
+    score: Mapped[float] = mapped_column(Float, nullable=False)
+    comment: Mapped[str] = mapped_column(Text, nullable=False, server_default="")
+    created_at: Mapped[datetime] = _now()
+
+
 class Feedback(Base):
     __tablename__ = "feedback"
     __table_args__ = (CheckConstraint("rating BETWEEN 1 AND 5", name="rating"),)

@@ -4,10 +4,17 @@ import { Link, useParams } from "react-router";
 import { ApiError } from "../api/client";
 import { sessions } from "../api/endpoints";
 import type { AnswerResult, MasteryChange, OptionKey, Question, Session } from "../api/types";
+import { isFixedSession } from "../api/types";
 import { Button, ButtonLink, Card, cx, ErrorState, pct, Spinner } from "../components/ui";
 import { useConceptNames } from "../hooks/useConcepts";
 
-const TITLES = { diagnostic: "Diagnostic", practice: "Practice", revision: "Revision" } as const;
+const TITLES = {
+  diagnostic: "Diagnostic",
+  practice: "Practice",
+  revision: "Revision",
+  pretest: "Pre-test",
+  posttest: "Post-test",
+} as const;
 
 type Phase =
   | { kind: "loading" }
@@ -61,11 +68,11 @@ export function SessionPage() {
     const result = await sessions.answer(id, q.question_id, picked);
     setSession((s) => (s ? { ...s, answered: result.answered } : s));
     if (result.session_complete) {
-      if (session?.type === "diagnostic") return finish(result);
+      if (session && isFixedSession(session.type)) return finish(result);
       setPhase({ kind: "feedback", q, picked, result });
       return;
     }
-    if (session?.type === "diagnostic") return loadNext(); // no feedback during the diagnostic
+    if (session && isFixedSession(session.type)) return loadNext(); // no feedback in tests
     setPhase({ kind: "feedback", q, picked, result });
   }
 
@@ -73,7 +80,9 @@ export function SessionPage() {
     const msg =
       session?.type === "diagnostic"
         ? "End the diagnostic now? Concepts you haven't reached will be estimated from your answers so far."
-        : "End this session now? Your answers so far are saved.";
+        : session?.type === "pretest" || session?.type === "posttest"
+          ? "End the test now? Questions you haven't answered count as not known."
+          : "End this session now? Your answers so far are saved.";
     if (!window.confirm(msg)) return;
     await sessions.end(id);
     await finish();
@@ -115,7 +124,7 @@ export function SessionPage() {
         <QuestionCard
           key={phase.q.question_id}
           q={phase.q}
-          diagnostic={session.type === "diagnostic"}
+          diagnostic={isFixedSession(session.type)}
           onSubmit={(picked) => submit(phase.q, picked)}
         />
       )}
@@ -372,11 +381,28 @@ function Summary({ session, result }: { session: Session; result?: AnswerResult 
         {session.status === "abandoned" ? "This session was replaced" : "Session complete"}
       </h2>
       {result?.goal?.goal_met_today && <GoalBanner goal={result.goal} />}
-      {session.type === "diagnostic" ? (
+      {isFixedSession(session.type) ? (
         <>
-          <p className="mt-1 text-ink-muted">
-            Your starting profile is ready: MENTORX has estimated your mastery of every concept.
-          </p>
+          {session.type !== "diagnostic" && (
+            <p className="mt-1 text-ink-muted">
+              Thank you! Your answers are saved for the study.
+              {session.type === "posttest" && (
+                <>
+                  {" "}
+                  One last step: a short{" "}
+                  <Link to="/survey" className="font-medium text-brand">
+                    usability questionnaire
+                  </Link>
+                  .
+                </>
+              )}
+            </p>
+          )}
+          {(session.type === "diagnostic" || result?.summary) && (
+            <p className="mt-1 text-ink-muted">
+              Your starting profile is ready: MENTORX has estimated your mastery of every concept.
+            </p>
+          )}
           {result?.summary && (
             <div className="mt-4 grid gap-4 sm:grid-cols-2">
               <ConceptList title="Strongest" items={result.summary.strongest} />

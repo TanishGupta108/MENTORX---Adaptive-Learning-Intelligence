@@ -130,6 +130,26 @@ export async function request<T>(method: string, path: string, opts: RequestOpti
   return (await res.json()) as T;
 }
 
+/** Download a file from the API with the user's credentials (e.g. CSV exports). */
+export async function downloadFile(path: string, filename: string) {
+  const send = () =>
+    fetch(`${BASE_URL}/api/v1${path}`, {
+      credentials: "include",
+      headers: accessToken ? { Authorization: `Bearer ${accessToken}` } : {},
+    });
+  let res = await send();
+  if (res.status === 401 && (await refreshSession())) res = await send();
+  if (!res.ok) throw await parseError(res);
+  const url = URL.createObjectURL(await res.blob());
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+}
+
 export const api = {
   get: <T>(path: string, opts?: RequestOptions) => request<T>("GET", path, opts),
   post: <T>(path: string, body?: unknown, opts?: RequestOptions) =>

@@ -3,7 +3,17 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.api.v1 import auth, dashboard, engagement, health, learning, me, sessions, subjects
+from app.api.v1 import (
+    auth,
+    dashboard,
+    engagement,
+    health,
+    learning,
+    me,
+    pilot,
+    sessions,
+    subjects,
+)
 from app.core import errors, headers
 from app.core.config import get_settings
 from app.core.logging import configure_logging
@@ -41,6 +51,7 @@ def create_app() -> FastAPI:
         learning.router,
         dashboard.router,
         engagement.router,
+        pilot.router,
     ):
         app.include_router(router, prefix="/api/v1")
     return app

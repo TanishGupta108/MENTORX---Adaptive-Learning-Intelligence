@@ -1,0 +1,32 @@
+# Experiment config: Phase B (M11), MENTORX pilot answers of consenting students.
+name: mentorx
+description: >-
+  Retraining on real MENTORX answers (v2). Small data: compare with v1 on held-out
+  MENTORX students and report honestly, including when the models are indistinguishable.
+dataset: mentorx
+seed: 42
+split:
+  val_frac: 0.15
+  test_frac: 0.15
+features:
+  use_time: true
+
+models:
+  prior: {}
+  heuristic: {}
+  logistic_regression:
+    C: [0.01, 0.1, 1.0, 10.0]
+  gradient_boosting:
+    learning_rate: [0.05, 0.1]
+    max_leaf_nodes: [15, 31, 63]
+  bkt: {}
+
+selection:
+  metric: log_loss
+  max_ece: 0.05
+  max_latency_ms_50_candidates: 50
+  exclude: [prior]
+
+evaluation:
+  bootstrap_reps: 200
+  reference_model: heuristic

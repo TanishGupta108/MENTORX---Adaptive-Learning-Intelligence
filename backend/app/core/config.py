@@ -38,8 +38,14 @@ class Settings(BaseSettings):
     # Draft (unreviewed) questions are loaded only outside production (see question-bank guide).
     seed_include_drafts: bool | None = None
 
-    # --- pilot (FR-PILOT-01) ---
-    pilot_active: bool = False
+    # --- pilot (FR-PILOT-01..05, docs/modules/pilot.md) ---
+    pilot_active: bool = False  # new sign-ups get an experiment group and a pre-test form
+    posttest_open: bool = False  # set at the end of the pilot window
+    admin_emails: str = ""  # comma-separated; these accounts can see pilot metrics and exports
+
+    @property
+    def admin_email_set(self) -> set[str]:
+        return {e.strip().lower() for e in self.admin_emails.split(",") if e.strip()}
 
     # --- learning engine (tunable; see docs/srs/SRS.md FR-QUIZ, FR-REV, FR-ENG) ---
     model_artifacts_dir: str = "model_artifacts"

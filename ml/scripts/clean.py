@@ -3,6 +3,7 @@
 Usage (from ml/):
     python scripts/clean.py --dataset assist2009 [--include-scaffolding]
     python scripts/clean.py --dataset ednet [--n-students 10000]
+    python scripts/clean.py --dataset mentorx   # pilot export in data/raw/mentorx/ (M11)
 """
 
 from __future__ import annotations
@@ -12,7 +13,7 @@ import json
 from dataclasses import asdict
 from pathlib import Path
 
-from mentorx_ml.data import assist2009, ednet
+from mentorx_ml.data import assist2009, ednet, mentorx
 
 ML_DIR = Path(__file__).resolve().parents[1]
 
@@ -26,7 +27,9 @@ def _raw(name: str, filename: str) -> Path:
 
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
-    parser.add_argument("--dataset", choices=[assist2009.NAME, ednet.NAME], required=True)
+    parser.add_argument(
+        "--dataset", choices=[assist2009.NAME, ednet.NAME, mentorx.NAME], required=True
+    )
     parser.add_argument("--include-scaffolding", action="store_true", help="assist2009 only")
     parser.add_argument("--n-students", type=int, default=10000, help="ednet only")
     args = parser.parse_args()
@@ -37,6 +40,17 @@ def main() -> None:
         raw = assist2009.load_raw(_raw(args.dataset, assist2009.REMOTE.filename))
         df, report = assist2009.clean(raw, cfg)
         name = args.dataset + ("_with_scaffolding" if args.include_scaffolding else "")
+        cfg_dict = asdict(cfg)
+    elif args.dataset == mentorx.NAME:
+        path = ML_DIR / "data" / "raw" / mentorx.NAME / mentorx.FILENAME
+        if not path.exists():
+            raise SystemExit(
+                f"{path} not found. Download it from the MENTORX Study page "
+                "('Answers (for retraining)') and put it there."
+            )
+        cfg = mentorx.CleaningConfig()
+        df, report = mentorx.clean(mentorx.load_raw(path), cfg)
+        name = args.dataset
         cfg_dict = asdict(cfg)
     else:
         cfg = ednet.SampleConfig(n_students=args.n_students)

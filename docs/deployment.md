@@ -69,7 +69,9 @@ CI runs the same script against the freshly built Docker image (the `docker` job
 | `COOKIE_SAMESITE` | `strict` | Works because of the same-origin rewrite |
 | `CORS_ORIGINS` | Vercel URL | Comma-separated |
 | `SEED_INCLUDE_DRAFTS` | unset | See above |
-| `PILOT_ACTIVE` | `false` | `true` when the M11 pilot starts |
+| `PILOT_ACTIVE` | `false` | `true` while pilot sign-ups are open ([pilot guide](modules/pilot.md)) |
+| `POSTTEST_OPEN` | `false` | `true` at the end of the pilot |
+| `ADMIN_EMAILS` | your team's emails | Comma-separated; these accounts see the Study page and exports |
 | `LOG_LEVEL` | `INFO` | JSON logs with a request ID per request (the `X-Request-ID` header) |
 | `LOGIN_ATTEMPTS_PER_MINUTE` | `5` | Per account |
 | `REGISTRATIONS_PER_HOUR` | `10` | Per client IP |

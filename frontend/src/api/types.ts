@@ -30,7 +30,11 @@ export type Concept = {
   n_attempts: number;
 };
 
-export type SessionType = "diagnostic" | "practice" | "revision";
+export type SessionType = "diagnostic" | "practice" | "revision" | "pretest" | "posttest";
+
+/** Sessions with a fixed list of questions and no feedback until the end. */
+export const isFixedSession = (t: SessionType) =>
+  t === "diagnostic" || t === "pretest" || t === "posttest";
 
 export type MasteryChange = { concept: string; before: number | null; after: number };
 
@@ -100,6 +104,63 @@ export type Weekly = {
 };
 
 export type FeedbackCategory = "bug" | "content" | "idea" | "other";
+
+export type TestState = {
+  status: "unavailable" | "todo" | "in_progress" | "done";
+  session_id: string | null;
+  questions: number;
+};
+
+export type PilotStatus = {
+  pilot_active: boolean;
+  in_study: boolean;
+  consented: boolean;
+  pretest: TestState;
+  posttest: TestState;
+  sus_done: boolean;
+};
+
+export type GroupOutcome = {
+  group: string;
+  participants: number;
+  pretest_done: number;
+  posttest_done: number;
+  mean_pre: number | null;
+  mean_post: number | null;
+  mean_gain: number | null;
+  gain_ci95: [number, number] | null;
+  sus_n: number;
+  sus_mean: number | null;
+};
+
+export type PilotMetrics = {
+  pilot_active: boolean;
+  posttest_open: boolean;
+  groups: GroupOutcome[];
+  gain_difference: number | null;
+  gain_difference_ci95: [number, number] | null;
+  cohens_d: number | null;
+  engagement: {
+    students: number;
+    wau: number;
+    d1_retention: number | null;
+    d7_retention: number | null;
+    sessions_started: number;
+    completion_rate: number | null;
+  };
+  model: {
+    n: number;
+    auc: number | null;
+    brier: number | null;
+    ece: number | null;
+    bins: { lo: number; hi: number; n: number; mean_predicted: number; observed: number }[];
+  };
+  feedback: {
+    n: number;
+    mean_rating: number | null;
+    recent: { rating: number; category: string; message: string; page: string | null; at: string }[];
+  };
+};
 
 export type PathReason = "revision" | "prerequisite" | "weak" | "new";
 

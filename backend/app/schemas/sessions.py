@@ -11,7 +11,7 @@ from app.schemas.engagement import GoalProgress
 
 class StartSessionRequest(BaseModel):
     subject: str = Field(min_length=1, max_length=20)
-    type: Literal["diagnostic", "practice", "revision"]
+    type: Literal["diagnostic", "practice", "revision", "pretest", "posttest"]
     concept: str | None = Field(default=None, description="practice only: focus on one concept")
 
 

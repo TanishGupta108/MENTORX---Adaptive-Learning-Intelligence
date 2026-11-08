@@ -1,4 +1,4 @@
-import { api, setAccessToken } from "./client";
+import { api, downloadFile, setAccessToken } from "./client";
 import type {
   Activity,
   AnswerResult,
@@ -7,6 +7,8 @@ import type {
   FeedbackCategory,
   LearningPath,
   OptionKey,
+  PilotMetrics,
+  PilotStatus,
   Question,
   RevisionQueue,
   Session,
@@ -96,4 +98,16 @@ export const engagement = {
     api.get<Weekly>(`/engagement/weekly?${q(SUBJECT)}`, { signal }),
   feedback: (body: { rating: number; category: FeedbackCategory; message: string; page: string }) =>
     api.post<{ id: number }>("/feedback", body),
+};
+
+export const pilot = {
+  status: (signal?: AbortSignal) => api.get<PilotStatus>(`/pilot/status?${q(SUBJECT)}`, { signal }),
+  sus: (answers: number[], comment: string) =>
+    api.post<{ score: number }>(`/pilot/sus?${q(SUBJECT)}`, { answers, comment }),
+};
+
+export const admin = {
+  metrics: (signal?: AbortSignal) => api.get<PilotMetrics>("/admin/pilot/metrics", { signal }),
+  exportAttempts: () => downloadFile("/admin/export/attempts.csv", "mentorx-attempts.csv"),
+  exportOutcomes: () => downloadFile("/admin/export/outcomes.csv", "mentorx-outcomes.csv"),
 };

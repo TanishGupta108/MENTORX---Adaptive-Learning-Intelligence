@@ -109,6 +109,8 @@ def main() -> int:
         assert streak["daily_goal"] >= 1 and streak["current_streak"] >= 0, streak
         weekly, _ = s.call("GET", "/engagement/weekly?subject=ML")
         assert weekly["questions"] == 1, weekly
+        study, _ = s.call("GET", "/pilot/status?subject=ML")
+        assert "group" not in study and "pretest" in study, study  # the arm is never revealed
         # Deleted with the throwaway account below.
         s.call("POST", "/feedback", {"rating": 5, "category": "other", "page": "/smoke"}, 201)
     except (AssertionError, KeyError, urllib.error.URLError) as e:

@@ -6,7 +6,13 @@ import { useApi } from "../hooks/useApi";
 import { useConceptNames } from "../hooks/useConcepts";
 import { MasteryDelta } from "./Session";
 
-const TYPE = { diagnostic: "Diagnostic", practice: "Practice", revision: "Revision" };
+const TYPE = {
+  diagnostic: "Diagnostic",
+  practice: "Practice",
+  revision: "Revision",
+  pretest: "Pre-test",
+  posttest: "Post-test",
+};
 const STATUS = { active: "In progress", completed: "Completed", abandoned: "Replaced" };
 
 export function HistoryPage() {

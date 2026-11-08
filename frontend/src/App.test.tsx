@@ -62,6 +62,16 @@ const emptyWeekly = {
   concepts_improved: [],
 };
 
+const test = (status: string, questions = 19) => ({ status, session_id: null, questions });
+const notInStudy = {
+  pilot_active: false,
+  in_study: false,
+  consented: false,
+  pretest: test("unavailable"),
+  posttest: test("unavailable"),
+  sus_done: false,
+};
+
 const dashboardRoutes = {
   ...loggedIn,
   "GET /dashboard": { body: emptyDashboard },
@@ -90,7 +100,106 @@ const dashboardRoutes = {
   },
   "GET /engagement/streak": { body: emptyStreak },
   "GET /engagement/weekly": { body: emptyWeekly },
+  "GET /pilot/status": { body: notInStudy },
 };
+
+describe("pilot study (M11)", () => {
+  it("invites study members; consenting shows the pre-test instead of the diagnostic", async () => {
+    let consented = false;
+    const calls = mockApi({
+      ...dashboardRoutes,
+      "GET /pilot/status": () => ({
+        body: {
+          ...notInStudy,
+          pilot_active: true,
+          in_study: true,
+          consented,
+          pretest: test(consented ? "todo" : "unavailable"),
+        },
+      }),
+      "PATCH /me": () => {
+        consented = true;
+        return { body: { ...user, consent_research: true } };
+      },
+    });
+    renderAt("/dashboard");
+    expect(await screen.findByText("You're invited to the MENTORX study")).toBeInTheDocument();
+    expect(screen.queryByText(/group/i)).not.toBeInTheDocument(); // never reveal the arm
+    await userEvent.click(screen.getByRole("button", { name: "I agree to take part" }));
+    expect(calls.find((c) => c.method === "PATCH")!.body).toEqual({ consent_research: true });
+    expect(await screen.findByText("Study step 1: the pre-test")).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /start the diagnostic/i })).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Start the test" })).toBeInTheDocument();
+  });
+
+  it("students outside the study see the normal diagnostic", async () => {
+    mockApi(dashboardRoutes);
+    renderAt("/dashboard");
+    expect(await screen.findByRole("button", { name: /start the diagnostic/i })).toBeInTheDocument();
+    expect(screen.queryByText(/study/i)).not.toBeInTheDocument();
+  });
+
+  it("SUS questionnaire needs all 10 answers and sends them (FR-PILOT-04)", async () => {
+    const calls = mockApi({
+      ...loggedIn,
+      "GET /pilot/status": {
+        body: { ...notInStudy, in_study: true, consented: true, pretest: test("done"), posttest: test("done") },
+      },
+      "POST /pilot/sus": { status: 201, body: { score: 75 } },
+    });
+    renderAt("/survey");
+    expect(await screen.findByText(/I think that I would like to use MENTORX frequently/)).toBeInTheDocument();
+    await userEvent.click(screen.getByRole("button", { name: "Submit questionnaire" }));
+    expect(screen.getByRole("alert")).toHaveTextContent("Please answer statement 1.");
+    const groups = screen.getAllByRole("group");
+    for (const [i, g] of groups.entries()) {
+      await userEvent.click(within(g).getByRole("radio", { name: String(i % 2 === 0 ? 4 : 2) + (i % 2 === 0 ? " Agree" : " Disagree") }));
+    }
+    await userEvent.click(screen.getByRole("button", { name: "Submit questionnaire" }));
+    expect(await screen.findByText("Thank you!")).toBeInTheDocument();
+    expect(calls.find((c) => c.path === "/pilot/sus")!.body).toEqual({
+      answers: [4, 2, 4, 2, 4, 2, 4, 2, 4, 2],
+      comment: "",
+    });
+  });
+
+  it("only admins get the Study page link; the page shows outcomes", async () => {
+    mockApi({
+      ...dashboardRoutes,
+      "GET /me": { body: { ...user, role: "admin" } },
+      "GET /admin/pilot/metrics": {
+        body: {
+          pilot_active: true,
+          posttest_open: false,
+          groups: [
+            { group: "adaptive", participants: 12, pretest_done: 12, posttest_done: 10, mean_pre: 0.4, mean_post: 0.65, mean_gain: 0.25, gain_ci95: [0.15, 0.35], sus_n: 9, sus_mean: 78.3 },
+            { group: "control", participants: 11, pretest_done: 11, posttest_done: 9, mean_pre: 0.42, mean_post: 0.55, mean_gain: 0.13, gain_ci95: [0.02, 0.24], sus_n: 8, sus_mean: 72.5 },
+          ],
+          gain_difference: 0.12,
+          gain_difference_ci95: [-0.02, 0.26],
+          cohens_d: 0.71,
+          engagement: { students: 25, wau: 14, d1_retention: 0.6, d7_retention: 0.32, sessions_started: 120, completion_rate: 0.8 },
+          model: { n: 900, auc: 0.731, brier: 0.19, ece: 0.04, bins: [{ lo: 0.6, hi: 0.7, n: 300, mean_predicted: 0.65, observed: 0.62 }] },
+          feedback: { n: 1, mean_rating: 4, recent: [{ rating: 4, category: "idea", message: "Great", page: "/", at: "2026-11-09T10:00:00Z" }] },
+        },
+      },
+    });
+    renderAt("/admin");
+    expect(await screen.findByRole("heading", { name: "Pilot study" })).toBeInTheDocument();
+    expect(screen.getAllByRole("link", { name: "Study" }).length).toBeGreaterThan(0);
+    expect(screen.getByText(/Adaptive − control/)).toHaveTextContent("Adaptive − control: +12 pts");
+    expect(screen.getByText(/Cohen's d 0.71/)).toBeInTheDocument();
+    expect(screen.getByText("AUC").nextSibling).toHaveTextContent("0.731");
+    expect(screen.getByRole("button", { name: "Answers (for retraining)" })).toBeInTheDocument();
+  });
+
+  it("students don't see the Study link", async () => {
+    mockApi(dashboardRoutes);
+    renderAt("/dashboard");
+    await screen.findByText("Hi, Asha");
+    expect(screen.queryByRole("link", { name: "Study" })).not.toBeInTheDocument();
+  });
+});
 
 describe("routing and auth", () => {
   it("shows the landing page when logged out", async () => {

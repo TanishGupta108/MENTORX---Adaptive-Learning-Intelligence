@@ -32,8 +32,14 @@ services:
       # for a supervised demo before the question bank has been reviewed.
       - key: SEED_INCLUDE_DRAFTS
         sync: false
+      # The pilot study (docs/modules/pilot.md). Change these in the Render dashboard.
       - key: PILOT_ACTIVE
         value: "false"
+      - key: POSTTEST_OPEN
+        value: "false"
+      # Comma-separated emails of the study team: they get the Study page and data exports.
+      - key: ADMIN_EMAILS
+        sync: false
       - key: LOG_LEVEL
         value: INFO
 

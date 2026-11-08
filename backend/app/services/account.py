@@ -7,6 +7,7 @@ from datetime import UTC, datetime
 from sqlalchemy import delete, select
 from sqlalchemy.orm import Session
 
+from app.core.config import get_settings
 from app.core.errors import AppError
 from app.db.models import (
     Attempt,
@@ -33,6 +34,8 @@ def to_out(db: Session, user: User) -> UserOut:
     ).all()
     out = UserOut.model_validate(user)
     out.enrolled_subjects = list(codes)
+    if user.email.lower() in get_settings().admin_email_set:
+        out.role = "admin"  # study team members listed in ADMIN_EMAILS
     return out
 
 

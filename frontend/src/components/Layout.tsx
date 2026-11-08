@@ -15,6 +15,7 @@ const links = [
 
 export function Layout() {
   const { user, logout } = useAuth();
+  const nav = user?.role === "admin" ? [...links, { to: "/admin", label: "Study" }] : links;
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
   const [feedback, setFeedback] = useState(false);
@@ -39,7 +40,7 @@ export function Layout() {
             MENTOR<span className="text-brand">X</span>
           </NavLink>
           <nav aria-label="Main" className="hidden items-center gap-1 lg:flex">
-            {links.map((l) => (
+            {nav.map((l) => (
               <NavLink key={l.to} to={l.to} className={linkClass}>
                 {l.label}
               </NavLink>
@@ -80,7 +81,7 @@ export function Layout() {
         </div>
         {open && (
           <nav id="mobile-nav" aria-label="Main" className="border-t border-line px-4 py-2 lg:hidden">
-            {links.map((l) => (
+            {nav.map((l) => (
               <NavLink key={l.to} to={l.to} className={linkClass} onClick={() => setOpen(false)}>
                 {l.label}
               </NavLink>

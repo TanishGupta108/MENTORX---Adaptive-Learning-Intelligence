@@ -15,6 +15,8 @@ import { PathPage } from "./pages/Path";
 import { RevisionPage } from "./pages/Revision";
 import { SessionPage } from "./pages/Session";
 import { SettingsPage } from "./pages/Settings";
+import { SurveyPage } from "./pages/Survey";
+import { AdminPage } from "./pages/Admin";
 
 function Checking() {
   return (
@@ -67,6 +69,8 @@ export function AppRoutes() {
             <Route path="history" element={<HistoryPage />} />
             <Route path="settings" element={<SettingsPage />} />
             <Route path="session/:id" element={<SessionPage />} />
+            <Route path="survey" element={<SurveyPage />} />
+            <Route path="admin" element={<AdminPage />} />
           </Route>
         </Route>
       </Route>

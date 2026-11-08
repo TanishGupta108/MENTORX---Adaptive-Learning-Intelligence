@@ -110,6 +110,70 @@ def _diagnostic_questions(db: Session, subject_id: int) -> list[Question]:
     )
 
 
+# Pre- and post-tests (FR-PILOT-02) run like the diagnostic: a fixed list of one question per
+# concept, in prerequisite order, with no feedback until the end.
+TEST_TYPES = ("pretest", "posttest")
+FIXED_TYPES = ("diagnostic", *TEST_TYPES)
+
+
+def is_participant(user: User) -> bool:
+    """In the pilot: assigned a group at sign-up (pilot active) and agreed to the study."""
+    return user.experiment_group is not None and user.consent_research
+
+
+def test_form_for(user: User, kind: str) -> str | None:
+    """Counterbalanced parallel forms: the post-test uses the form the pre-test didn't."""
+    if user.pretest_form is None:
+        return None
+    if kind == "pretest":
+        return user.pretest_form
+    return "B" if user.pretest_form == "A" else "A"
+
+
+def _form_questions(db: Session, subject_id: int, form: str | None) -> list[Question]:
+    return list(
+        db.scalars(
+            select(Question)
+            .join(Concept, Concept.id == Question.concept_id)
+            .where(
+                Concept.subject_id == subject_id,
+                Question.test_form == form,
+                Question.status == "active",
+            )
+            .order_by(Concept.topo_order, Question.id)
+        )
+    )
+
+
+def _fixed_questions(db: Session, user: User, s: StudySession) -> list[Question]:
+    if s.type == "diagnostic":
+        return _diagnostic_questions(db, s.subject_id)
+    return _form_questions(db, s.subject_id, test_form_for(user, s.type))
+
+
+def test_done(db: Session, user: User, subject_id: int, kind: str) -> bool:
+    return bool(
+        db.scalar(
+            select(func.count())
+            .select_from(StudySession)
+            .where(
+                StudySession.user_id == user.id,
+                StudySession.subject_id == subject_id,
+                StudySession.type == kind,
+                StudySession.status == "completed",
+            )
+        )
+    )
+
+
+def _finishes_diagnostic(db: Session, user: User, s: StudySession) -> bool:
+    """The diagnostic, or a pre-test taken instead of it (pilot participants)."""
+    if s.type == "diagnostic":
+        return True
+    enrollment = db.get(Enrollment, (user.id, s.subject_id))
+    return s.type == "pretest" and enrollment.diagnostic_completed_at is None
+
+
 def to_out(db: Session, s: StudySession) -> SessionOut:
     subject = db.get(Subject, s.subject_id)
     focus = db.get(Concept, s.focus_concept_id) if s.focus_concept_id else None
@@ -160,11 +224,36 @@ def start_session(db: Session, user: User, req: StartSessionRequest) -> StudySes
     if req.type == "diagnostic":
         if enrollment.diagnostic_completed_at is not None:
             raise AppError(409, "diagnostic_done", "You've already completed the diagnostic.")
+        if is_participant(user) and not test_done(db, user, subject.id, "pretest"):
+            raise AppError(
+                409, "pretest_first", "Take the pre-test: it also sets up your starting profile."
+            )
         if active:
             return active  # resume where the student left off (FR-DIAG-06)
         target = len(_diagnostic_questions(db, subject.id))
         if target == 0:
             raise AppError(409, "no_content", "This subject has no diagnostic questions yet.")
+    elif req.type in TEST_TYPES:
+        if not is_participant(user):
+            raise AppError(
+                403,
+                "not_in_pilot",
+                "Pre- and post-tests are only for students taking part in the study.",
+            )
+        if test_done(db, user, subject.id, req.type):
+            raise AppError(409, f"{req.type}_done", "You've already taken this test.")
+        if req.type == "posttest":
+            if not test_done(db, user, subject.id, "pretest"):
+                raise AppError(409, "pretest_first", "Take the pre-test first.")
+            if not get_settings().posttest_open:
+                raise AppError(
+                    409, "posttest_closed", "The post-test opens at the end of the study."
+                )
+        if active:
+            return active
+        target = len(_form_questions(db, subject.id, test_form_for(user, req.type)))
+        if target == 0:
+            raise AppError(409, "no_content", "This subject has no test questions yet.")
     elif req.type == "revision":
         if active:
             return active
@@ -198,10 +287,10 @@ def end_session(db: Session, user: User, session_id: uuid.UUID) -> StudySession:
         s.status, s.ended_at = "completed", _now()
         s.current_question_id = s.current_served_at = s.current_predicted_p = None
         s.current_model_version_id = None
-        if s.type == "diagnostic":  # skipping the rest of the diagnostic (FR-DIAG-05)
+        if _finishes_diagnostic(db, user, s):  # skipping the rest (FR-DIAG-05)
             _finish_diagnostic(db, user, s)
             learning.generate(db, user, s.subject_id, "diagnostic")
-        elif s.answered_count:
+        elif s.answered_count and s.type not in TEST_TYPES:
             learning.generate(db, user, s.subject_id, "session")
         db.commit()
     return s
@@ -220,7 +309,7 @@ def list_sessions(db: Session, user: User, limit: int = 50) -> list[SessionOut]:
     for s, correct in rows:
         o = to_out(db, s)
         o.correct = int(correct)
-        if s.type != "diagnostic" and s.answered_count:
+        if s.type not in FIXED_TYPES and s.answered_count:
             o.changes = session_changes(db, s)  # FR-DASH-05
         out.append(o)
     return out
@@ -331,9 +420,9 @@ def next_question(db: Session, user: User, session_id: uuid.UUID) -> QuestionOut
 
     model = get_model(db)
     now = _now()
-    if s.type == "diagnostic":
+    if s.type in FIXED_TYPES:
         answered = set(db.scalars(select(Attempt.question_id).where(Attempt.session_id == s.id)))
-        remaining = [q for q in _diagnostic_questions(db, s.subject_id) if q.id not in answered]
+        remaining = [q for q in _fixed_questions(db, user, s) if q.id not in answered]
         if not remaining:
             raise AppError(409, "session_complete", "No questions left in this session.")
         chosen = remaining[0]
@@ -423,16 +512,18 @@ def answer(
     summary = changes = None
     if complete:
         s.status, s.ended_at = "completed", now
-        if s.type == "diagnostic":
+        if _finishes_diagnostic(db, user, s):
             summary = _finish_diagnostic(db, user, s)
             learning.generate(db, user, s.subject_id, "diagnostic", now)  # FR-PATH-04
+        elif s.type in TEST_TYPES:
+            pass  # a measurement: no path regeneration, no per-session summary
         else:
             changes = session_changes(db, s)
             learning.generate(db, user, s.subject_id, "session", now)
     goal = engagement.record_progress(db, user, now)
     db.commit()
 
-    is_diag = s.type == "diagnostic"
+    is_diag = s.type in FIXED_TYPES
     return AnswerResult(
         feedback=None
         if is_diag
@@ -505,6 +596,6 @@ def session_changes(db: Session, s: StudySession) -> list[MasteryChange]:
 def session_detail(db: Session, user: User, session_id: uuid.UUID) -> SessionOut:
     s = _own_session(db, user, session_id)
     out = to_out(db, s)
-    if s.type != "diagnostic":
+    if s.type not in FIXED_TYPES:
         out.changes = session_changes(db, s)
     return out
