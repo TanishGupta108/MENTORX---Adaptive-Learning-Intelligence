@@ -2,7 +2,7 @@
 
 from functools import lru_cache
 
-from pydantic import Field, model_validator
+from pydantic import Field, field_validator, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 DEV_JWT_SECRET = "dev-only-insecure-secret-change-me-0123456789"
@@ -14,6 +14,7 @@ class Settings(BaseSettings):
     app_name: str = "MENTORX API"
     environment: str = Field(default="development", pattern="^(development|test|production)$")
     log_level: str = "INFO"
+    expose_docs: bool | None = None  # default: on outside production, off in production
 
     database_url: str = "postgresql+psycopg://mentorx:mentorx@localhost:5432/mentorx"
 
@@ -31,6 +32,7 @@ class Settings(BaseSettings):
     cookie_secure: bool = False
     cookie_samesite: str = Field(default="strict", pattern="^(strict|lax|none)$")
     login_attempts_per_minute: int = 5
+    registrations_per_hour: int = 10  # per client IP
 
     # --- content ---
     # Draft (unreviewed) questions are loaded only outside production (see question-bank guide).
@@ -55,6 +57,19 @@ class Settings(BaseSettings):
     practice_path_concepts: int = Field(default=3, ge=1)  # recommended practice draws from these
     mastery_stale_hours: float = Field(default=24, gt=0)  # FR-KT-04: recompute on read if older
     revision_projection_days: int = Field(default=180, ge=1)  # FR-REV-05 horizon
+
+    @field_validator("database_url")
+    @classmethod
+    def use_psycopg_driver(cls, v: str) -> str:
+        """Hosts (Render, Neon) hand out postgres:// URLs; SQLAlchemy needs the driver named."""
+        for prefix in ("postgres://", "postgresql://"):
+            if v.startswith(prefix):
+                return "postgresql+psycopg://" + v[len(prefix) :]
+        return v
+
+    @property
+    def is_production(self) -> bool:
+        return self.environment == "production"
 
     @property
     def cors_origin_list(self) -> list[str]:

@@ -22,6 +22,7 @@ dependencies = [
   # ML serving. The shared feature code (mentorx_ml) is installed from ../ml:
   #   pip install -e ../ml -e ".[dev]"
   "numpy>=1.26",
+  "pandas>=2.2",
   "joblib>=1.4",
   "scikit-learn==1.9.1",  # must equal the version the model was saved with
 ]

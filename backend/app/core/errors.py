@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import logging
+import re
 import time
 import uuid
 from contextvars import ContextVar
@@ -14,6 +15,7 @@ from starlette.exceptions import HTTPException as StarletteHTTPException
 
 logger = logging.getLogger("app.request")
 request_id_var: ContextVar[str] = ContextVar("request_id", default="-")
+_SAFE_REQUEST_ID = re.compile(r"[A-Za-z0-9._-]{1,64}")
 
 
 class AppError(Exception):
@@ -35,7 +37,9 @@ def _body(code: str, message: str, **extra) -> dict:
 def install(app: FastAPI) -> None:
     @app.middleware("http")
     async def request_context(request: Request, call_next):
-        rid = request.headers.get("x-request-id") or uuid.uuid4().hex[:16]
+        # A client-supplied ID is reused only if it's short and plain (it ends up in the logs).
+        given = request.headers.get("x-request-id", "")
+        rid = given if _SAFE_REQUEST_ID.fullmatch(given) else uuid.uuid4().hex[:16]
         token = request_id_var.set(rid)
         start = time.perf_counter()
         try:
@@ -45,12 +49,12 @@ def install(app: FastAPI) -> None:
             request_id_var.reset(token)
         response.headers["X-Request-ID"] = rid
         logger.info(
-            "%s %s -> %s %.1fms rid=%s",
+            "%s %s -> %s %.1fms",
             request.method,
             request.url.path,
             response.status_code,
             elapsed,
-            rid,
+            extra={"request_id": rid},
         )
         return response
 

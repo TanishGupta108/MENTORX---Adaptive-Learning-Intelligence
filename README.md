@@ -2,7 +2,7 @@
 
 An ML-powered adaptive learning platform that teaches **Machine Learning**. It estimates each student's concept mastery from their real attempts, then uses those predictions to choose the next question, build a learning path and schedule revision.
 
-**Status:** M0 scaffold ✓ · M1 requirements & design ✓ · M2 question bank drafted (285 questions, awaiting review) · M3 data pipeline + EDA ✓ · M4 models ✓ ([ML report](docs/ml-report.md)) · M5 database, auth & core API ✓ · M6 adaptive quiz engine ✓ · M7 learning paths & revision ✓ · M8 frontend MVP ✓. See [docs/PROJECT_PLAN.md](docs/PROJECT_PLAN.md) for the feasibility analysis, scope, architecture, database schema, ML methodology and roadmap.
+**Status:** M0 scaffold ✓ · M1 requirements & design ✓ · M2 question bank drafted (285 questions, awaiting review) · M3 data pipeline + EDA ✓ · M4 models ✓ ([ML report](docs/ml-report.md)) · M5 database, auth & core API ✓ · M6 adaptive quiz engine ✓ · M7 learning paths & revision ✓ · M8 frontend MVP ✓ · M9 deployment & hardening (configs ready, [deployment guide](docs/deployment.md)). See [docs/PROJECT_PLAN.md](docs/PROJECT_PLAN.md) for the feasibility analysis, scope, architecture, database schema, ML methodology and roadmap.
 
 | Part | Stack | Folder |
 |---|---|---|
@@ -48,6 +48,12 @@ cd backend  && ruff check . && ruff format --check . && pytest   # needs the doc
 cd ml       && ruff check . && ruff format --check . && pytest
 cd frontend && npm run typecheck && npm test && npm run build
 ```
+
+CI also builds the production Docker image and runs [backend/scripts/smoke.py](backend/scripts/smoke.py) against it.
+
+## Deployment
+
+Vercel (frontend) + Render (API in Docker + managed Postgres). The checklist, environment variables and smoke test are in [docs/deployment.md](docs/deployment.md).
 
 ## Contributing
 

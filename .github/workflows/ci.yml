@@ -41,6 +41,40 @@ jobs:
       - run: alembic upgrade head
       - run: pytest --cov=app --cov-report=term-missing
 
+  # Builds the production image (backend/Dockerfile) and smoke-tests it against a real
+  # Postgres: migrations, seeding, model loading and the full student flow (M9).
+  docker:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_USER: mentorx
+          POSTGRES_PASSWORD: mentorx
+          POSTGRES_DB: mentorx
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U mentorx" --health-interval 5s
+          --health-timeout 3s --health-retries 10
+    steps:
+      - uses: actions/checkout@v4
+      - run: docker build -f backend/Dockerfile -t mentorx-api .
+      - name: Start the container in production mode
+        run: |
+          docker run -d --name api --network host \
+            -e DATABASE_URL=postgres://mentorx:mentorx@localhost:5432/mentorx \
+            -e JWT_SECRET="$(openssl rand -hex 32)" \
+            -e COOKIE_SECURE=true \
+            -e SEED_INCLUDE_DRAFTS=true \
+            mentorx-api
+          for i in $(seq 1 60); do
+            curl -fs http://127.0.0.1:8000/api/v1/health/ready && break
+            sleep 2
+          done
+      - run: python3 backend/scripts/smoke.py http://127.0.0.1:8000
+      - if: always()
+        run: docker logs api
+
   ml:
     runs-on: ubuntu-latest
     defaults:

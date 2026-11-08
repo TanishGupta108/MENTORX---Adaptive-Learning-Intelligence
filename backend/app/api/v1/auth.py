@@ -37,7 +37,9 @@ RefreshCookie = Annotated[str | None, Cookie(alias=get_settings().refresh_cookie
 
 
 @router.post("/register", status_code=status.HTTP_201_CREATED, response_model=TokenResponse)
-def register(req: RegisterRequest, response: Response, db: DB) -> TokenResponse:
+def register(req: RegisterRequest, request: Request, response: Response, db: DB) -> TokenResponse:
+    ip = request.client.host if request.client else "unknown"
+    auth_service.check_registration_rate(ip)
     _, tokens = auth_service.register(db, req)
     return _tokens(response, tokens)
 

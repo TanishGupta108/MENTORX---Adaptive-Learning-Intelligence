@@ -21,6 +21,19 @@ from app.schemas.auth import RegisterRequest
 logger = logging.getLogger(__name__)
 
 login_limiter = RateLimiter(limit=get_settings().login_attempts_per_minute, window_seconds=60)
+register_limiter = RateLimiter(limit=get_settings().registrations_per_hour, window_seconds=3600)
+
+
+def check_registration_rate(client_ip: str) -> None:
+    """Slow down scripted sign-ups from one address (NFR-SEC)."""
+    if not register_limiter.hit(f"ip:{client_ip}"):
+        raise AppError(
+            429,
+            "rate_limited",
+            "Too many accounts created from this network. Please try again later.",
+            headers={"Retry-After": str(register_limiter.retry_after(f"ip:{client_ip}"))},
+        )
+
 
 INVALID_CREDENTIALS = AppError(401, "invalid_credentials", "Email or password is incorrect.")
 
