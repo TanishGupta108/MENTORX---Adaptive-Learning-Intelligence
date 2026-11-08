@@ -180,4 +180,4 @@ questions:
       C: It always stays the same
       D: It becomes equal to the number of examples
     answer: B
-    explanation: A stronger L1 penalty pushes more weights to exactly zero, so the model uses fewer features. At very large λ every weight becomes zero.
+    explanation: A stronger L1 penalty pushes more weights to exactly zero, so the model uses fewer features. The trend isn't strictly guaranteed at every step, but at very large λ every weight becomes zero.

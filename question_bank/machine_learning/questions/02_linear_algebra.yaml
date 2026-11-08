@@ -82,7 +82,7 @@ questions:
       C: X + w
       D: X w, giving an n × 1 vector
     answer: D
-    explanation: X w multiplies each row (example) by the weights, giving one prediction per example (n × 1). w X and Xᵀ w have mismatched inner dimensions unless n = d, and adding them isn't defined.
+    explanation: X w multiplies each row (example) by the weights, giving one prediction per example (n × 1). w X (d × 1 times n × d) and Xᵀ w (d × n times d × 1) have mismatched inner dimensions in general, and adding a matrix to a vector of a different shape isn't defined.
 
   - id: linalg-008
     concept: ml.linear_algebra
