@@ -166,7 +166,7 @@ All endpoints are under `/api/v1`, JSON, documented at `/docs`. 🔒 = needs an 
 | GET | `/learning-path?subject=` 🔒 | Current path (regenerated when revisions fall due) | FR-PATH-01, FR-PATH-04 |
 | POST | `/learning-path/regenerate?subject=` 🔒 | New path now; old one kept | FR-PATH-05 |
 | GET | `/revision?subject=` 🔒 | Revision queue + projected revision dates | FR-REV-02, FR-REV-05 |
-| GET | `/dashboard?subject=` 🔒 | Summary, strong/weak, streak, today | FR-DASH-01/03, FR-ENG-03 |
+| GET | `/dashboard?subject=` 🔒 | Summary, strong/weak, active sessions | FR-DASH-01/03 |
 | GET | `/dashboard/trends?subject=&days=30` 🔒 | Accuracy + mastery series | FR-DASH-04 |
 | GET | `/dashboard/activity?weeks=12` 🔒 | Heatmap data | FR-DASH-07 |
 | POST | `/feedback` 🔒 | Submit feedback | FR-PILOT-03 |

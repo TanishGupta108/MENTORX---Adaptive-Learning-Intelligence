@@ -220,6 +220,8 @@ def list_sessions(db: Session, user: User, limit: int = 50) -> list[SessionOut]:
     for s, correct in rows:
         o = to_out(db, s)
         o.correct = int(correct)
+        if s.type != "diagnostic" and s.answered_count:
+            o.changes = session_changes(db, s)  # FR-DASH-05
         out.append(o)
     return out
 

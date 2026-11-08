@@ -1,6 +1,6 @@
 # MENTORX — Project Plan (v0.1)
 
-> Status: **M0, M1, M3–M7 done · M2 drafted** (285 questions awaiting team review). ML results: [ml-report.md](ml-report.md).
+> Status: **M0, M1, M3–M8 done · M2 drafted** (285 questions awaiting team review). ML results: [ml-report.md](ml-report.md).
 > Plan date: 2026-11-08 (v0.2). There's no fixed deadline: the goal is the best possible product, built in milestone order. Each milestone is finished, tested and deployed before the next one starts.
 >
 > **Decisions made:** MVP subject = **Machine Learning** · Frontend = **TypeScript** · No ethics approval required by the college (consent + privacy safeguards stay in place anyway).
@@ -518,4 +518,6 @@ python scripts/download.py --dataset assist2009
 | Learning path rules | uml.md §3.2 as designed, plus D-11 (unpractised prerequisites aren't "in place") and D-13 (fill with not-yet-mastered concepts) | 2026-11-08 |
 | Monotone decay | D-10: mastery can't rise with time alone (running minimum over a time grid) | 2026-11-08 |
 | Question choice vs target difficulty | D-12: the model's P(correct) chooses; target difficulty is guidance | 2026-11-08 |
+| Frontend auth | Same-origin API (Vite proxy / Vercel rewrite); access token in memory, refresh token in a Strict HttpOnly cookie | 2026-11-08 |
+| Charts | Hand-written SVG, no chart library (bundle 97 KB gzipped) | 2026-11-08 |
 | Repo visibility | Private for now (open) | — |

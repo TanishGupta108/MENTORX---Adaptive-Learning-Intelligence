@@ -11,6 +11,7 @@
   --color-brand-ink: #ffffff;
   --color-success: #2b8a3e;
   --color-danger: #c92a2a;
+  --color-warning: #e67700;
 
   --font-sans: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
 }
@@ -26,6 +27,7 @@
     --color-brand-ink: #10131f;
     --color-success: #69db7c;
     --color-danger: #ff8787;
+    --color-warning: #ffa94d;
   }
 }
 
@@ -33,4 +35,18 @@ body {
   background: var(--color-canvas);
   color: var(--color-ink);
   font-family: var(--font-sans);
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+/* Respect users who ask for less motion. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
 }
