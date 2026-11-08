@@ -2,6 +2,7 @@ questions:
   - id: tree-001
     concept: ml.decision_trees
     difficulty: 2
+    review_status: reviewed
     diagnostic: true
     stem: A node contains examples from two classes in a 50% / 50% split. What is its entropy (in bits)?
     options:
@@ -15,6 +16,7 @@ questions:
   - id: tree-002
     concept: ml.decision_trees
     difficulty: 1
+    review_status: reviewed
     stem: In a classification tree, what does a leaf node do?
     options:
       A: It outputs a prediction, such as the majority class of the training examples that reach it
@@ -27,6 +29,7 @@ questions:
   - id: tree-003
     concept: ml.decision_trees
     difficulty: 1
+    review_status: reviewed
     stem: When building a decision tree, how is each split chosen?
     options:
       A: At random
@@ -39,6 +42,7 @@ questions:
   - id: tree-004
     concept: ml.decision_trees
     difficulty: 1
+    review_status: reviewed
     stem: What is a key advantage of a small decision tree?
     options:
       A: It never overfits
@@ -51,6 +55,7 @@ questions:
   - id: tree-005
     concept: ml.decision_trees
     difficulty: 1
+    review_status: reviewed
     stem: What is the entropy of a node in which every example has the same class?
     options:
       A: "1"
@@ -63,6 +68,7 @@ questions:
   - id: tree-006
     concept: ml.decision_trees
     difficulty: 2
+    review_status: reviewed
     stem: What is the Gini impurity of a node whose two classes are split 50% / 50%?
     options:
       A: "0.5"
@@ -75,6 +81,7 @@ questions:
   - id: tree-007
     concept: ml.decision_trees
     difficulty: 2
+    review_status: reviewed
     stem: How is the information gain of a split defined?
     options:
       A: The number of child nodes created
@@ -87,6 +94,7 @@ questions:
   - id: tree-008
     concept: ml.decision_trees
     difficulty: 2
+    review_status: reviewed
     stem: A decision tree is grown with no depth limit and no minimum leaf size. What is the likely result?
     options:
       A: Underfitting
@@ -99,6 +107,7 @@ questions:
   - id: tree-009
     concept: ml.decision_trees
     difficulty: 2
+    review_status: reviewed
     stem: What does pruning a decision tree do?
     options:
       A: It adds more branches to fit the data better
@@ -111,6 +120,7 @@ questions:
   - id: tree-010
     concept: ml.decision_trees
     difficulty: 2
+    review_status: reviewed
     stem: How does a regression tree make a prediction for a new example?
     options:
       A: It returns the mean target value of the training examples in its leaf
@@ -123,6 +133,7 @@ questions:
   - id: tree-011
     concept: ml.decision_trees
     difficulty: 3
+    review_status: reviewed
     stem: A node contains 80% class A and 20% class B. What is its Gini impurity?
     options:
       A: "0.20"
@@ -135,6 +146,7 @@ questions:
   - id: tree-012
     concept: ml.decision_trees
     difficulty: 3
+    review_status: reviewed
     stem: Why can plain information gain be misleading for a feature like "customer ID"?
     options:
       A: IDs are always missing
@@ -147,6 +159,7 @@ questions:
   - id: tree-013
     concept: ml.decision_trees
     difficulty: 3
+    review_status: reviewed
     stem: Why are single decision trees described as unstable?
     options:
       A: Small changes in the training data can produce a very different tree, so they have high variance
@@ -159,6 +172,7 @@ questions:
   - id: tree-014
     concept: ml.decision_trees
     difficulty: 2
+    review_status: reviewed
     test_form: A
     stem: A node contains 10 examples, 7 of class A and 3 of class B. What is its Gini impurity?
     options:
@@ -172,6 +186,7 @@ questions:
   - id: tree-015
     concept: ml.decision_trees
     difficulty: 2
+    review_status: reviewed
     test_form: B
     stem: A node contains 10 examples, 6 of class A and 4 of class B. What is its Gini impurity?
     options:

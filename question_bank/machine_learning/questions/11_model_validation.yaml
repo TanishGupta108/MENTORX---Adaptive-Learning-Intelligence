@@ -2,6 +2,7 @@ questions:
   - id: val-001
     concept: ml.model_validation
     difficulty: 2
+    review_status: reviewed
     diagnostic: true
     stem: What happens in 5-fold cross-validation?
     options:
@@ -15,6 +16,7 @@ questions:
   - id: val-002
     concept: ml.model_validation
     difficulty: 1
+    review_status: reviewed
     stem: What is a validation set used for?
     options:
       A: Choosing hyperparameters and comparing models without touching the test set
@@ -27,6 +29,7 @@ questions:
   - id: val-003
     concept: ml.model_validation
     difficulty: 1
+    review_status: reviewed
     stem: Which of these is a hyperparameter rather than a learned parameter?
     options:
       A: The weights of a linear regression
@@ -39,6 +42,7 @@ questions:
   - id: val-004
     concept: ml.model_validation
     difficulty: 1
+    review_status: reviewed
     stem: When should the test set be used?
     options:
       A: After every epoch, to decide when to stop
@@ -51,6 +55,7 @@ questions:
   - id: val-005
     concept: ml.model_validation
     difficulty: 1
+    review_status: reviewed
     stem: What does a stratified train/test split guarantee?
     options:
       A: The training set is larger than the test set
@@ -63,6 +68,7 @@ questions:
   - id: val-006
     concept: ml.model_validation
     difficulty: 2
+    review_status: reviewed
     stem: What does grid search do?
     options:
       A: It evaluates every combination of the hyperparameter values you list
@@ -75,6 +81,7 @@ questions:
   - id: val-007
     concept: ml.model_validation
     difficulty: 2
+    review_status: reviewed
     stem: A dataset has many rows per patient. Patients in the real deployment will be new. How should you split for cross-validation?
     options:
       A: Shuffle all rows randomly
@@ -87,6 +94,7 @@ questions:
   - id: val-008
     concept: ml.model_validation
     difficulty: 2
+    review_status: reviewed
     stem: You're forecasting next month's sales. How should the data be split for validation?
     options:
       A: Randomly, like any other dataset
@@ -99,6 +107,7 @@ questions:
   - id: val-009
     concept: ml.model_validation
     difficulty: 2
+    review_status: reviewed
     stem: A team tunes its model dozens of times, checking the test-set score after each change. What is the problem?
     options:
       A: Testing is too slow
@@ -111,6 +120,7 @@ questions:
   - id: val-010
     concept: ml.model_validation
     difficulty: 2
+    review_status: reviewed
     stem: How many models does leave-one-out cross-validation train on a dataset of n examples?
     options:
       A: n
@@ -123,6 +133,7 @@ questions:
   - id: val-011
     concept: ml.model_validation
     difficulty: 3
+    review_status: reviewed
     stem: You pick the 20 features most correlated with the label using the whole dataset, then run cross-validation on those features. What is wrong?
     options:
       A: Nothing, because feature selection is just preprocessing
@@ -135,6 +146,7 @@ questions:
   - id: val-012
     concept: ml.model_validation
     difficulty: 3
+    review_status: reviewed
     stem: What is nested cross-validation for?
     options:
       A: Making training faster
@@ -147,6 +159,7 @@ questions:
   - id: val-013
     concept: ml.model_validation
     difficulty: 3
+    review_status: reviewed
     stem: Why does random search often beat grid search for the same number of trials?
     options:
       A: Random search uses gradients
@@ -159,6 +172,7 @@ questions:
   - id: val-014
     concept: ml.model_validation
     difficulty: 2
+    review_status: reviewed
     test_form: A
     stem: You run 10-fold cross-validation on 1,000 examples. How many times is the model trained, and how large is each validation fold?
     options:
@@ -172,6 +186,7 @@ questions:
   - id: val-015
     concept: ml.model_validation
     difficulty: 2
+    review_status: reviewed
     test_form: B
     stem: You run 4-fold cross-validation on 800 examples. How many times is the model trained, and how large is each validation fold?
     options:

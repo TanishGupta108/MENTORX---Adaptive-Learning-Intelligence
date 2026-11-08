@@ -2,6 +2,7 @@ questions:
   - id: nb-001
     concept: ml.naive_bayes
     difficulty: 2
+    review_status: reviewed
     diagnostic: true
     stem: What is the "naive" assumption in Naive Bayes?
     options:
@@ -15,6 +16,7 @@ questions:
   - id: nb-002
     concept: ml.naive_bayes
     difficulty: 1
+    review_status: reviewed
     stem: Which rule are Naive Bayes classifiers built on?
     options:
       A: The chain rule of calculus
@@ -27,6 +29,7 @@ questions:
   - id: nb-003
     concept: ml.naive_bayes
     difficulty: 1
+    review_status: reviewed
     stem: Which is a classic application of Naive Bayes?
     options:
       A: Spam filtering and text classification
@@ -39,6 +42,7 @@ questions:
   - id: nb-004
     concept: ml.naive_bayes
     difficulty: 1
+    review_status: reviewed
     stem: Which class does a Naive Bayes classifier predict?
     options:
       A: The class with the most training examples, always
@@ -51,6 +55,7 @@ questions:
   - id: nb-005
     concept: ml.naive_bayes
     difficulty: 1
+    review_status: reviewed
     stem: How is the prior P(class) usually estimated in Naive Bayes?
     options:
       A: It's always set to 0.5
@@ -63,6 +68,7 @@ questions:
   - id: nb-006
     concept: ml.naive_bayes
     difficulty: 2
+    review_status: reviewed
     stem: Why is Laplace (add-one) smoothing used in Naive Bayes?
     options:
       A: So that a word never seen with a class doesn't make that class's probability exactly zero
@@ -75,6 +81,7 @@ questions:
   - id: nb-007
     concept: ml.naive_bayes
     difficulty: 2
+    review_status: reviewed
     stem: How does Gaussian Naive Bayes model continuous features?
     options:
       A: It turns them into word counts
@@ -87,6 +94,7 @@ questions:
   - id: nb-008
     concept: ml.naive_bayes
     difficulty: 2
+    review_status: reviewed
     stem: P(spam) = 0.4, P("offer" | spam) = 0.5 and P("offer" | not spam) = 0.1. An email contains "offer". What is P(spam | "offer")?
     options:
       A: "0.50"
@@ -99,6 +107,7 @@ questions:
   - id: nb-009
     concept: ml.naive_bayes
     difficulty: 2
+    review_status: reviewed
     stem: Which Naive Bayes variant suits features that are word counts in documents?
     options:
       A: Gaussian Naive Bayes
@@ -111,6 +120,7 @@ questions:
   - id: nb-010
     concept: ml.naive_bayes
     difficulty: 2
+    review_status: reviewed
     stem: Why do Naive Bayes implementations add log-probabilities instead of multiplying probabilities?
     options:
       A: Multiplying many small probabilities can underflow to 0 on a computer
@@ -123,6 +133,7 @@ questions:
   - id: nb-011
     concept: ml.naive_bayes
     difficulty: 3
+    review_status: reviewed
     stem: You accidentally include the same feature twice in a Naive Bayes model. What is the likely effect?
     options:
       A: No effect, because Naive Bayes removes duplicates
@@ -135,6 +146,7 @@ questions:
   - id: nb-012
     concept: ml.naive_bayes
     difficulty: 3
+    review_status: reviewed
     stem: How does Naive Bayes differ from logistic regression in modelling approach?
     options:
       A: Both model P(y | x) directly
@@ -147,6 +159,7 @@ questions:
   - id: nb-013
     concept: ml.naive_bayes
     difficulty: 3
+    review_status: reviewed
     stem: In multinomial Naive Bayes with Laplace smoothing (α = 1), the spam class contains 100 word occurrences in total, the vocabulary has 50 words, and the word "lottery" never appears in spam. What is P("lottery" | spam)?
     options:
       A: "0"
@@ -159,6 +172,7 @@ questions:
   - id: nb-014
     concept: ml.naive_bayes
     difficulty: 2
+    review_status: reviewed
     test_form: A
     stem: P(A) = 0.5 and P(B) = 0.5 are the class priors. A word has P(word | A) = 0.6 and P(word | B) = 0.2. A document contains the word. What is P(A | word)?
     options:
@@ -172,6 +186,7 @@ questions:
   - id: nb-015
     concept: ml.naive_bayes
     difficulty: 2
+    review_status: reviewed
     test_form: B
     stem: P(A) = 0.2 and P(B) = 0.8 are the class priors. A word has P(word | A) = 0.5 and P(word | B) = 0.1. A document contains the word. What is P(A | word)?
     options:

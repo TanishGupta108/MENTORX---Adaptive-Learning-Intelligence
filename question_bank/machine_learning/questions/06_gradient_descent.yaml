@@ -2,6 +2,7 @@ questions:
   - id: gd-001
     concept: ml.gradient_descent
     difficulty: 2
+    review_status: reviewed
     diagnostic: true
     stem: During gradient descent, the training loss gets larger and oscillates from one iteration to the next. What is the most likely cause?
     options:
@@ -15,6 +16,7 @@ questions:
   - id: gd-002
     concept: ml.gradient_descent
     difficulty: 1
+    review_status: reviewed
     stem: In which direction does gradient descent move the parameters at each step?
     options:
       A: In the direction of the negative gradient
@@ -27,6 +29,7 @@ questions:
   - id: gd-003
     concept: ml.gradient_descent
     difficulty: 1
+    review_status: reviewed
     stem: What does the learning rate control in gradient descent?
     options:
       A: The number of features
@@ -39,6 +42,7 @@ questions:
   - id: gd-004
     concept: ml.gradient_descent
     difficulty: 1
+    review_status: reviewed
     stem: What is one "epoch" in training?
     options:
       A: One parameter update
@@ -51,6 +55,7 @@ questions:
   - id: gd-005
     concept: ml.gradient_descent
     difficulty: 1
+    review_status: reviewed
     stem: For the loss L(w) = w², what is the gradient at w = 3?
     options:
       A: "3"
@@ -63,6 +68,7 @@ questions:
   - id: gd-006
     concept: ml.gradient_descent
     difficulty: 2
+    review_status: reviewed
     stem: The current weight is w = 2, the gradient is 4 and the learning rate is 0.1. What is w after one gradient descent step?
     options:
       A: "2.4"
@@ -75,6 +81,7 @@ questions:
   - id: gd-007
     concept: ml.gradient_descent
     difficulty: 2
+    review_status: reviewed
     stem: How does stochastic gradient descent (SGD) differ from full-batch gradient descent?
     options:
       A: SGD updates using one example (or a small batch) at a time, so updates are cheaper but noisier
@@ -87,6 +94,7 @@ questions:
   - id: gd-008
     concept: ml.gradient_descent
     difficulty: 2
+    review_status: reviewed
     stem: The training loss decreases steadily but extremely slowly, and after 1,000 epochs it's still far from converging. What is the most likely cause?
     options:
       A: The learning rate is too large
@@ -99,6 +107,7 @@ questions:
   - id: gd-009
     concept: ml.gradient_descent
     difficulty: 2
+    review_status: reviewed
     stem: Why does feature scaling usually make gradient descent converge faster?
     options:
       A: It reduces the number of parameters
@@ -111,6 +120,7 @@ questions:
   - id: gd-010
     concept: ml.gradient_descent
     difficulty: 2
+    review_status: reviewed
     stem: The loss function of linear regression with MSE is convex. What does that guarantee?
     options:
       A: Gradient descent converges in one step
@@ -123,6 +133,7 @@ questions:
   - id: gd-011
     concept: ml.gradient_descent
     difficulty: 3
+    review_status: reviewed
     stem: What does adding momentum to gradient descent do?
     options:
       A: It keeps a running average of past gradients, which damps oscillations and speeds progress along consistent directions
@@ -135,6 +146,7 @@ questions:
   - id: gd-012
     concept: ml.gradient_descent
     difficulty: 3
+    review_status: reviewed
     stem: You increase the mini-batch size from 32 to 1,024 while keeping the dataset the same. What happens?
     options:
       A: Each gradient estimate becomes noisier
@@ -147,6 +159,7 @@ questions:
   - id: gd-013
     concept: ml.gradient_descent
     difficulty: 3
+    review_status: reviewed
     stem: Why can training the same neural network twice give different final losses?
     options:
       A: Gradient descent always finds the global minimum
@@ -159,6 +172,7 @@ questions:
   - id: gd-014
     concept: ml.gradient_descent
     difficulty: 2
+    review_status: reviewed
     test_form: A
     stem: The current weight is w = 5, the gradient is 10 and the learning rate is 0.2. What is w after one gradient descent step?
     options:
@@ -172,6 +186,7 @@ questions:
   - id: gd-015
     concept: ml.gradient_descent
     difficulty: 2
+    review_status: reviewed
     test_form: B
     stem: The current weight is w = 1, the gradient is −4 and the learning rate is 0.5. What is w after one gradient descent step?
     options:

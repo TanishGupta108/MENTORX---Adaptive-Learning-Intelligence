@@ -2,6 +2,7 @@ questions:
   - id: nn-001
     concept: ml.neural_networks
     difficulty: 2
+    review_status: reviewed
     diagnostic: true
     stem: A network has several hidden layers, but every layer uses a linear (identity) activation. What can it represent?
     options:
@@ -15,6 +16,7 @@ questions:
   - id: nn-002
     concept: ml.neural_networks
     difficulty: 1
+    review_status: reviewed
     stem: What does a single perceptron (artificial neuron) compute?
     options:
       A: A weighted sum of its inputs plus a bias, passed through an activation function
@@ -27,6 +29,7 @@ questions:
   - id: nn-003
     concept: ml.neural_networks
     difficulty: 1
+    review_status: reviewed
     stem: How is the ReLU activation function defined?
     options:
       A: 1 / (1 + e^(−x))
@@ -39,6 +42,7 @@ questions:
   - id: nn-004
     concept: ml.neural_networks
     difficulty: 1
+    review_status: reviewed
     stem: What is ReLU(−3)?
     options:
       A: "-3"
@@ -51,6 +55,7 @@ questions:
   - id: nn-005
     concept: ml.neural_networks
     difficulty: 1
+    review_status: reviewed
     stem: What does backpropagation compute?
     options:
       A: The network's predictions on the test set
@@ -63,6 +68,7 @@ questions:
   - id: nn-006
     concept: ml.neural_networks
     difficulty: 2
+    review_status: reviewed
     stem: What do hidden layers allow a neural network to do?
     options:
       A: Learn intermediate features (representations) that make non-linear patterns easier to model
@@ -75,6 +81,7 @@ questions:
   - id: nn-007
     concept: ml.neural_networks
     difficulty: 2
+    review_status: reviewed
     stem: A network classifies handwritten digits into 10 classes. Which output activation and loss fit best?
     options:
       A: ReLU with mean squared error
@@ -87,6 +94,7 @@ questions:
   - id: nn-008
     concept: ml.neural_networks
     difficulty: 2
+    review_status: reviewed
     stem: What does dropout do during training?
     options:
       A: It removes training examples with errors
@@ -99,6 +107,7 @@ questions:
   - id: nn-009
     concept: ml.neural_networks
     difficulty: 2
+    review_status: reviewed
     stem: A fully connected layer maps 4 inputs to 3 units. How many trainable parameters does it have, including biases?
     options:
       A: "12"
@@ -111,6 +120,7 @@ questions:
   - id: nn-010
     concept: ml.neural_networks
     difficulty: 2
+    review_status: reviewed
     stem: Why do deep networks with sigmoid activations often train slowly in their early layers?
     options:
       A: The gradients get multiplied by small sigmoid derivatives at every layer and shrink towards zero (vanishing gradients)
@@ -123,6 +133,7 @@ questions:
   - id: nn-011
     concept: ml.neural_networks
     difficulty: 3
+    review_status: reviewed
     stem: What goes wrong if you initialise all the weights of a network to zero?
     options:
       A: Nothing, because training will find the right weights
@@ -135,6 +146,7 @@ questions:
   - id: nn-012
     concept: ml.neural_networks
     difficulty: 3
+    review_status: reviewed
     stem: Let y = σ(z) with z = w x, where σ is the sigmoid. What is dy/dw?
     options:
       A: σ(z)
@@ -147,6 +159,7 @@ questions:
   - id: nn-013
     concept: ml.neural_networks
     difficulty: 3
+    review_status: reviewed
     stem: What does batch normalisation do?
     options:
       A: It removes outliers from the dataset
@@ -159,6 +172,7 @@ questions:
   - id: nn-014
     concept: ml.neural_networks
     difficulty: 2
+    review_status: reviewed
     test_form: A
     stem: A ReLU neuron has weights w = [2, −1] and bias b = 1. What does it output for the input x = [1, 4]?
     options:
@@ -172,6 +186,7 @@ questions:
   - id: nn-015
     concept: ml.neural_networks
     difficulty: 2
+    review_status: reviewed
     test_form: B
     stem: A ReLU neuron has weights w = [1, 2] and bias b = −1. What does it output for the input x = [2, 1]?
     options:

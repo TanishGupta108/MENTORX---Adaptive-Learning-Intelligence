@@ -2,6 +2,7 @@ questions:
   - id: metrics-001
     concept: ml.evaluation_metrics
     difficulty: 2
+    review_status: reviewed
     diagnostic: true
     stem: In a dataset, 99% of transactions are legitimate and 1% are fraud. A model predicts "legitimate" for every transaction. What are its accuracy and its recall for the fraud class?
     options:
@@ -15,6 +16,7 @@ questions:
   - id: metrics-002
     concept: ml.evaluation_metrics
     difficulty: 1
+    review_status: reviewed
     stem: How is precision calculated?
     options:
       A: TP / (TP + FN)
@@ -27,6 +29,7 @@ questions:
   - id: metrics-003
     concept: ml.evaluation_metrics
     difficulty: 1
+    review_status: reviewed
     stem: How is recall (sensitivity) calculated?
     options:
       A: TP / (TP + FP)
@@ -39,6 +42,7 @@ questions:
   - id: metrics-004
     concept: ml.evaluation_metrics
     difficulty: 1
+    review_status: reviewed
     stem: In a confusion matrix, what is a false positive?
     options:
       A: Predicted negative, actually positive
@@ -51,6 +55,7 @@ questions:
   - id: metrics-005
     concept: ml.evaluation_metrics
     difficulty: 1
+    review_status: reviewed
     stem: How is accuracy calculated from a confusion matrix?
     options:
       A: (TP + TN) / (TP + TN + FP + FN)
@@ -63,6 +68,7 @@ questions:
   - id: metrics-006
     concept: ml.evaluation_metrics
     difficulty: 2
+    review_status: reviewed
     stem: A classifier has TP = 40, FP = 10 and FN = 20. What are its precision and recall?
     options:
       A: Precision 0.67, recall 0.8
@@ -75,6 +81,7 @@ questions:
   - id: metrics-007
     concept: ml.evaluation_metrics
     difficulty: 2
+    review_status: reviewed
     stem: What is the F1 score?
     options:
       A: The arithmetic mean of precision and recall
@@ -87,6 +94,7 @@ questions:
   - id: metrics-008
     concept: ml.evaluation_metrics
     difficulty: 2
+    review_status: reviewed
     stem: A classifier has ROC-AUC = 0.5. What does that mean?
     options:
       A: It ranks positives above negatives no better than random guessing
@@ -99,6 +107,7 @@ questions:
   - id: metrics-009
     concept: ml.evaluation_metrics
     difficulty: 2
+    review_status: reviewed
     stem: In cancer screening, missing a real cancer is far worse than a false alarm that leads to a follow-up test. Which metric should you prioritise?
     options:
       A: Precision
@@ -111,6 +120,7 @@ questions:
   - id: metrics-010
     concept: ml.evaluation_metrics
     difficulty: 2
+    review_status: reviewed
     stem: Which statement about RMSE (root mean squared error) is true?
     options:
       A: It always equals MAE
@@ -123,6 +133,7 @@ questions:
   - id: metrics-011
     concept: ml.evaluation_metrics
     difficulty: 3
+    review_status: reviewed
     stem: What does it mean for a classifier's probabilities to be well calibrated?
     options:
       A: Its accuracy is above 90%
@@ -135,6 +146,7 @@ questions:
   - id: metrics-012
     concept: ml.evaluation_metrics
     difficulty: 3
+    review_status: reviewed
     stem: What is the probabilistic interpretation of ROC-AUC?
     options:
       A: The probability that a randomly chosen positive gets a higher score than a randomly chosen negative
@@ -147,6 +159,7 @@ questions:
   - id: metrics-013
     concept: ml.evaluation_metrics
     difficulty: 3
+    review_status: reviewed
     stem: You lower a classifier's decision threshold from 0.5 to 0.3. What usually happens?
     options:
       A: Both precision and recall increase
@@ -159,6 +172,7 @@ questions:
   - id: metrics-014
     concept: ml.evaluation_metrics
     difficulty: 2
+    review_status: reviewed
     test_form: A
     stem: A classifier has TP = 30, FP = 10 and FN = 30. What are its precision and recall?
     options:
@@ -172,6 +186,7 @@ questions:
   - id: metrics-015
     concept: ml.evaluation_metrics
     difficulty: 2
+    review_status: reviewed
     test_form: B
     stem: A classifier has TP = 20, FP = 20 and FN = 5. What are its precision and recall?
     options:

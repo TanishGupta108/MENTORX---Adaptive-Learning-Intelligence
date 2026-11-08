@@ -2,6 +2,7 @@ questions:
   - id: prob-001
     concept: ml.probability
     difficulty: 2
+    review_status: reviewed
     diagnostic: true
     stem: Events A and B are independent, with P(A) = 0.5 and P(B) = 0.4. What is P(A and B)?
     options:
@@ -15,6 +16,7 @@ questions:
   - id: prob-002
     concept: ml.probability
     difficulty: 1
+    review_status: reviewed
     stem: You roll a fair six-sided die. What is the probability of getting an even number?
     options:
       A: 1/6
@@ -27,6 +29,7 @@ questions:
   - id: prob-003
     concept: ml.probability
     difficulty: 1
+    review_status: reviewed
     stem: For a discrete probability distribution, what do the probabilities of all possible outcomes add up to?
     options:
       A: "0"
@@ -39,6 +42,7 @@ questions:
   - id: prob-004
     concept: ml.probability
     difficulty: 1
+    review_status: reviewed
     stem: What is the expected value of one roll of a fair six-sided die?
     options:
       A: "3.5"
@@ -51,6 +55,7 @@ questions:
   - id: prob-005
     concept: ml.probability
     difficulty: 1
+    review_status: reviewed
     stem: What does the variance of a random variable measure?
     options:
       A: Its most likely value
@@ -63,6 +68,7 @@ questions:
   - id: prob-006
     concept: ml.probability
     difficulty: 2
+    review_status: reviewed
     stem: How is the conditional probability P(A | B) defined (for P(B) > 0)?
     options:
       A: P(A) × P(B)
@@ -75,6 +81,7 @@ questions:
   - id: prob-007
     concept: ml.probability
     difficulty: 2
+    review_status: reviewed
     stem: Which formula is Bayes' theorem?
     options:
       A: P(A | B) = P(A) + P(B)
@@ -87,6 +94,7 @@ questions:
   - id: prob-008
     concept: ml.probability
     difficulty: 2
+    review_status: reviewed
     stem: For a normal distribution, roughly what fraction of values lies within one standard deviation of the mean?
     options:
       A: About 68%
@@ -99,6 +107,7 @@ questions:
   - id: prob-009
     concept: ml.probability
     difficulty: 2
+    review_status: reviewed
     stem: In maximum likelihood estimation (MLE), what is maximised?
     options:
       A: The number of parameters
@@ -111,6 +120,7 @@ questions:
   - id: prob-010
     concept: ml.probability
     difficulty: 2
+    review_status: reviewed
     stem: A Bernoulli random variable has P(X = 1) = 0.3. What is its variance?
     options:
       A: "0.3"
@@ -123,6 +133,7 @@ questions:
   - id: prob-011
     concept: ml.probability
     difficulty: 3
+    review_status: reviewed
     stem: A disease affects 1% of people. A test detects 90% of true cases, but also gives a positive result for 9% of healthy people. Someone tests positive. Roughly how likely is it that they have the disease?
     options:
       A: About 90%
@@ -135,6 +146,7 @@ questions:
   - id: prob-012
     concept: ml.probability
     difficulty: 3
+    review_status: reviewed
     stem: Two variables have a correlation of exactly 0. Which statement is true?
     options:
       A: They have no linear relationship, but they can still be dependent
@@ -147,6 +159,7 @@ questions:
   - id: prob-013
     concept: ml.probability
     difficulty: 3
+    review_status: reviewed
     stem: You add up n independent Bernoulli(p) random variables. What distribution does the sum follow?
     options:
       A: Normal(p, 1)
@@ -159,6 +172,7 @@ questions:
   - id: prob-014
     concept: ml.probability
     difficulty: 2
+    review_status: reviewed
     test_form: A
     stem: Events A and B are independent, with P(A) = 0.6 and P(B) = 0.5. What is P(A and B)?
     options:
@@ -172,6 +186,7 @@ questions:
   - id: prob-015
     concept: ml.probability
     difficulty: 2
+    review_status: reviewed
     test_form: B
     stem: Events A and B are independent, with P(A) = 0.3 and P(B) = 0.4. What is P(A and B)?
     options:

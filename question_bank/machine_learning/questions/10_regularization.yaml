@@ -2,6 +2,7 @@ questions:
   - id: reg-001
     concept: ml.regularization
     difficulty: 2
+    review_status: reviewed
     diagnostic: true
     stem: Which type of regularisation tends to set some weights to exactly zero?
     options:
@@ -15,6 +16,7 @@ questions:
   - id: reg-002
     concept: ml.regularization
     difficulty: 1
+    review_status: reviewed
     stem: What does L1 or L2 regularisation add to the loss function?
     options:
       A: The number of training examples
@@ -27,6 +29,7 @@ questions:
   - id: reg-003
     concept: ml.regularization
     difficulty: 1
+    review_status: reviewed
     stem: What is the main purpose of regularisation?
     options:
       A: To reduce overfitting
@@ -39,6 +42,7 @@ questions:
   - id: reg-004
     concept: ml.regularization
     difficulty: 1
+    review_status: reviewed
     stem: Which penalty does ridge (L2) regression add to the loss?
     options:
       A: λ × Σ|wᵢ|
@@ -51,6 +55,7 @@ questions:
   - id: reg-005
     concept: ml.regularization
     difficulty: 1
+    review_status: reviewed
     stem: What happens if you make the regularisation strength λ very large?
     options:
       A: The model overfits more
@@ -63,6 +68,7 @@ questions:
   - id: reg-006
     concept: ml.regularization
     difficulty: 2
+    review_status: reviewed
     stem: What model do you get if you set λ = 0 in ridge regression?
     options:
       A: A model with all weights equal to zero
@@ -75,6 +81,7 @@ questions:
   - id: reg-007
     concept: ml.regularization
     difficulty: 2
+    review_status: reviewed
     stem: Is the bias (intercept) term usually regularised?
     options:
       A: Usually not, because it only shifts predictions and doesn't add model complexity
@@ -87,6 +94,7 @@ questions:
   - id: reg-008
     concept: ml.regularization
     difficulty: 2
+    review_status: reviewed
     stem: Why should you scale features before applying L1 or L2 regularisation?
     options:
       A: Regularisation only works on integer features
@@ -99,6 +107,7 @@ questions:
   - id: reg-009
     concept: ml.regularization
     difficulty: 2
+    review_status: reviewed
     stem: What is early stopping?
     options:
       A: Stopping training as soon as training loss starts falling
@@ -111,6 +120,7 @@ questions:
   - id: reg-010
     concept: ml.regularization
     difficulty: 2
+    review_status: reviewed
     stem: What is the correct way to choose the regularisation strength λ?
     options:
       A: Pick the λ with the best test-set score
@@ -123,6 +133,7 @@ questions:
   - id: reg-011
     concept: ml.regularization
     difficulty: 3
+    review_status: reviewed
     stem: What is elastic net regularisation?
     options:
       A: L1 regularisation applied twice
@@ -135,6 +146,7 @@ questions:
   - id: reg-012
     concept: ml.regularization
     difficulty: 3
+    review_status: reviewed
     stem: What is the closed-form solution for ridge regression, and what side benefit does it have?
     options:
       A: w = (XᵀX)⁻¹Xᵀy, which is always invertible
@@ -147,6 +159,7 @@ questions:
   - id: reg-013
     concept: ml.regularization
     difficulty: 3
+    review_status: reviewed
     stem: From a Bayesian point of view, what does L2 regularisation correspond to?
     options:
       A: A Gaussian (normal) prior on the weights, using MAP estimation
@@ -159,6 +172,7 @@ questions:
   - id: reg-014
     concept: ml.regularization
     difficulty: 2
+    review_status: reviewed
     test_form: A
     stem: You increase the ridge penalty λ from 0.01 to 100. What typically happens to the training error?
     options:
@@ -172,6 +186,7 @@ questions:
   - id: reg-015
     concept: ml.regularization
     difficulty: 2
+    review_status: reviewed
     test_form: B
     stem: You increase the lasso penalty λ. What typically happens to the number of non-zero weights?
     options:

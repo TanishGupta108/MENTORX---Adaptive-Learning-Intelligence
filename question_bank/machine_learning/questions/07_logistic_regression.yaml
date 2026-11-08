@@ -2,6 +2,7 @@ questions:
   - id: logreg-001
     concept: ml.logistic_regression
     difficulty: 2
+    review_status: reviewed
     diagnostic: true
     stem: For one example, a logistic regression model computes z = w·x + b = 0. What probability does it output for the positive class?
     options:
@@ -15,6 +16,7 @@ questions:
   - id: logreg-002
     concept: ml.logistic_regression
     difficulty: 1
+    review_status: reviewed
     stem: Despite its name, what is logistic regression mainly used for?
     options:
       A: Classification
@@ -27,6 +29,7 @@ questions:
   - id: logreg-003
     concept: ml.logistic_regression
     difficulty: 1
+    review_status: reviewed
     stem: Which function does logistic regression apply to the linear score z?
     options:
       A: ReLU, max(0, z)
@@ -39,6 +42,7 @@ questions:
   - id: logreg-004
     concept: ml.logistic_regression
     difficulty: 1
+    review_status: reviewed
     stem: What range are the outputs of a logistic regression model in?
     options:
       A: Any real number
@@ -51,6 +55,7 @@ questions:
   - id: logreg-005
     concept: ml.logistic_regression
     difficulty: 1
+    review_status: reviewed
     stem: A model predicts P(y = 1) = 0.7 and the threshold is 0.5. Which class is predicted?
     options:
       A: Class 0
@@ -63,6 +68,7 @@ questions:
   - id: logreg-006
     concept: ml.logistic_regression
     difficulty: 2
+    review_status: reviewed
     stem: Which loss function is used to train logistic regression?
     options:
       A: Log loss (binary cross-entropy)
@@ -75,6 +81,7 @@ questions:
   - id: logreg-007
     concept: ml.logistic_regression
     difficulty: 2
+    review_status: reviewed
     stem: What shape is the decision boundary of logistic regression on the original features (with no feature transformations)?
     options:
       A: A circle
@@ -87,6 +94,7 @@ questions:
   - id: logreg-008
     concept: ml.logistic_regression
     difficulty: 2
+    review_status: reviewed
     stem: In logistic regression, a feature has weight w = 0.7. What happens when that feature increases by 1, with the others fixed?
     options:
       A: The probability increases by exactly 0.7
@@ -99,6 +107,7 @@ questions:
   - id: logreg-009
     concept: ml.logistic_regression
     difficulty: 2
+    review_status: reviewed
     stem: Why is log loss preferred over mean squared error for training logistic regression?
     options:
       A: MSE can't be computed for probabilities
@@ -111,6 +120,7 @@ questions:
   - id: logreg-010
     concept: ml.logistic_regression
     difficulty: 2
+    review_status: reviewed
     stem: How is logistic regression usually extended to more than two classes?
     options:
       A: With softmax (multinomial) regression or one-vs-rest
@@ -123,6 +133,7 @@ questions:
   - id: logreg-011
     concept: ml.logistic_regression
     difficulty: 3
+    review_status: reviewed
     stem: The true label is 1 and the model predicts p = 0.9. What is the log loss for this example (natural log)?
     options:
       A: "0.9"
@@ -135,6 +146,7 @@ questions:
   - id: logreg-012
     concept: ml.logistic_regression
     difficulty: 3
+    review_status: reviewed
     stem: You train an unregularised logistic regression on data that is perfectly linearly separable. What happens to the weights?
     options:
       A: They converge to small values
@@ -147,6 +159,7 @@ questions:
   - id: logreg-013
     concept: ml.logistic_regression
     difficulty: 3
+    review_status: reviewed
     stem: For a single example, what is the gradient of the log loss with respect to the weights w?
     options:
       A: (σ(w·x) − y) x
@@ -159,6 +172,7 @@ questions:
   - id: logreg-014
     concept: ml.logistic_regression
     difficulty: 2
+    review_status: reviewed
     test_form: A
     stem: A logistic regression model computes z = 2 for one example. Approximately what probability does it output?
     options:
@@ -172,6 +186,7 @@ questions:
   - id: logreg-015
     concept: ml.logistic_regression
     difficulty: 2
+    review_status: reviewed
     test_form: B
     stem: A logistic regression model computes z = −2 for one example. Approximately what probability does it output?
     options:

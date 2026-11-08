@@ -2,6 +2,7 @@ questions:
   - id: prep-001
     concept: ml.data_preprocessing
     difficulty: 2
+    review_status: reviewed
     diagnostic: true
     stem: You standardise features (subtract the mean, divide by the standard deviation) before training. Which approach avoids data leakage?
     options:
@@ -15,6 +16,7 @@ questions:
   - id: prep-002
     concept: ml.data_preprocessing
     difficulty: 1
+    review_status: reviewed
     stem: After min-max scaling, what range do a feature's training values fall into?
     options:
       A: "[0, 1]"
@@ -27,6 +29,7 @@ questions:
   - id: prep-003
     concept: ml.data_preprocessing
     difficulty: 1
+    review_status: reviewed
     stem: A feature "colour" takes the values red, green and blue. How many binary columns does one-hot encoding create (without dropping any)?
     options:
       A: "1"
@@ -39,6 +42,7 @@ questions:
   - id: prep-004
     concept: ml.data_preprocessing
     difficulty: 1
+    review_status: reviewed
     stem: A numeric feature has a few missing values. What is a simple, reasonable way to fill them?
     options:
       A: Replace them with a random number
@@ -51,6 +55,7 @@ questions:
   - id: prep-005
     concept: ml.data_preprocessing
     difficulty: 1
+    review_status: reviewed
     stem: Why is feature scaling important for k-nearest neighbours?
     options:
       A: It removes the need for a test set
@@ -63,6 +68,7 @@ questions:
   - id: prep-006
     concept: ml.data_preprocessing
     difficulty: 2
+    review_status: reviewed
     stem: A "city" feature with 500 cities is encoded as the integers 1 to 500 and fed into linear regression. What is the main problem?
     options:
       A: The model treats the cities as ordered numbers, implying for example that city 400 is "more" than city 2
@@ -75,6 +81,7 @@ questions:
   - id: prep-007
     concept: ml.data_preprocessing
     difficulty: 2
+    review_status: reviewed
     stem: A feature has a few extreme outliers. Which statistic is most robust to them?
     options:
       A: Mean
@@ -87,6 +94,7 @@ questions:
   - id: prep-008
     concept: ml.data_preprocessing
     difficulty: 2
+    review_status: reviewed
     stem: A feature has mean 50 and standard deviation 10 on the training set. What is the standardised value of 70?
     options:
       A: "20"
@@ -99,6 +107,7 @@ questions:
   - id: prep-009
     concept: ml.data_preprocessing
     difficulty: 2
+    review_status: reviewed
     stem: Which model is LEAST affected by whether features are scaled?
     options:
       A: k-nearest neighbours
@@ -111,6 +120,7 @@ questions:
   - id: prep-010
     concept: ml.data_preprocessing
     difficulty: 2
+    review_status: reviewed
     stem: A feature "T-shirt size" takes the values small, medium and large. Which encoding fits best?
     options:
       A: One-hot encoding, because order never matters
@@ -123,6 +133,7 @@ questions:
   - id: prep-011
     concept: ml.data_preprocessing
     difficulty: 3
+    review_status: reviewed
     stem: You fill missing values with the mean of the whole dataset, then run 5-fold cross-validation. What is wrong, and how do you fix it?
     options:
       A: Nothing is wrong, because imputation can't leak information
@@ -135,6 +146,7 @@ questions:
   - id: prep-012
     concept: ml.data_preprocessing
     difficulty: 3
+    review_status: reviewed
     stem: A feature such as "annual income" is heavily right-skewed (a few very large values). Which transformation often helps linear models?
     options:
       A: A log transform, such as log(1 + x)
@@ -147,6 +159,7 @@ questions:
   - id: prep-013
     concept: ml.data_preprocessing
     difficulty: 3
+    review_status: reviewed
     stem: In a loan dataset, applicants who skip the "monthly debt" field default much more often. What is a good way to handle the missing values?
     options:
       A: Drop every row with a missing value
@@ -159,6 +172,7 @@ questions:
   - id: prep-014
     concept: ml.data_preprocessing
     difficulty: 2
+    review_status: reviewed
     test_form: A
     stem: A feature has mean 20 and standard deviation 5 on the training set. What is the standardised value of 35?
     options:
@@ -172,6 +186,7 @@ questions:
   - id: prep-015
     concept: ml.data_preprocessing
     difficulty: 2
+    review_status: reviewed
     test_form: B
     stem: A feature has mean 20 and standard deviation 4 on the training set. What is the standardised value of 12?
     options:

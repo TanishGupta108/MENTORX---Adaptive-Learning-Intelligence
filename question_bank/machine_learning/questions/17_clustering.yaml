@@ -2,6 +2,7 @@ questions:
   - id: clust-001
     concept: ml.clustering
     difficulty: 2
+    review_status: reviewed
     diagnostic: true
     stem: Which two steps does the k-means algorithm repeat until it converges?
     options:
@@ -15,6 +16,7 @@ questions:
   - id: clust-002
     concept: ml.clustering
     difficulty: 1
+    review_status: reviewed
     stem: What kind of learning is clustering?
     options:
       A: Unsupervised learning
@@ -27,6 +29,7 @@ questions:
   - id: clust-003
     concept: ml.clustering
     difficulty: 1
+    review_status: reviewed
     stem: In k-means, what does k represent?
     options:
       A: The number of features
@@ -39,6 +42,7 @@ questions:
   - id: clust-004
     concept: ml.clustering
     difficulty: 1
+    review_status: reviewed
     stem: In k-means, what is a cluster's centroid?
     options:
       A: The point farthest from the others
@@ -51,6 +55,7 @@ questions:
   - id: clust-005
     concept: ml.clustering
     difficulty: 1
+    review_status: reviewed
     stem: Which of these is a typical clustering task?
     options:
       A: Predicting house prices from labelled sales
@@ -63,6 +68,7 @@ questions:
   - id: clust-006
     concept: ml.clustering
     difficulty: 2
+    review_status: reviewed
     stem: What objective does k-means minimise?
     options:
       A: The total squared distance from each point to its cluster's centroid (the within-cluster sum of squares)
@@ -75,6 +81,7 @@ questions:
   - id: clust-007
     concept: ml.clustering
     difficulty: 2
+    review_status: reviewed
     stem: How does the elbow method help choose k for k-means?
     options:
       A: It always picks k = 2
@@ -87,6 +94,7 @@ questions:
   - id: clust-008
     concept: ml.clustering
     difficulty: 2
+    review_status: reviewed
     stem: You run k-means twice on the same data and get different clusters. Why, and what helps?
     options:
       A: k-means is broken, so switch algorithms
@@ -99,6 +107,7 @@ questions:
   - id: clust-009
     concept: ml.clustering
     difficulty: 2
+    review_status: reviewed
     stem: A cluster contains the points (1, 2), (3, 4) and (5, 6). Where is its centroid?
     options:
       A: (3, 4)
@@ -111,6 +120,7 @@ questions:
   - id: clust-010
     concept: ml.clustering
     difficulty: 2
+    review_status: reviewed
     stem: What does agglomerative hierarchical clustering produce?
     options:
       A: Exactly two clusters
@@ -123,6 +133,7 @@ questions:
   - id: clust-011
     concept: ml.clustering
     difficulty: 3
+    review_status: reviewed
     stem: Your data forms two interleaving crescent ("moon") shapes. k-means with k = 2 splits them badly. Which algorithm is better suited?
     options:
       A: k-means with more iterations
@@ -135,6 +146,7 @@ questions:
   - id: clust-012
     concept: ml.clustering
     difficulty: 3
+    review_status: reviewed
     stem: What does DBSCAN do with a point that has too few neighbours within distance ε and isn't near any core point?
     options:
       A: It assigns the point to the nearest centroid
@@ -147,6 +159,7 @@ questions:
   - id: clust-013
     concept: ml.clustering
     difficulty: 3
+    review_status: reviewed
     stem: What does a silhouette score close to +1 indicate for a point?
     options:
       A: It's much closer to points in its own cluster than to points in the nearest other cluster
@@ -159,6 +172,7 @@ questions:
   - id: clust-014
     concept: ml.clustering
     difficulty: 2
+    review_status: reviewed
     test_form: A
     stem: A cluster contains the points (2, 0), (4, 2) and (6, 4). Where is its centroid?
     options:
@@ -172,6 +186,7 @@ questions:
   - id: clust-015
     concept: ml.clustering
     difficulty: 2
+    review_status: reviewed
     test_form: B
     stem: A cluster contains the points (0, 1), (2, 3) and (4, 5). Where is its centroid?
     options:

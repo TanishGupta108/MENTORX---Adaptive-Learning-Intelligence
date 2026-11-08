@@ -2,6 +2,7 @@ questions:
   - id: found-001
     concept: ml.foundations
     difficulty: 1
+    review_status: reviewed
     diagnostic: true
     stem: A model is trained on emails labelled "spam" or "not spam". What type of learning is this?
     options:
@@ -15,6 +16,7 @@ questions:
   - id: found-002
     concept: ml.foundations
     difficulty: 1
+    review_status: reviewed
     stem: Which of these is a regression task?
     options:
       A: Classifying a photo as a cat or a dog
@@ -27,6 +29,7 @@ questions:
   - id: found-003
     concept: ml.foundations
     difficulty: 1
+    review_status: reviewed
     stem: In supervised learning, what is a "label"?
     options:
       A: A column used as an input feature
@@ -39,6 +42,7 @@ questions:
   - id: found-004
     concept: ml.foundations
     difficulty: 1
+    review_status: reviewed
     stem: Why do we keep a separate test set that the model never sees during training?
     options:
       A: To give the model more data to learn from
@@ -51,6 +55,7 @@ questions:
   - id: found-005
     concept: ml.foundations
     difficulty: 1
+    review_status: reviewed
     stem: What kind of output does a classification model produce?
     options:
       A: A category from a fixed set of classes
@@ -63,6 +68,7 @@ questions:
   - id: found-006
     concept: ml.foundations
     difficulty: 2
+    review_status: reviewed
     stem: An online store wants to discover groups of similar customers from purchase history, but has no predefined customer categories. Which approach fits?
     options:
       A: Supervised regression
@@ -75,6 +81,7 @@ questions:
   - id: found-007
     concept: ml.foundations
     difficulty: 2
+    review_status: reviewed
     stem: A program learns to play a video game by trying actions and receiving points for winning and penalties for losing. What kind of learning is this?
     options:
       A: Supervised learning
@@ -87,6 +94,7 @@ questions:
   - id: found-008
     concept: ml.foundations
     difficulty: 2
+    review_status: reviewed
     stem: What does it mean for a model to "generalise" well?
     options:
       A: It performs well on new, unseen data from the same distribution as the training data
@@ -99,6 +107,7 @@ questions:
   - id: found-009
     concept: ml.foundations
     difficulty: 2
+    review_status: reviewed
     stem: You're building a model to predict a student's exam score. Which of these is a valid input feature?
     options:
       A: The exam score itself
@@ -111,6 +120,7 @@ questions:
   - id: found-010
     concept: ml.foundations
     difficulty: 2
+    review_status: reviewed
     stem: A model scored 92% on its test set in 2023. Deployed in 2026 on new customers, its accuracy drops to 70%, although the code is unchanged. What is the most likely explanation?
     options:
       A: The model underfits the training data
@@ -123,6 +133,7 @@ questions:
   - id: found-011
     concept: ml.foundations
     difficulty: 3
+    review_status: reviewed
     stem: You have 1,000,000 unlabelled images and only 1,000 labelled ones. Which approach is designed to learn from both?
     options:
       A: Pure supervised learning on the 1,000 labelled images
@@ -135,6 +146,7 @@ questions:
   - id: found-012
     concept: ml.foundations
     difficulty: 3
+    review_status: reviewed
     stem: What does the "no free lunch" theorem imply for machine learning?
     options:
       A: Training a model always costs money
@@ -147,6 +159,7 @@ questions:
   - id: found-013
     concept: ml.foundations
     difficulty: 3
+    review_status: reviewed
     stem: What is the "inductive bias" of a learning algorithm?
     options:
       A: The assumptions it uses to generalise from training data to unseen inputs
@@ -159,6 +172,7 @@ questions:
   - id: found-014
     concept: ml.foundations
     difficulty: 2
+    review_status: reviewed
     test_form: A
     stem: Which of these is an unsupervised learning task?
     options:
@@ -172,6 +186,7 @@ questions:
   - id: found-015
     concept: ml.foundations
     difficulty: 2
+    review_status: reviewed
     test_form: B
     stem: Which of these is a supervised regression task?
     options:

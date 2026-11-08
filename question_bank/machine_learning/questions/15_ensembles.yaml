@@ -2,6 +2,7 @@ questions:
   - id: ens-001
     concept: ml.ensembles
     difficulty: 2
+    review_status: reviewed
     diagnostic: true
     stem: Which description best fits a random forest?
     options:
@@ -15,6 +16,7 @@ questions:
   - id: ens-002
     concept: ml.ensembles
     difficulty: 1
+    review_status: reviewed
     stem: What is an ensemble method?
     options:
       A: A method that combines the predictions of several models
@@ -27,6 +29,7 @@ questions:
   - id: ens-003
     concept: ml.ensembles
     difficulty: 1
+    review_status: reviewed
     stem: What does "bagging" stand for?
     options:
       A: Batch gradient gathering
@@ -39,6 +42,7 @@ questions:
   - id: ens-004
     concept: ml.ensembles
     difficulty: 1
+    review_status: reviewed
     stem: How does a random forest classifier combine its trees' predictions?
     options:
       A: It uses only the best tree
@@ -51,6 +55,7 @@ questions:
   - id: ens-005
     concept: ml.ensembles
     difficulty: 1
+    review_status: reviewed
     stem: How does boosting build its models?
     options:
       A: All models are trained independently in parallel
@@ -63,6 +68,7 @@ questions:
   - id: ens-006
     concept: ml.ensembles
     difficulty: 2
+    review_status: reviewed
     stem: How is a bootstrap sample of a dataset with n examples created?
     options:
       A: By drawing n examples at random with replacement
@@ -75,6 +81,7 @@ questions:
   - id: ens-007
     concept: ml.ensembles
     difficulty: 2
+    review_status: reviewed
     stem: Why does a random forest consider only a random subset of features at each split?
     options:
       A: To make each tree deeper
@@ -87,6 +94,7 @@ questions:
   - id: ens-008
     concept: ml.ensembles
     difficulty: 2
+    review_status: reviewed
     stem: What are out-of-bag (OOB) examples in a random forest?
     options:
       A: Examples with missing values
@@ -99,6 +107,7 @@ questions:
   - id: ens-009
     concept: ml.ensembles
     difficulty: 2
+    review_status: reviewed
     stem: In gradient boosting, what does each new tree learn to predict?
     options:
       A: The original labels, independently of the earlier trees
@@ -111,6 +120,7 @@ questions:
   - id: ens-010
     concept: ml.ensembles
     difficulty: 2
+    review_status: reviewed
     stem: In AdaBoost, what happens to the training examples misclassified by the current model?
     options:
       A: Their weights are increased, so the next model focuses on them
@@ -123,6 +133,7 @@ questions:
   - id: ens-011
     concept: ml.ensembles
     difficulty: 3
+    review_status: reviewed
     stem: Which statement about bagging and boosting is generally true?
     options:
       A: Both mainly reduce bias
@@ -135,6 +146,7 @@ questions:
   - id: ens-012
     concept: ml.ensembles
     difficulty: 3
+    review_status: reviewed
     stem: A gradient boosting model with 5,000 trees and a learning rate of 1.0 has much worse validation error than training error. What is the best fix?
     options:
       A: Add more trees
@@ -147,6 +159,7 @@ questions:
   - id: ens-013
     concept: ml.ensembles
     difficulty: 3
+    review_status: reviewed
     stem: When does averaging several models help the most?
     options:
       A: When all the models are identical
@@ -159,6 +172,7 @@ questions:
   - id: ens-014
     concept: ml.ensembles
     difficulty: 2
+    review_status: reviewed
     test_form: A
     stem: A random forest with 5 trees predicts yes, no, yes, yes, no for one example. What is the forest's prediction, using majority voting?
     options:
@@ -172,6 +186,7 @@ questions:
   - id: ens-015
     concept: ml.ensembles
     difficulty: 2
+    review_status: reviewed
     test_form: B
     stem: A random forest with 7 trees predicts cat, dog, dog, cat, dog, dog, cat for one example. What is the forest's prediction, using majority voting?
     options:

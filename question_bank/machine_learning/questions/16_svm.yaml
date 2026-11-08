@@ -2,6 +2,7 @@ questions:
   - id: svm-001
     concept: ml.svm
     difficulty: 2
+    review_status: reviewed
     diagnostic: true
     stem: Out of all the lines that separate two classes perfectly, which one does a linear SVM choose?
     options:
@@ -15,6 +16,7 @@ questions:
   - id: svm-002
     concept: ml.svm
     difficulty: 1
+    review_status: reviewed
     stem: In an SVM, what are support vectors?
     options:
       A: The weights of the model
@@ -27,6 +29,7 @@ questions:
   - id: svm-003
     concept: ml.svm
     difficulty: 1
+    review_status: reviewed
     stem: In SVM terminology, what is the margin?
     options:
       A: The number of misclassified points
@@ -39,6 +42,7 @@ questions:
   - id: svm-004
     concept: ml.svm
     difficulty: 1
+    review_status: reviewed
     stem: What does the kernel trick allow an SVM to do?
     options:
       A: Train without any data
@@ -51,6 +55,7 @@ questions:
   - id: svm-005
     concept: ml.svm
     difficulty: 1
+    review_status: reviewed
     stem: What does the decision boundary of a linear SVM look like?
     options:
       A: A straight line or hyperplane
@@ -63,6 +68,7 @@ questions:
   - id: svm-006
     concept: ml.svm
     difficulty: 2
+    review_status: reviewed
     stem: In a soft-margin SVM, what does a very large C do?
     options:
       A: It allows many misclassifications in exchange for a wide margin
@@ -75,6 +81,7 @@ questions:
   - id: svm-007
     concept: ml.svm
     difficulty: 2
+    review_status: reviewed
     stem: With an RBF kernel, what happens if gamma is set very large?
     options:
       A: The boundary becomes a straight line
@@ -87,6 +94,7 @@ questions:
   - id: svm-008
     concept: ml.svm
     difficulty: 2
+    review_status: reviewed
     stem: Which formula is the hinge loss used by SVMs, for a label y ∈ {−1, +1} and score f(x)?
     options:
       A: (y − f(x))²
@@ -99,6 +107,7 @@ questions:
   - id: svm-009
     concept: ml.svm
     difficulty: 2
+    review_status: reviewed
     stem: You remove a training point that is far from the boundary and not a support vector, then retrain. What happens to the SVM's decision boundary?
     options:
       A: It stays exactly the same
@@ -111,6 +120,7 @@ questions:
   - id: svm-010
     concept: ml.svm
     difficulty: 2
+    review_status: reviewed
     stem: Should features be scaled before training an SVM?
     options:
       A: No, SVMs are scale-invariant
@@ -123,6 +133,7 @@ questions:
   - id: svm-011
     concept: ml.svm
     difficulty: 3
+    review_status: reviewed
     stem: For an example with true label y = +1, the SVM score is f(x) = 0.3. What is its hinge loss?
     options:
       A: "0"
@@ -135,6 +146,7 @@ questions:
   - id: svm-012
     concept: ml.svm
     difficulty: 3
+    review_status: reviewed
     stem: You need well-calibrated probabilities from an SVM. What is the usual approach?
     options:
       A: Use the raw scores directly as probabilities
@@ -147,6 +159,7 @@ questions:
   - id: svm-013
     concept: ml.svm
     difficulty: 3
+    review_status: reviewed
     stem: For a hard-margin linear SVM with weight vector w, how wide is the margin (the distance between the two margin hyperplanes)?
     options:
       A: 2 / ‖w‖
@@ -159,6 +172,7 @@ questions:
   - id: svm-014
     concept: ml.svm
     difficulty: 2
+    review_status: reviewed
     test_form: A
     stem: For an example with true label y = +1, the SVM score is f(x) = −0.5. What is its hinge loss?
     options:
@@ -172,6 +186,7 @@ questions:
   - id: svm-015
     concept: ml.svm
     difficulty: 2
+    review_status: reviewed
     test_form: B
     stem: For an example with true label y = −1, the SVM score is f(x) = 0.5. What is its hinge loss?
     options:

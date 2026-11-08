@@ -2,6 +2,7 @@ questions:
   - id: linreg-001
     concept: ml.linear_regression
     difficulty: 1
+    review_status: reviewed
     diagnostic: true
     stem: Which loss function is minimised by ordinary least squares linear regression?
     options:
@@ -15,6 +16,7 @@ questions:
   - id: linreg-002
     concept: ml.linear_regression
     difficulty: 1
+    review_status: reviewed
     stem: In the model y = w x + b with a single feature, what does w represent?
     options:
       A: The predicted value when x = 0
@@ -27,6 +29,7 @@ questions:
   - id: linreg-003
     concept: ml.linear_regression
     difficulty: 1
+    review_status: reviewed
     stem: A fitted model is y = 3x + 2. What does it predict for x = 4?
     options:
       A: "12"
@@ -39,6 +42,7 @@ questions:
   - id: linreg-004
     concept: ml.linear_regression
     difficulty: 1
+    review_status: reviewed
     stem: In linear regression, what is a residual?
     options:
       A: The actual value minus the predicted value
@@ -51,6 +55,7 @@ questions:
   - id: linreg-005
     concept: ml.linear_regression
     difficulty: 1
+    review_status: reviewed
     stem: What type of output does a linear regression model predict?
     options:
       A: A class label such as "yes" or "no"
@@ -63,6 +68,7 @@ questions:
   - id: linreg-006
     concept: ml.linear_regression
     difficulty: 2
+    review_status: reviewed
     stem: In a house-price model, the coefficient for "number of bedrooms" is 5,000 (in rupees). How should you interpret it?
     options:
       A: Every house costs at least ₹5,000
@@ -75,6 +81,7 @@ questions:
   - id: linreg-007
     concept: ml.linear_regression
     difficulty: 2
+    review_status: reviewed
     stem: What is the closed-form (normal equation) solution for linear regression weights?
     options:
       A: w = X y
@@ -87,6 +94,7 @@ questions:
   - id: linreg-008
     concept: ml.linear_regression
     difficulty: 2
+    review_status: reviewed
     stem: A regression model has R² = 0.8 on test data. What does that mean?
     options:
       A: The model explains 80% of the variance in the target
@@ -99,6 +107,7 @@ questions:
   - id: linreg-009
     concept: ml.linear_regression
     difficulty: 2
+    review_status: reviewed
     stem: Compared with mean absolute error (MAE), what is mean squared error (MSE) more sensitive to?
     options:
       A: The number of features
@@ -111,6 +120,7 @@ questions:
   - id: linreg-010
     concept: ml.linear_regression
     difficulty: 2
+    review_status: reviewed
     stem: The true relationship in your data is y = x². Can linear regression model it?
     options:
       A: No, linear regression can only fit straight lines in the original feature
@@ -123,6 +133,7 @@ questions:
   - id: linreg-011
     concept: ml.linear_regression
     difficulty: 3
+    review_status: reviewed
     stem: Two features in a regression are almost perfectly correlated (multicollinearity). What is the typical effect?
     options:
       A: The model can't make predictions at all
@@ -135,6 +146,7 @@ questions:
   - id: linreg-012
     concept: ml.linear_regression
     difficulty: 3
+    review_status: reviewed
     stem: A plot of residuals against predicted values shows a clear U-shaped curve. What does this suggest?
     options:
       A: The relationship is non-linear, so the model is missing a curved pattern
@@ -147,6 +159,7 @@ questions:
   - id: linreg-013
     concept: ml.linear_regression
     difficulty: 3
+    review_status: reviewed
     stem: Which assumption do the standard OLS confidence intervals for coefficients rely on?
     options:
       A: Each feature is normally distributed
@@ -159,6 +172,7 @@ questions:
   - id: linreg-014
     concept: ml.linear_regression
     difficulty: 2
+    review_status: reviewed
     test_form: A
     stem: A model is y = 2x − 1. For an example with x = 5, the actual value is 12. What is the residual?
     options:
@@ -172,6 +186,7 @@ questions:
   - id: linreg-015
     concept: ml.linear_regression
     difficulty: 2
+    review_status: reviewed
     test_form: B
     stem: A model is y = 4x + 1. For an example with x = 2, the actual value is 6. What is the residual?
     options:

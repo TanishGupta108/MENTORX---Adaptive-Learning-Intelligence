@@ -2,6 +2,7 @@ questions:
   - id: dimred-001
     concept: ml.dimensionality_reduction
     difficulty: 2
+    review_status: reviewed
     diagnostic: true
     stem: Which direction does PCA's first principal component point along?
     options:
@@ -15,6 +16,7 @@ questions:
   - id: dimred-002
     concept: ml.dimensionality_reduction
     difficulty: 1
+    review_status: reviewed
     stem: What is the main goal of dimensionality reduction?
     options:
       A: To represent the data with fewer features while keeping most of the important information
@@ -27,6 +29,7 @@ questions:
   - id: dimred-003
     concept: ml.dimensionality_reduction
     difficulty: 1
+    review_status: reviewed
     stem: Does PCA use the class labels?
     options:
       A: Yes, it needs labels to find its components
@@ -39,6 +42,7 @@ questions:
   - id: dimred-004
     concept: ml.dimensionality_reduction
     difficulty: 1
+    review_status: reviewed
     stem: How are the principal components found by PCA related to each other?
     options:
       A: They are all parallel
@@ -51,6 +55,7 @@ questions:
   - id: dimred-005
     concept: ml.dimensionality_reduction
     difficulty: 1
+    review_status: reviewed
     stem: What is a common use of reducing data to 2 or 3 dimensions?
     options:
       A: Increasing the number of classes
@@ -63,6 +68,7 @@ questions:
   - id: dimred-006
     concept: ml.dimensionality_reduction
     difficulty: 2
+    review_status: reviewed
     stem: Why should features usually be standardised before PCA?
     options:
       A: PCA follows variance, so a feature with a large scale would dominate the components just because of its units
@@ -75,6 +81,7 @@ questions:
   - id: dimred-007
     concept: ml.dimensionality_reduction
     difficulty: 2
+    review_status: reviewed
     stem: The first principal component has an explained variance ratio of 0.6. What does that mean?
     options:
       A: 60% of the features were removed
@@ -87,6 +94,7 @@ questions:
   - id: dimred-008
     concept: ml.dimensionality_reduction
     difficulty: 2
+    review_status: reviewed
     stem: What is a common way to choose how many principal components to keep?
     options:
       A: Always keep exactly 2
@@ -99,6 +107,7 @@ questions:
   - id: dimred-009
     concept: ml.dimensionality_reduction
     difficulty: 2
+    review_status: reviewed
     stem: Mathematically, what are the principal components?
     options:
       A: The rows of the data matrix
@@ -111,6 +120,7 @@ questions:
   - id: dimred-010
     concept: ml.dimensionality_reduction
     difficulty: 2
+    review_status: reviewed
     stem: PCA is a linear method. What does that mean in practice?
     options:
       A: Each component is a linear combination (weighted sum) of the original features
@@ -123,6 +133,7 @@ questions:
   - id: dimred-011
     concept: ml.dimensionality_reduction
     difficulty: 3
+    review_status: reviewed
     stem: The covariance matrix of some data has eigenvalues 5, 3, 1 and 1. What fraction of the variance do the first two principal components explain?
     options:
       A: 50%
@@ -135,6 +146,7 @@ questions:
   - id: dimred-012
     concept: ml.dimensionality_reduction
     difficulty: 3
+    review_status: reviewed
     stem: You apply PCA before a classifier, keep only the top components, and accuracy drops sharply. What could explain this?
     options:
       A: PCA always improves accuracy, so the code must be wrong
@@ -147,6 +159,7 @@ questions:
   - id: dimred-013
     concept: ml.dimensionality_reduction
     difficulty: 3
+    review_status: reviewed
     stem: Which statement about t-SNE is true?
     options:
       A: It's a linear method like PCA
@@ -159,6 +172,7 @@ questions:
   - id: dimred-014
     concept: ml.dimensionality_reduction
     difficulty: 2
+    review_status: reviewed
     test_form: A
     stem: The covariance matrix of some data has eigenvalues 6, 2 and 2. What fraction of the variance does the first principal component explain?
     options:
@@ -172,6 +186,7 @@ questions:
   - id: dimred-015
     concept: ml.dimensionality_reduction
     difficulty: 2
+    review_status: reviewed
     test_form: B
     stem: The covariance matrix of some data has eigenvalues 4, 3, 2 and 1. What fraction of the variance do the first two principal components explain?
     options:

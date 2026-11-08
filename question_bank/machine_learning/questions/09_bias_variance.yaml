@@ -2,6 +2,7 @@ questions:
   - id: bv-001
     concept: ml.bias_variance
     difficulty: 2
+    review_status: reviewed
     diagnostic: true
     stem: A model has 99% training accuracy but 70% validation accuracy. Which change is most likely to help?
     options:
@@ -15,6 +16,7 @@ questions:
   - id: bv-002
     concept: ml.bias_variance
     difficulty: 1
+    review_status: reviewed
     stem: What is overfitting?
     options:
       A: Fitting the training data very well but performing poorly on new data
@@ -27,6 +29,7 @@ questions:
   - id: bv-003
     concept: ml.bias_variance
     difficulty: 1
+    review_status: reviewed
     stem: What does underfitting look like?
     options:
       A: Very low training error and high test error
@@ -39,6 +42,7 @@ questions:
   - id: bv-004
     concept: ml.bias_variance
     difficulty: 1
+    review_status: reviewed
     stem: You fit a degree-15 polynomial to 20 noisy data points. What is the most likely outcome?
     options:
       A: Underfitting
@@ -51,6 +55,7 @@ questions:
   - id: bv-005
     concept: ml.bias_variance
     difficulty: 1
+    review_status: reviewed
     stem: Which of these usually helps reduce overfitting?
     options:
       A: Adding more model parameters
@@ -63,6 +68,7 @@ questions:
   - id: bv-006
     concept: ml.bias_variance
     difficulty: 2
+    review_status: reviewed
     stem: A model with high bias is most likely to be doing what?
     options:
       A: Underfitting
@@ -75,6 +81,7 @@ questions:
   - id: bv-007
     concept: ml.bias_variance
     difficulty: 2
+    review_status: reviewed
     stem: On a learning curve, training error stays low while validation error is much higher, and the gap shrinks as the training set grows. What does this suggest?
     options:
       A: High bias, so more data won't help
@@ -87,6 +94,7 @@ questions:
   - id: bv-008
     concept: ml.bias_variance
     difficulty: 2
+    review_status: reviewed
     stem: Training error is 30% and validation error is 31%, but a better model is known to reach 5%. What should you try?
     options:
       A: Add strong regularisation
@@ -99,6 +107,7 @@ questions:
   - id: bv-009
     concept: ml.bias_variance
     difficulty: 2
+    review_status: reviewed
     stem: In k-nearest neighbours, what happens as you increase k?
     options:
       A: Bias decreases and variance increases
@@ -111,6 +120,7 @@ questions:
   - id: bv-010
     concept: ml.bias_variance
     difficulty: 2
+    review_status: reviewed
     stem: For squared-error loss, how does the expected test error decompose?
     options:
       A: Bias² + variance + irreducible noise
@@ -123,6 +133,7 @@ questions:
   - id: bv-011
     concept: ml.bias_variance
     difficulty: 3
+    review_status: reviewed
     stem: How does increasing a decision tree's maximum depth affect bias and variance?
     options:
       A: Bias increases, variance decreases
@@ -135,6 +146,7 @@ questions:
   - id: bv-012
     concept: ml.bias_variance
     difficulty: 3
+    review_status: reviewed
     stem: What is irreducible error?
     options:
       A: Error caused by a bad learning rate
@@ -147,6 +159,7 @@ questions:
   - id: bv-013
     concept: ml.bias_variance
     difficulty: 3
+    review_status: reviewed
     stem: Which component of the error does bagging (bootstrap aggregating) mainly reduce?
     options:
       A: Bias
@@ -159,6 +172,7 @@ questions:
   - id: bv-014
     concept: ml.bias_variance
     difficulty: 2
+    review_status: reviewed
     test_form: A
     stem: A model achieves 98% training accuracy and 65% validation accuracy. What is the most likely diagnosis?
     options:
@@ -172,6 +186,7 @@ questions:
   - id: bv-015
     concept: ml.bias_variance
     difficulty: 2
+    review_status: reviewed
     test_form: B
     stem: A model achieves 62% training accuracy and 60% validation accuracy, while 90% is known to be achievable. What is the most likely diagnosis?
     options:
