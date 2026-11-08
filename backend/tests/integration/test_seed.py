@@ -53,6 +53,8 @@ def test_removed_question_is_retired_not_deleted(db):
 
 def test_reviewed_only_mode_skips_drafts(db):
     bank = _bank()
+    for q in bank.questions:  # independent of the real bank's review state
+        q.review_status = "draft"
     bank.questions[0].review_status = "reviewed"
     report = seed(db, bank, include_drafts=False)
     assert report.drafts_skipped == len(bank.questions) - 1

@@ -1,7 +1,7 @@
 """Smoke test a running MENTORX deployment end to end (standard library only).
 
 Usage:
-    python scripts/smoke.py https://mentorx-adaptive-learning-intellige.vercel.app      # through the frontend's /api rewrite
+    python scripts/smoke.py https://mentorx-adaptive-learning-intellige.vercel.app  # via /api
     python scripts/smoke.py https://mentorx-api-2a6a.onrender.com
     python scripts/smoke.py http://localhost:8000
 
