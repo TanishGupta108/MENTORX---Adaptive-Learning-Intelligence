@@ -1,8 +1,8 @@
 """Smoke test a running MENTORX deployment end to end (standard library only).
 
 Usage:
-    python scripts/smoke.py https://mentorx.vercel.app      # through the frontend's /api rewrite
-    python scripts/smoke.py https://mentorx-api.onrender.com
+    python scripts/smoke.py https://mentorx-adaptive-learning-intellige.vercel.app      # through the frontend's /api rewrite
+    python scripts/smoke.py https://mentorx-api-2a6a.onrender.com
     python scripts/smoke.py http://localhost:8000
 
 Creates a throwaway account, enrols, answers one diagnostic question, reads the dashboard
