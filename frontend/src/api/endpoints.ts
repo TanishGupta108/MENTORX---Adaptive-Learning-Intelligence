@@ -4,15 +4,18 @@ import type {
   AnswerResult,
   Concept,
   Dashboard,
+  FeedbackCategory,
   LearningPath,
   OptionKey,
   Question,
   RevisionQueue,
   Session,
   SessionType,
+  Streak,
   Subject,
   Trends,
   User,
+  Weekly,
 } from "./types";
 
 /** The MVP has one subject. Kept as a constant so adding subjects later is a small change. */
@@ -85,4 +88,12 @@ export const dashboard = {
     api.get<Trends>(`/dashboard/trends?${q(SUBJECT)}&days=${days}`, { signal }),
   activity: (weeks = 12, signal?: AbortSignal) =>
     api.get<Activity>(`/dashboard/activity?weeks=${weeks}`, { signal }),
+};
+
+export const engagement = {
+  streak: (signal?: AbortSignal) => api.get<Streak>("/engagement/streak", { signal }),
+  weekly: (signal?: AbortSignal) =>
+    api.get<Weekly>(`/engagement/weekly?${q(SUBJECT)}`, { signal }),
+  feedback: (body: { rating: number; category: FeedbackCategory; message: string; page: string }) =>
+    api.post<{ id: number }>("/feedback", body),
 };

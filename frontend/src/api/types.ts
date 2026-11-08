@@ -72,7 +72,34 @@ export type AnswerResult = {
   session_complete: boolean;
   summary: { strongest: ConceptSummary[]; weakest: ConceptSummary[] } | null;
   changes: MasteryChange[] | null;
+  goal?: GoalProgress | null;
 };
+
+/** FR-ENG-03: progress toward today's goal of valid answers. */
+export type GoalProgress = {
+  daily_goal: number;
+  today_valid: number;
+  goal_met_today: boolean;
+  just_met: boolean;
+  current_streak: number;
+};
+
+export type Streak = GoalProgress & { longest_streak: number; today: string; timezone: string };
+
+export type Weekly = {
+  subject: string;
+  start: string;
+  end: string;
+  questions: number;
+  accuracy: number | null;
+  goal_days_met: number;
+  mean_mastery_start: number | null;
+  mean_mastery_end: number | null;
+  mastery_change: number | null;
+  concepts_improved: { concept: string; name: string; before: number; after: number }[];
+};
+
+export type FeedbackCategory = "bug" | "content" | "idea" | "other";
 
 export type PathReason = "revision" | "prerequisite" | "weak" | "new";
 

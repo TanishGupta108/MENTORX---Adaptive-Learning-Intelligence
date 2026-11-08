@@ -72,6 +72,9 @@ def clean_tables(migrated_database):
 
     login_limiter.reset()
     register_limiter.reset()
+    from app.services.engagement import feedback_limiter
+
+    feedback_limiter.reset()
     reset_cache()
 
 

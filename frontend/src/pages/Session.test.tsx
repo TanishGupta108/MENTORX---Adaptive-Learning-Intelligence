@@ -94,6 +94,31 @@ describe("session player", () => {
     expect(await screen.findByText("Question 11 stem")).toBeInTheDocument();
   });
 
+  it("celebrates the answer that reaches today's goal (FR-ENG-03)", async () => {
+    mockApi({
+      "GET /sessions/s1": { body: session("practice") },
+      "POST /sessions/s1/next": { body: question(10, 1) },
+      "POST /sessions/s1/answer": {
+        body: {
+          feedback: { correct: true, correct_key: "B", explanation: "Right." },
+          mastery: null,
+          answered: 1,
+          target: 2,
+          session_complete: false,
+          summary: null,
+          changes: null,
+          goal: { daily_goal: 10, today_valid: 10, goal_met_today: true, just_met: true, current_streak: 3 },
+        },
+      },
+      "GET /subjects/ML/concepts": { body: [] },
+    });
+    renderSession();
+    await userEvent.click(await screen.findByLabelText(/B\.\s*second/));
+    await userEvent.click(screen.getByRole("button", { name: "Check answer" }));
+    expect(await screen.findByText("Daily goal reached!")).toBeInTheDocument();
+    expect(screen.getByText(/10 questions today/)).toHaveTextContent("3-day streak");
+  });
+
   it("diagnostic: no feedback between questions; 'I don't know yet' sends null", async () => {
     let served = 0;
     const calls = mockApi({

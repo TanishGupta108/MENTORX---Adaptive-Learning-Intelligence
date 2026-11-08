@@ -8,12 +8,13 @@ Every table that belongs to a user cascades on user delete, so account deletion
 from __future__ import annotations
 
 import uuid
-from datetime import datetime
+from datetime import date, datetime
 
 from sqlalchemy import (
     BigInteger,
     Boolean,
     CheckConstraint,
+    Date,
     DateTime,
     Float,
     ForeignKey,
@@ -370,6 +371,20 @@ class LearningPathItem(Base):
     target_difficulty: Mapped[int] = mapped_column(SmallInteger, nullable=False)
     mastery_at_generation: Mapped[float | None] = mapped_column(Float)
     explanation: Mapped[str] = mapped_column(Text, nullable=False)
+
+
+class GoalDay(Base):
+    """A local day on which the student reached their daily goal (FR-ENG-01).
+
+    Stores the goal in force at that moment, so later goal changes don't rewrite history.
+    """
+
+    __tablename__ = "goal_days"
+
+    user_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), user_fk(), primary_key=True)
+    day: Mapped[date] = mapped_column(Date, primary_key=True)
+    goal: Mapped[int] = mapped_column(SmallInteger, nullable=False)
+    met_at: Mapped[datetime] = _now()
 
 
 class Feedback(Base):

@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { NavLink, Outlet, useNavigate } from "react-router";
 import { useAuth } from "../auth/AuthContext";
+import { FeedbackDialog } from "./FeedbackDialog";
 import { cx } from "./ui";
 
 const links = [
@@ -16,6 +17,7 @@ export function Layout() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
+  const [feedback, setFeedback] = useState(false);
 
   const linkClass = ({ isActive }: { isActive: boolean }) =>
     cx(
@@ -44,6 +46,13 @@ export function Layout() {
             ))}
           </nav>
           <div className="flex items-center gap-2">
+            <button
+              type="button"
+              className="min-h-11 rounded-lg border border-line px-3 text-sm text-ink-muted hover:text-ink"
+              onClick={() => setFeedback(true)}
+            >
+              Feedback
+            </button>
             <span className="hidden max-w-40 truncate text-sm text-ink-muted sm:inline">
               {user?.full_name}
             </span>
@@ -92,6 +101,7 @@ export function Layout() {
       <main id="main" className="mx-auto max-w-6xl px-4 py-6 sm:py-8">
         <Outlet />
       </main>
+      {feedback && <FeedbackDialog onClose={() => setFeedback(false)} />}
     </div>
   );
 }

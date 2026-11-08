@@ -1,6 +1,6 @@
 import { Link } from "react-router";
-import { dashboard, learning } from "../api/endpoints";
-import type { Dashboard } from "../api/types";
+import { dashboard, engagement, learning } from "../api/endpoints";
+import type { Dashboard, Streak, Weekly } from "../api/types";
 import { useAuth } from "../auth/AuthContext";
 import { ActivityHeatmap, TrendChart } from "../components/charts";
 import { ReasonBadge } from "../components/ReasonBadge";
@@ -28,6 +28,8 @@ export function DashboardPage() {
   const revision = useApi((s) => learning.revision(s));
   const trends = useApi((s) => dashboard.trends(30, s));
   const activity = useApi((s) => dashboard.activity(12, s));
+  const streak = useApi((s) => engagement.streak(s));
+  const weekly = useApi((s) => engagement.weekly(s));
   const starter = useStartSession();
 
   if (summary.loading && !summary.data) return <Spinner />;
@@ -96,6 +98,26 @@ export function DashboardPage() {
           value={d.accuracy == null ? "—" : pct(d.accuracy)}
           hint={`${d.sessions_completed} session${d.sessions_completed === 1 ? "" : "s"} completed`}
         />
+      </div>
+
+      <div className="mt-6 grid gap-6 lg:grid-cols-2">
+        <Card
+          title="Daily goal"
+          action={
+            <Link to="/settings" className="text-sm font-medium text-brand">
+              Change goal
+            </Link>
+          }
+        >
+          {streak.loading && !streak.data && <Spinner />}
+          {streak.error && <ErrorState error={streak.error} onRetry={streak.reload} />}
+          {streak.data && <GoalCard s={streak.data} />}
+        </Card>
+        <Card title="This week">
+          {weekly.loading && !weekly.data && <Spinner />}
+          {weekly.error && <ErrorState error={weekly.error} onRetry={weekly.reload} />}
+          {weekly.data && <WeeklyCard w={weekly.data} />}
+        </Card>
       </div>
 
       <div className="mt-6 grid gap-6 lg:grid-cols-3">
@@ -234,5 +256,117 @@ function ConceptRanking({ items }: { items: Dashboard["strongest"] }) {
         </li>
       ))}
     </ul>
+  );
+}
+
+/** FR-ENG-03: today's progress, current and longest streak. */
+function GoalCard({ s }: { s: Streak }) {
+  const done = Math.min(s.today_valid, s.daily_goal);
+  return (
+    <div>
+      <p>
+        {s.goal_met_today ? (
+          <strong className="text-success">Goal reached today.</strong>
+        ) : (
+          <>
+            <strong className="tabular-nums">{s.daily_goal - done}</strong> more question
+            {s.daily_goal - done === 1 ? "" : "s"} to reach today's goal.
+          </>
+        )}
+      </p>
+      <div
+        className="mt-3 h-2 overflow-hidden rounded-full bg-canvas"
+        role="progressbar"
+        aria-label="Today's goal"
+        aria-valuemin={0}
+        aria-valuemax={s.daily_goal}
+        aria-valuenow={done}
+        aria-valuetext={`${s.today_valid} of ${s.daily_goal} questions`}
+      >
+        <div
+          className={s.goal_met_today ? "h-full bg-success" : "h-full bg-brand"}
+          style={{ width: `${(done / s.daily_goal) * 100}%` }}
+        />
+      </div>
+      <p className="mt-1 text-xs text-ink-muted tabular-nums">
+        {s.today_valid} / {s.daily_goal} today
+      </p>
+      <dl className="mt-4 grid grid-cols-2 gap-3">
+        <div>
+          <dt className="text-sm text-ink-muted">Current streak</dt>
+          <dd className="text-2xl font-semibold tabular-nums">
+            {s.current_streak} day{s.current_streak === 1 ? "" : "s"}
+          </dd>
+        </div>
+        <div>
+          <dt className="text-sm text-ink-muted">Longest streak</dt>
+          <dd className="text-2xl font-semibold tabular-nums">
+            {s.longest_streak} day{s.longest_streak === 1 ? "" : "s"}
+          </dd>
+        </div>
+      </dl>
+      <p className="mt-3 text-xs text-ink-muted">
+        Answers count when you spend at least 3 seconds on them. Days follow your time zone (
+        {s.timezone}).
+      </p>
+    </div>
+  );
+}
+
+/** FR-ENG-05: the last 7 days. */
+function WeeklyCard({ w }: { w: Weekly }) {
+  if (w.questions === 0 && w.mastery_change == null)
+    return (
+      <EmptyState title="No activity this week">
+        Your weekly summary appears after your first answers.
+      </EmptyState>
+    );
+  const change = w.mastery_change;
+  return (
+    <div>
+      <dl className="grid grid-cols-3 gap-3">
+        <div>
+          <dt className="text-sm text-ink-muted">Questions</dt>
+          <dd className="text-2xl font-semibold tabular-nums">{w.questions}</dd>
+        </div>
+        <div>
+          <dt className="text-sm text-ink-muted">Accuracy</dt>
+          <dd className="text-2xl font-semibold tabular-nums">
+            {w.accuracy == null ? "—" : pct(w.accuracy)}
+          </dd>
+        </div>
+        <div>
+          <dt className="text-sm text-ink-muted">Goal days</dt>
+          <dd className="text-2xl font-semibold tabular-nums">{w.goal_days_met} / 7</dd>
+        </div>
+      </dl>
+      <p className="mt-4 text-sm">
+        {change == null ? (
+          <span className="text-ink-muted">
+            Mastery change shows from your second week, once there's a starting point to compare.
+          </span>
+        ) : (
+          <>
+            Mean mastery {pct(w.mean_mastery_start ?? 0)} → <strong>{pct(w.mean_mastery_end ?? 0)}</strong>{" "}
+            <span className={change >= 0 ? "text-success" : "text-danger"}>
+              ({change >= 0 ? "+" : "−"}
+              {Math.round(Math.abs(change) * 100)} pts)
+            </span>
+          </>
+        )}
+      </p>
+      {w.concepts_improved.length > 0 && (
+        <>
+          <p className="mt-3 text-sm font-medium">Improved this week</p>
+          <ul className="mt-1 space-y-1 text-sm text-ink-muted">
+            {w.concepts_improved.slice(0, 3).map((c) => (
+              <li key={c.concept}>
+                {c.name}: {pct(c.before)} → {pct(c.after)}
+              </li>
+            ))}
+          </ul>
+        </>
+      )}
+    </div>
   );
 }

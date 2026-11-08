@@ -13,6 +13,7 @@ from app.db.models import (
     Concept,
     Enrollment,
     Feedback,
+    GoalDay,
     Mastery,
     Question,
     StudySession,
@@ -20,6 +21,7 @@ from app.db.models import (
     User,
 )
 from app.schemas.auth import UserOut, UserUpdate
+from app.services import engagement
 
 
 def to_out(db: Session, user: User) -> UserOut:
@@ -39,6 +41,9 @@ def update_profile(db: Session, user: User, req: UserUpdate) -> User:
         if value is None:
             raise AppError(422, "validation_error", f"{field} cannot be null.")
         setattr(user, field, " ".join(value.split()) if field == "full_name" else value)
+    if {"daily_goal", "timezone"} & req.model_fields_set:
+        db.flush()
+        engagement.record_progress(db, user)  # e.g. a lowered goal is already met today
     db.commit()
     db.refresh(user)
     return user
@@ -78,6 +83,9 @@ def export_data(db: Session, user: User) -> dict:
         .where(Mastery.user_id == user.id)
     ).all()
     feedback = db.scalars(select(Feedback).where(Feedback.user_id == user.id)).all()
+    goal_days = db.scalars(
+        select(GoalDay).where(GoalDay.user_id == user.id).order_by(GoalDay.day)
+    ).all()
     return {
         "exported_at": datetime.now(UTC).isoformat(),
         "profile": to_out(db, user).model_dump(mode="json"),
@@ -120,8 +128,10 @@ def export_data(db: Session, user: User) -> dict:
                 "rating": f.rating,
                 "category": f.category,
                 "message": f.message,
+                "page": f.page,
                 "at": iso(f.created_at),
             }
             for f in feedback
         ],
+        "goal_days": [{"day": g.day.isoformat(), "goal": g.goal} for g in goal_days],
     }

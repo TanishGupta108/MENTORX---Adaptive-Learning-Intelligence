@@ -43,7 +43,7 @@ from app.schemas.sessions import (
     SessionOut,
     StartSessionRequest,
 )
-from app.services import learning
+from app.services import engagement, learning
 from app.services import mastery as mastery_service
 from app.services.selection import select_index
 
@@ -429,6 +429,7 @@ def answer(
         else:
             changes = session_changes(db, s)
             learning.generate(db, user, s.subject_id, "session", now)
+    goal = engagement.record_progress(db, user, now)
     db.commit()
 
     is_diag = s.type == "diagnostic"
@@ -444,6 +445,7 @@ def answer(
         session_complete=complete,
         summary=summary,
         changes=changes,
+        goal=goal,
     )
 
 

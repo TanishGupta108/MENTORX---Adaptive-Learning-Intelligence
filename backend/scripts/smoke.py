@@ -104,6 +104,13 @@ def main() -> int:
         path, _ = s.call("GET", "/learning-path?subject=ML")
         assert path["model_version"], "no active model version"
         print(f"  model in use: {path['model_version']}")
+
+        streak, _ = s.call("GET", "/engagement/streak")
+        assert streak["daily_goal"] >= 1 and streak["current_streak"] >= 0, streak
+        weekly, _ = s.call("GET", "/engagement/weekly?subject=ML")
+        assert weekly["questions"] == 1, weekly
+        # Deleted with the throwaway account below.
+        s.call("POST", "/feedback", {"rating": 5, "category": "other", "page": "/smoke"}, 201)
     except (AssertionError, KeyError, urllib.error.URLError) as e:
         print(f"FAILED: {e}")
         return 1

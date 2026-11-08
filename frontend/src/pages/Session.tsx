@@ -328,10 +328,21 @@ function FeedbackCard({
           <MasteryDelta change={result.mastery} name={q.concept_name} />
         </div>
       )}
+      {result.goal?.just_met && <GoalBanner goal={result.goal} />}
       <Button ref={next} className="mt-5" onClick={onNext}>
         {result.session_complete ? "See results" : "Next question"}
       </Button>
     </Card>
+  );
+}
+
+/** FR-ENG-03: shown when today's goal of valid answers is reached. */
+function GoalBanner({ goal }: { goal: NonNullable<AnswerResult["goal"]> }) {
+  return (
+    <p role="status" className="mt-4 rounded-lg border border-success/40 bg-success/10 p-3 text-sm">
+      <strong>Daily goal reached!</strong> {goal.today_valid} questions today · {goal.current_streak}
+      -day streak
+    </p>
   );
 }
 
@@ -360,6 +371,7 @@ function Summary({ session, result }: { session: Session; result?: AnswerResult 
       <h2 className="text-lg font-semibold">
         {session.status === "abandoned" ? "This session was replaced" : "Session complete"}
       </h2>
+      {result?.goal?.goal_met_today && <GoalBanner goal={result.goal} />}
       {session.type === "diagnostic" ? (
         <>
           <p className="mt-1 text-ink-muted">

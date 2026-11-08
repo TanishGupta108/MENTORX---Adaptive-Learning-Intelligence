@@ -6,6 +6,8 @@ from typing import Literal
 
 from pydantic import BaseModel, Field
 
+from app.schemas.engagement import GoalProgress
+
 
 class StartSessionRequest(BaseModel):
     subject: str = Field(min_length=1, max_length=20)
@@ -88,3 +90,5 @@ class AnswerResult(BaseModel):
     summary: DiagnosticSummary | None = None
     # When a practice or revision session completes: mastery before -> after per concept.
     changes: list[MasteryChange] | None = None
+    # Daily goal progress after this answer (FR-ENG-03).
+    goal: GoalProgress | None = None

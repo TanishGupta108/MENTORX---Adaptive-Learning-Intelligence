@@ -2,7 +2,7 @@
 
 An ML-powered adaptive learning platform that teaches **Machine Learning**. It estimates each student's concept mastery from their real attempts, then uses those predictions to choose the next question, build a learning path and schedule revision.
 
-**Status:** M0 scaffold ✓ · M1 requirements & design ✓ · M2 question bank ✓ (285 questions, AI-checked, [review log](docs/question-review-log.md)) · M3 data pipeline + EDA ✓ · M4 models ✓ ([ML report](docs/ml-report.md)) · M5 database, auth & core API ✓ · M6 adaptive quiz engine ✓ · M7 learning paths & revision ✓ · M8 frontend MVP ✓ · M9 deployment & hardening ✓ (live at https://mentorx-adaptive-learning-intellige.vercel.app, [deployment guide](docs/deployment.md)). See [docs/PROJECT_PLAN.md](docs/PROJECT_PLAN.md) for the feasibility analysis, scope, architecture, database schema, ML methodology and roadmap.
+**Status:** M0 scaffold ✓ · M1 requirements & design ✓ · M2 question bank ✓ (285 questions, AI-checked, [review log](docs/question-review-log.md)) · M3 data pipeline + EDA ✓ · M4 models ✓ ([ML report](docs/ml-report.md)) · M5 database, auth & core API ✓ · M6 adaptive quiz engine ✓ · M7 learning paths & revision ✓ · M8 frontend MVP ✓ · M9 deployment & hardening ✓ (live at https://mentorx-adaptive-learning-intellige.vercel.app, [deployment guide](docs/deployment.md)) · M10 engagement ✓ (daily goal, streaks, weekly report, feedback; [module doc](docs/modules/engagement.md)). See [docs/PROJECT_PLAN.md](docs/PROJECT_PLAN.md) for the feasibility analysis, scope, architecture, database schema, ML methodology and roadmap.
 
 | Part | Stack | Folder |
 |---|---|---|
