@@ -30,7 +30,7 @@ def history(user: CurrentUser, db: DB) -> list[SessionOut]:
 
 @router.get("/{session_id}", response_model=SessionOut)
 def read(session_id: uuid.UUID, user: CurrentUser, db: DB) -> SessionOut:
-    return quiz.to_out(db, quiz._own_session(db, user, session_id))
+    return quiz.session_detail(db, user, session_id)
 
 
 @router.post("/{session_id}/next", response_model=QuestionOut)

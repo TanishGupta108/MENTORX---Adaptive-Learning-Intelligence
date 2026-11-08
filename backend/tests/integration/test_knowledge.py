@@ -103,3 +103,17 @@ def test_peak_mastery_never_decreases(db, client, seeded):
     row = db.get(Mastery, (user.id, svm.id))
     db.refresh(row)
     assert row.p_mastery < peak_before and row.peak_mastery == pytest.approx(peak_before)
+
+
+def test_mastery_never_rises_with_time_alone(db, client, seeded):
+    """Without new answers, projected mastery is non-increasing (revision can't flicker)."""
+    user = _student_with_history(db, client, correct_answers=6)
+    subject = db.scalar(select(Subject))
+    concepts = db.scalars(select(Concept)).all()
+    model = registry.get_model(db)
+    now = datetime.now(UTC)
+    times = [now + timedelta(days=d) for d in (0, 0.5, 1, 4, 9, 20, 33, 70, 100, 200, 400, 800)]
+    at = knowledge.concept_mastery_at(db, model, user.id, subject.id, concepts, times)
+    assert len(at) == len(concepts)
+    for ps in at.values():
+        assert all(b <= a for a, b in zip(ps, ps[1:], strict=False))

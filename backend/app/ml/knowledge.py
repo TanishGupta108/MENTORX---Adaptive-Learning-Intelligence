@@ -9,7 +9,7 @@ from __future__ import annotations
 
 import uuid
 from dataclasses import dataclass
-from datetime import datetime
+from datetime import datetime, timedelta
 
 import numpy as np
 from mentorx_ml.serve import StudentState
@@ -176,6 +176,56 @@ def concept_mastery(
     Because time since practice is a feature, this decays when a concept isn't practised,
     which is what drives revision (FR-KT-04, design decision D-6).
     """
+    at = concept_mastery_at(db, model, user_id, subject_id, concepts, [now], state)
+    return {cid: ps[0] for cid, ps in at.items()}
+
+
+# Without new answers, mastery is not allowed to RISE with the passage of time alone. Gradient
+# boosting isn't monotone in the time features (measured: one student's estimate went 0.587
+# at 30 days -> 0.600 at 90 days), which would make a concept due for revision and then
+# not due again. So mastery at time t is the minimum of the model's predictions over these
+# offsets after the student's last answer (any concept), up to t.
+DECAY_GRID_DAYS = (
+    1 / 24,
+    0.25,
+    1,
+    2,
+    3,
+    5,
+    7,
+    10,
+    14,
+    21,
+    30,
+    45,
+    60,
+    90,
+    120,
+    180,
+    270,
+    365,
+    540,
+    730,
+)
+
+
+def concept_mastery_at(
+    db: Session,
+    model: LoadedModel,
+    user_id: uuid.UUID,
+    subject_id: int,
+    concepts: list[Concept],
+    times: list[datetime],
+    state: StudentState | None = None,
+) -> dict[int, list[float]]:
+    """Mastery of each concept at each of `times`, assuming no further practice.
+
+    One batched prediction for all (concept, time) pairs, including the decay-grid points
+    (see DECAY_GRID_DAYS). Used for "now" and for projecting when a concept will be due
+    for revision (FR-REV-05).
+    """
+    if not concepts or not times:
+        return {}
     state = state or load_history(db, user_id, subject_id)
     questions = db.scalars(
         select(Question).where(
@@ -183,13 +233,27 @@ def concept_mastery(
         )
     ).all()
     _, reference = difficulty(db, list(questions), user_id)
+
+    grid: list[datetime] = []
+    if model.use_time and state.last_time is not None:
+        horizon = max(times)
+        grid = [g for d in DECAY_GRID_DAYS if (g := state.last_time + timedelta(days=d)) < horizon]
+    points = sorted(set(grid) | set(times))
+
     rows, ids = [], []
     for c in concepts:
         ref = reference.get(c.id)
         if ref is None:
             continue
-        rows.append(
-            {**state.history_row(c.code, REFERENCE_ITEM, now, model.use_time), **ref.as_row()}
-        )
         ids.append(c.id)
-    return dict(zip(ids, (float(p) for p in model.predict(rows)), strict=True))
+        for t in points:
+            rows.append(
+                {**state.history_row(c.code, REFERENCE_ITEM, t, model.use_time), **ref.as_row()}
+            )
+    if not rows:
+        return {}
+    preds = np.asarray(model.predict(rows), dtype=float).reshape(len(ids), len(points))
+    # running minimum over time, then read off the requested times
+    envelope = np.minimum.accumulate(preds, axis=1)
+    col = {t: i for i, t in enumerate(points)}
+    return {cid: [float(envelope[k, col[t]]) for t in times] for k, cid in enumerate(ids)}

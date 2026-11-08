@@ -95,6 +95,12 @@ This is the behaviour MENTORX's revision scheduler depends on (FR-REV-01): maste
 
 The v1 artifact (EdNet gradient boosting) is exported and integrated with the backend in M6. That milestone adds a fast serving path for the features, tested to produce identical values to the training code (design decision D-3).
 
+### Serving-time finding (M7): decay is not monotone
+
+Holding a real MENTORX student's history fixed and projecting forward, the raw model's estimate for a concept they had just answered 10/10 on went **0.838 → 0.761 (7 days) → 0.587 (30 days) → 0.600 (90 days)**. For another student, it went 0.676 (7 days) → 0.715 (30 days). Gradient boosting isn't constrained to be monotone in time, and these bumps sit right at the 0.6 revision threshold, so a concept could become due for revision and then not due again.
+
+MENTORX therefore uses a **monotone envelope** (design decision D-10): with no new answers, mastery at time *t* is the minimum of the model's predictions over a fixed grid of times since the student's last answer. A test checks that projected mastery never rises with time. This is a post-processing rule, not a property the model learnt; a monotone constraint in training (`HistGradientBoostingClassifier(monotonic_cst=...)`) is a candidate for the v2 model (M11).
+
 ## 7. Limitations (state these in the report and viva)
 
 1. **Domain transfer is unproven.** Both datasets differ from undergraduate ML (school maths; English test prep). The reported numbers describe those datasets, not MENTORX. MENTORX logs every prediction before the answer (FR-QUIZ-05), so live AUC and calibration on real students will be measured during the pilot (M11).
@@ -102,6 +108,7 @@ The v1 artifact (EdNet gradient boosting) is exported and integrated with the ba
 3. **No DKT.** Deep Knowledge Tracing (a "Could" requirement) wasn't run. Published DKT results on ASSISTments 2009 typically use all rows, including scaffolding, so they aren't directly comparable with these numbers.
 4. **One random split per dataset.** The CIs capture variation among test students, not variation across different splits.
 5. **EdNet sample.** 10,000 of 784,309 students. Larger samples might change the absolute numbers somewhat.
+6. **Long-run mastery levels off near the revision threshold.** In the projections above, mastery without practice settles at roughly 0.6–0.67, depending on the student. With the default thresholds (peak ≥ 0.8, floor 0.6, FR-REV-01), some well-practised concepts will never become due. The thresholds are configurable, and the pilot (M11) should check them against students' real retention.
 
 ## 8. Reproduce
 

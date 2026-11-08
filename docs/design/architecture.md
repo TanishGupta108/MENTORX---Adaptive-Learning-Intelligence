@@ -134,6 +134,10 @@ flowchart TB
 | D-7 | Content in YAML in git | Peer review via PRs, history, reproducible seeding |
 | D-8 | Short-lived access JWT + rotating refresh cookie | Stateless request auth with real logout/revocation |
 | D-9 | Random top-3 among closest-to-target | Avoids always serving the same question, adds exploration data for retraining |
+| D-10 | Without new answers, mastery never rises with time alone: mastery at time *t* is the running minimum of the model's predictions over a fixed grid of times since the student's last answer | Gradient boosting isn't monotone in the time features (measured: 0.587 at 30 days, 0.600 at 90). Without this, a concept could become due for revision and then not due again |
+| D-11 | A prerequisite counts as "in place" only if it has been practised **and** its mastery is ≥ 0.6 | The model's guess for a never-practised concept is not evidence the student knows it |
+| D-12 | Questions are chosen by the model's predicted P(correct) (target 0.65), not by the path's target difficulty; target difficulty (from the mastery band) is shown to the student as guidance | Keeps one principled selection rule driven by the ML model; the author's 1–3 rating is only a cold-start prior |
+| D-13 | When the path has room left, it is filled with concepts that are in place but not yet mastered (< 0.8), weakest first, reason *weak* | Otherwise a student whose concepts are all between 0.6 and 0.8 would get an empty path |
 
 ## 4. API overview
 
@@ -152,15 +156,16 @@ All endpoints are under `/api/v1`, JSON, documented at `/docs`. 🔒 = needs an 
 | GET | `/subjects` 🔒 | List subjects | FR-CONT-01 |
 | POST | `/subjects/{code}/enroll` 🔒 | Enrol | FR-CONT-02 |
 | GET | `/subjects/{code}/concepts` 🔒 | Concepts, prerequisite graph, my mastery | FR-DASH-02 |
-| POST | `/sessions` 🔒 | Start (or resume) a session `{subject, type, concept?}` | FR-QUIZ-01 |
-| GET | `/sessions/{id}` 🔒 | Session state | FR-DIAG-06 |
+| POST | `/sessions` 🔒 | Start (or resume) a session `{subject, type: diagnostic \| practice \| revision, concept?}` | FR-QUIZ-01, FR-REV-03 |
+| GET | `/sessions/{id}` 🔒 | Session state, with mastery before → after per concept | FR-DIAG-06, FR-REV-04 |
 | POST | `/sessions/{id}/next` 🔒 | Serve the next question (no answer key) | FR-QUIZ-02 |
 | POST | `/sessions/{id}/answer` 🔒 | Submit `{question_id, selected_key \| null}` → feedback + mastery | FR-QUIZ-07/08 |
 | POST | `/sessions/{id}/end` 🔒 | End session | FR-QUIZ-09 |
 | GET | `/sessions` 🔒 | History | FR-DASH-05 |
 | POST | `/questions/{id}/flag` 🔒 | Report a question | FR-QUIZ-11 |
-| GET | `/learning-path?subject=` 🔒 | Current path | FR-PATH-01 |
-| GET | `/revision?subject=` 🔒 | Revision queue | FR-REV-02 |
+| GET | `/learning-path?subject=` 🔒 | Current path (regenerated when revisions fall due) | FR-PATH-01, FR-PATH-04 |
+| POST | `/learning-path/regenerate?subject=` 🔒 | New path now; old one kept | FR-PATH-05 |
+| GET | `/revision?subject=` 🔒 | Revision queue + projected revision dates | FR-REV-02, FR-REV-05 |
 | GET | `/dashboard?subject=` 🔒 | Summary, strong/weak, streak, today | FR-DASH-01/03, FR-ENG-03 |
 | GET | `/dashboard/trends?subject=&days=30` 🔒 | Accuracy + mastery series | FR-DASH-04 |
 | GET | `/dashboard/activity?weeks=12` 🔒 | Heatmap data | FR-DASH-07 |

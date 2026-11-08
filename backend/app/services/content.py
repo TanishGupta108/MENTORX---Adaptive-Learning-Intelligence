@@ -2,13 +2,17 @@
 
 from __future__ import annotations
 
+from datetime import UTC, datetime
+
 from sqlalchemy import func, select
 from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.orm import Session
 
 from app.core.errors import AppError
 from app.db.models import Concept, ConceptPrerequisite, Enrollment, Mastery, Subject, User
+from app.ml.registry import get_model
 from app.schemas.content import ConceptOut, EnrollmentOut, SubjectOut
+from app.services import mastery as mastery_service
 
 
 def _subject(db: Session, code: str) -> Subject:
@@ -73,12 +77,27 @@ def list_concepts(db: Session, user: User, code: str) -> list[ConceptOut]:
         )
     ):
         prereqs[cid].append(by_id[pid])
-    mastery = {
-        m.concept_id: m
-        for m in db.scalars(
-            select(Mastery).where(Mastery.user_id == user.id, Mastery.concept_id.in_(by_id))
+    stored = set(
+        db.scalars(
+            select(Mastery.concept_id).where(
+                Mastery.user_id == user.id, Mastery.concept_id.in_(by_id)
+            )
         )
-    }
+    )
+    # Stored values older than a day are recomputed, so the map shows decay (FR-KT-04).
+    mastery = (
+        mastery_service.current(
+            db,
+            get_model(db),
+            user.id,
+            subject.id,
+            [c for c in concepts if c.id in stored],
+            datetime.now(UTC),
+        )
+        if stored
+        else {}
+    )
+    db.commit()
     return [
         ConceptOut(
             code=c.code,
@@ -86,7 +105,7 @@ def list_concepts(db: Session, user: User, code: str) -> list[ConceptOut]:
             description=c.description,
             topo_order=c.topo_order,
             prerequisites=sorted(prereqs[c.id]),
-            mastery=mastery[c.id].p_mastery if c.id in mastery else None,
+            mastery=mastery[c.id].p if c.id in mastery else None,
             n_attempts=mastery[c.id].n_attempts if c.id in mastery else 0,
         )
         for c in concepts

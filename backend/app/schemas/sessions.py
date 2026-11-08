@@ -9,8 +9,14 @@ from pydantic import BaseModel, Field
 
 class StartSessionRequest(BaseModel):
     subject: str = Field(min_length=1, max_length=20)
-    type: Literal["diagnostic", "practice"]
+    type: Literal["diagnostic", "practice", "revision"]
     concept: str | None = Field(default=None, description="practice only: focus on one concept")
+
+
+class MasteryChange(BaseModel):
+    concept: str
+    before: float | None
+    after: float
 
 
 class SessionOut(BaseModel):
@@ -24,6 +30,9 @@ class SessionOut(BaseModel):
     started_at: datetime
     ended_at: datetime | None
     correct: int | None = None  # filled in history views
+    # Mastery before -> after for each concept practised (FR-REV-04); filled in single-session
+    # views of practice and revision sessions.
+    changes: list[MasteryChange] | None = None
 
 
 class OptionOut(BaseModel):
@@ -52,12 +61,6 @@ class AnswerRequest(BaseModel):
     )
 
 
-class MasteryChange(BaseModel):
-    concept: str
-    before: float | None
-    after: float
-
-
 class Feedback(BaseModel):
     correct: bool
     correct_key: str
@@ -83,3 +86,5 @@ class AnswerResult(BaseModel):
     target: int
     session_complete: bool
     summary: DiagnosticSummary | None = None
+    # When a practice or revision session completes: mastery before -> after per concept.
+    changes: list[MasteryChange] | None = None

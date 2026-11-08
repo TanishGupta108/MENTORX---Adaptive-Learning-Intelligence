@@ -15,6 +15,7 @@ from pathlib import Path
 
 import joblib
 import numpy as np
+import pandas as pd
 import sklearn
 from sqlalchemy import select, update
 from sqlalchemy.orm import Session
@@ -45,8 +46,9 @@ class LoadedModel:
             return np.zeros(0)
         if self.estimator is None:
             return np.full(len(rows), self.prior_p)
-        X = np.array([[r[f] for f in self.features] for r in rows], dtype=float)
-        return self.estimator.predict_proba(X)[:, 1]
+        # Named columns: the estimator was fitted on a DataFrame and checks names and order.
+        X = pd.DataFrame([[r[f] for f in self.features] for r in rows], columns=self.features)
+        return self.estimator.predict_proba(X.astype(float))[:, 1]
 
 
 class ArtifactError(RuntimeError):

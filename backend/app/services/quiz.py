@@ -23,9 +23,8 @@ from app.core.errors import AppError
 from app.db.models import (
     Attempt,
     Concept,
-    ConceptPrerequisite,
     Enrollment,
-    Mastery,
+    MasterySnapshot,
     Question,
     StudySession,
     Subject,
@@ -44,6 +43,7 @@ from app.schemas.sessions import (
     SessionOut,
     StartSessionRequest,
 )
+from app.services import learning
 from app.services import mastery as mastery_service
 from app.services.selection import select_index
 
@@ -165,6 +165,12 @@ def start_session(db: Session, user: User, req: StartSessionRequest) -> StudySes
         target = len(_diagnostic_questions(db, subject.id))
         if target == 0:
             raise AppError(409, "no_content", "This subject has no diagnostic questions yet.")
+    elif req.type == "revision":
+        if active:
+            return active
+        if not learning.due_concepts(db, user, subject.id):
+            raise AppError(409, "nothing_due", "No concepts are due for revision right now.")
+        target = get_settings().revision_length  # FR-REV-03
     else:
         if active and active.focus_concept_id == (focus.id if focus else None):
             return active
@@ -194,6 +200,9 @@ def end_session(db: Session, user: User, session_id: uuid.UUID) -> StudySession:
         s.current_model_version_id = None
         if s.type == "diagnostic":  # skipping the rest of the diagnostic (FR-DIAG-05)
             _finish_diagnostic(db, user, s)
+            learning.generate(db, user, s.subject_id, "diagnostic")
+        elif s.answered_count:
+            learning.generate(db, user, s.subject_id, "session")
         db.commit()
     return s
 
@@ -219,31 +228,36 @@ def list_sessions(db: Session, user: User, limit: int = 50) -> list[SessionOut]:
 
 
 def _target_concepts(db: Session, user: User, s: StudySession) -> list[int]:
-    """Concepts a practice session draws from.
+    """Concepts a practice or revision session draws from.
 
-    Focused session: that concept. Recommended session: the (up to) 3 weakest concepts whose
-    prerequisites are met (FR-PATH-02). M7 replaces this with the full learning path.
+    - focused practice: that concept;
+    - recommended practice: the first concepts of the current learning path (FR-PATH);
+    - revision: the concepts currently due, else (all revived mid-session) the ones this
+      session has already revised (FR-REV-03).
     """
+    cfg = get_settings()
     if s.focus_concept_id:
         return [s.focus_concept_id]
-    threshold = get_settings().mastery_threshold
-    concepts = _concepts(db, s.subject_id)
-    mastery = {
-        m.concept_id: m.p_mastery
-        for m in db.scalars(select(Mastery).where(Mastery.user_id == user.id))
-    }
-    prereqs: dict[int, list[int]] = {}
-    for cid, pid in db.execute(
-        select(ConceptPrerequisite.concept_id, ConceptPrerequisite.prerequisite_id)
-    ):
-        prereqs.setdefault(cid, []).append(pid)
-    ready = [
-        c.id
-        for c in concepts
-        if all(mastery.get(p, 0.0) >= threshold for p in prereqs.get(c.id, []))
+    if s.type == "revision":
+        due = [c.concept.id for c in learning.due_concepts(db, user, s.subject_id)]
+        if due:
+            return due
+        return list(
+            db.scalars(
+                select(Question.concept_id)
+                .join(Attempt, Attempt.question_id == Question.id)
+                .where(Attempt.session_id == s.id)
+                .distinct()
+            )
+        )
+    concepts = learning.path_concepts(db, user, s.subject_id, cfg.practice_path_concepts)
+    if concepts:
+        return concepts
+    # Empty path = everything mastered: keep practising the weakest concepts.
+    current = learning.states(db, user, s.subject_id, _now())
+    return [c for c, _ in sorted(current.items(), key=lambda kv: kv[1].p)][
+        : cfg.practice_path_concepts
     ]
-    pool = ready or [c.id for c in concepts]
-    return sorted(pool, key=lambda cid: (mastery.get(cid, 0.0), pool.index(cid)))[:3]
 
 
 def _practice_candidates(db: Session, user: User, s: StudySession) -> list[Question]:
@@ -404,11 +418,15 @@ def answer(
     before, after = change[concept.id]
 
     complete = s.answered_count >= s.target_count
-    summary = None
+    summary = changes = None
     if complete:
         s.status, s.ended_at = "completed", now
         if s.type == "diagnostic":
             summary = _finish_diagnostic(db, user, s)
+            learning.generate(db, user, s.subject_id, "diagnostic", now)  # FR-PATH-04
+        else:
+            changes = session_changes(db, s)
+            learning.generate(db, user, s.subject_id, "session", now)
     db.commit()
 
     is_diag = s.type == "diagnostic"
@@ -423,6 +441,7 @@ def answer(
         target=s.target_count,
         session_complete=complete,
         summary=summary,
+        changes=changes,
     )
 
 
@@ -441,3 +460,47 @@ def _finish_diagnostic(db: Session, user: User, s: StudySession) -> DiagnosticSu
         key=lambda x: x.mastery,
     )
     return DiagnosticSummary(strongest=list(reversed(ranked[-3:])), weakest=ranked[:3])
+
+
+def session_changes(db: Session, s: StudySession) -> list[MasteryChange]:
+    """FR-REV-04: each practised concept's mastery just before and just after this session.
+
+    From the mastery snapshots taken after every answer: "after" is the snapshot of the
+    session's last answer on that concept, "before" the latest snapshot preceding the
+    session's first one (null if the concept had none).
+    """
+    db.flush()  # autoflush is off: include this request's snapshots
+    snaps = db.execute(
+        select(MasterySnapshot.concept_id, MasterySnapshot.id, MasterySnapshot.p_mastery)
+        .join(Attempt, Attempt.id == MasterySnapshot.attempt_id)
+        .where(Attempt.session_id == s.id)
+        .order_by(MasterySnapshot.id)
+    ).all()
+    first: dict[int, int] = {}
+    after: dict[int, float] = {}
+    for cid, sid, p in snaps:
+        first.setdefault(cid, sid)
+        after[cid] = p
+    codes = dict(db.execute(select(Concept.id, Concept.code).where(Concept.id.in_(first))).all())
+    out = []
+    for cid, first_id in first.items():
+        before = db.scalar(
+            select(MasterySnapshot.p_mastery)
+            .where(
+                MasterySnapshot.user_id == s.user_id,
+                MasterySnapshot.concept_id == cid,
+                MasterySnapshot.id < first_id,
+            )
+            .order_by(MasterySnapshot.id.desc())
+            .limit(1)
+        )
+        out.append(MasteryChange(concept=codes[cid], before=before, after=after[cid]))
+    return sorted(out, key=lambda c: c.concept)
+
+
+def session_detail(db: Session, user: User, session_id: uuid.UUID) -> SessionOut:
+    s = _own_session(db, user, session_id)
+    out = to_out(db, s)
+    if s.type != "diagnostic":
+        out.changes = session_changes(db, s)
+    return out

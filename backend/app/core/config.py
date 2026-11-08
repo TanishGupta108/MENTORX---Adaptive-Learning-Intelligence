@@ -47,6 +47,14 @@ class Settings(BaseSettings):
     recent_correct_exclusion_days: int = Field(default=7, ge=0)  # FR-QUIZ-03
     valid_answer_min_ms: int = Field(default=3000, ge=0)  # FR-ENG-02
     mastery_threshold: float = Field(default=0.6, gt=0, lt=1)  # prerequisite "met" (FR-PATH-02)
+    mastered_threshold: float = Field(default=0.8, gt=0, lt=1)  # "mastered" (FR-DASH-01)
+    revision_peak: float = Field(default=0.8, gt=0, lt=1)  # FR-REV-01: peak reached ...
+    revision_floor: float = Field(default=0.6, gt=0, lt=1)  # ... and current fell below this
+    revision_length: int = Field(default=5, ge=1, le=50)  # FR-REV-03
+    path_length: int = Field(default=5, ge=1, le=20)  # FR-PATH-01
+    practice_path_concepts: int = Field(default=3, ge=1)  # recommended practice draws from these
+    mastery_stale_hours: float = Field(default=24, gt=0)  # FR-KT-04: recompute on read if older
+    revision_projection_days: int = Field(default=180, ge=1)  # FR-REV-05 horizon
 
     @property
     def cors_origin_list(self) -> list[str]:
