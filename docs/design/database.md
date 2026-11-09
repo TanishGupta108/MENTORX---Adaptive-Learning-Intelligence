@@ -255,6 +255,15 @@ erDiagram
 - `metrics` copies the evaluation report's headline numbers; `artifact_sha256` guards against loading a different file than the one evaluated.
 - A built-in row `prior` (constant training-set average) exists as the last-resort fallback (FR-KT-06).
 
+### goal_days (M10)
+- PK `(user_id, day)`: a local calendar day on which the student's valid answers reached their daily goal, with the `goal` in force at that moment, so later goal changes don't rewrite history (FR-ENG-01). The only stored engagement state; streaks are computed from it.
+
+### sus_responses (M11)
+- PK `user_id`: one System Usability Scale response per student, after the post-test (FR-PILOT-04). `answers` is a JSONB array of 10 values 1–5; `score` (0–100, check constraint) uses standard SUS scoring.
+
+### feedback
+- Rating 1–5 (check constraint), category, message, and the page it was sent from (FR-PILOT-03). Deleted with the account.
+
 ## 3. Key queries (and the index that serves each)
 
 | Query | Index |
@@ -268,6 +277,8 @@ erDiagram
 | Valid answers per local day (streak) | `attempts(user_id, created_at)` |
 
 ## 4. Pseudonymised training export (FR-PILOT-05, NFR-PRIV-02)
+
+> **As built (M11):** the export is produced in Python (`app/services/pilot.py`, `export_attempts`), not SQL. The pseudonym is the first 12 hex characters of `HMAC-SHA256(key = JWT_SECRET + "|pseudonym", message = user id)`, so `pgcrypto` isn't needed. It also includes the session type, experiment group, validity flag and the stored prediction and model version. The query below was the original design.
 
 ```sql
 SELECT encode(digest(a.user_id::text || :salt, 'sha256'), 'hex') AS student_id,
