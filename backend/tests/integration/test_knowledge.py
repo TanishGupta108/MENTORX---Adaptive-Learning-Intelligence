@@ -117,3 +117,59 @@ def test_mastery_never_rises_with_time_alone(db, client, seeded):
     assert len(at) == len(concepts)
     for ps in at.values():
         assert all(b <= a for a, b in zip(ps, ps[1:], strict=False))
+
+
+def _answer_some(client, db, h, concept, n, correct):
+    from app.db.models import Question
+
+    sid = client.post(
+        "/api/v1/sessions",
+        headers=h,
+        json={"subject": "ML", "type": "practice", "concept": concept},
+    ).json()["id"]
+    for _ in range(n):
+        q = client.post(f"/api/v1/sessions/{sid}/next", headers=h).json()
+        key = db.get(Question, q["question_id"]).correct_key if correct else None
+        client.post(
+            f"/api/v1/sessions/{sid}/answer",
+            headers=h,
+            json={"question_id": q["question_id"], "selected_key": key},
+        )
+
+
+def test_cached_difficulty_matches_a_fresh_computation(db, client, seeded, monkeypatch):
+    """The answer-statistics cache (M12 performance fix) never changes the numbers it serves
+    for a given snapshot, and never counts the requesting student's own answers."""
+    from app.core.config import get_settings
+    from app.db.models import Question
+    from tests.conftest import auth, register
+
+    a = auth(register(client, email="a@example.com"))
+    b = auth(register(client, email="b@example.com"))
+    for h in (a, b):
+        client.post("/api/v1/subjects/ML/enroll", headers=h)
+    _answer_some(client, db, a, "ml.knn", 5, correct=True)
+    _answer_some(client, db, b, "ml.knn", 5, correct=False)
+
+    questions = list(db.scalars(select(Question).join(Concept).where(Concept.code == "ml.knn")))
+    user_a = db.scalar(select(User).where(User.email == "a@example.com"))
+
+    knowledge.reset_stats_cache()
+    cached = knowledge.difficulty(db, questions, user_a.id)
+    # The student's own new answers after the snapshot must not leak into "other students".
+    _answer_some(client, db, a, "ml.knn", 3, correct=True)
+    assert knowledge.difficulty(db, questions, user_a.id) == cached
+
+    monkeypatch.setattr(get_settings(), "difficulty_cache_seconds", 0)  # always fresh
+    assert knowledge.difficulty(db, questions, user_a.id) == cached  # only b counts for a
+
+    # Another student's new answers appear once the cache is refreshed.
+    monkeypatch.setattr(get_settings(), "difficulty_cache_seconds", 60)
+    knowledge.reset_stats_cache()
+    before = knowledge.difficulty(db, questions, user_a.id)
+    _answer_some(client, db, b, "ml.knn", 4, correct=False)
+    assert knowledge.difficulty(db, questions, user_a.id) == before  # within the TTL
+    knowledge.reset_stats_cache()
+    after = knowledge.difficulty(db, questions, user_a.id)
+    knn = questions[0].concept_id
+    assert after[1][knn].concept_logit < before[1][knn].concept_logit  # b's wrong answers count

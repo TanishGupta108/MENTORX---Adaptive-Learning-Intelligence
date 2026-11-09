@@ -7,6 +7,8 @@ because MENTORX's questions have no history at launch (see `difficulty`).
 
 from __future__ import annotations
 
+import threading
+import time
 import uuid
 from dataclasses import dataclass
 from datetime import datetime, timedelta
@@ -16,6 +18,7 @@ from mentorx_ml.serve import StudentState
 from sqlalchemy import case, func, select
 from sqlalchemy.orm import Session
 
+from app.core.config import get_settings
 from app.db.models import Attempt, Concept, Question
 from app.ml.registry import LoadedModel
 
@@ -71,41 +74,23 @@ def difficulty(
     concept_ids = {q.concept_id for q in questions}
     if not concept_ids:
         return {}, {}
-    ext_ids = {q.external_id for q in questions}
-    others = Attempt.user_id != exclude_user
-    correct = func.sum(case((Attempt.is_correct, 1), else_=0))
+    stats = _all_student_stats(db)
+    own_items, own_concepts = _own_stats(db, exclude_user, stats.max_attempt_id)
+
+    def minus(total: tuple[int, int], own: tuple[int, int]) -> tuple[int, int]:
+        return max(total[0] - own[0], 0), max(total[1] - own[1], 0)
 
     item_stats = {
-        ext: (int(n), int(k or 0))
-        for ext, n, k in db.execute(
-            select(Question.external_id, func.count(), correct)
-            .join(Attempt, Attempt.question_id == Question.id)
-            .where(Question.external_id.in_(ext_ids), others)
-            .group_by(Question.external_id)
+        q.external_id: minus(
+            stats.items.get(q.external_id, (0, 0)), own_items.get(q.external_id, (0, 0))
         )
+        for q in questions
     }
     concept_stats = {
-        cid: (int(n), int(k or 0))
-        for cid, n, k in db.execute(
-            select(Question.concept_id, func.count(), correct)
-            .join(Attempt, Attempt.question_id == Question.id)
-            .where(Question.concept_id.in_(concept_ids), others)
-            .group_by(Question.concept_id)
-        )
+        cid: minus(stats.concepts.get(cid, (0, 0)), own_concepts.get(cid, (0, 0)))
+        for cid in concept_ids
     }
-    author_mean = {
-        cid: float(m)
-        for cid, m in db.execute(
-            select(
-                Question.concept_id,
-                func.avg(
-                    case(*((Question.author_difficulty == d, p) for d, p in AUTHOR_PRIOR.items()))
-                ),
-            )
-            .where(Question.concept_id.in_(concept_ids), Question.status == "active")
-            .group_by(Question.concept_id)
-        )
-    }
+    author_mean = {cid: stats.author_mean[cid] for cid in concept_ids if cid in stats.author_mean}
 
     concept_p: dict[int, float] = {}
     for cid in concept_ids:
@@ -257,3 +242,105 @@ def concept_mastery_at(
     envelope = np.minimum.accumulate(preds, axis=1)
     col = {t: i for i, t in enumerate(points)}
     return {cid: [float(envelope[k, col[t]]) for t in times] for k, cid in enumerate(ids)}
+
+
+# ---------------------------------------------------------------- answer statistics cache
+#
+# `difficulty` needs, for each question and concept, how many OTHER students answered and how
+# many were correct. Aggregating the whole attempts table on every request was the largest
+# single cost of serving a question (M12 load test). Instead, totals over ALL students are
+# cached for `difficulty_cache_seconds`, together with the highest attempt id they include.
+# Each request subtracts the requesting student's own answers up to that same id, which is
+# cheap (indexed by user) and exact for that snapshot. The only approximation: other students'
+# newest answers are reflected up to `difficulty_cache_seconds` late.
+
+
+@dataclass(frozen=True)
+class _Stats:
+    max_attempt_id: int
+    items: dict[str, tuple[int, int]]  # external_id -> (answers, correct)
+    concepts: dict[int, tuple[int, int]]  # concept_id -> (answers, correct)
+    author_mean: dict[int, float]  # concept_id -> mean author prior of active questions
+    at: float
+
+
+_stats: _Stats | None = None
+_stats_lock = threading.Lock()
+
+
+def reset_stats_cache() -> None:
+    global _stats
+    with _stats_lock:
+        _stats = None
+
+
+def _correct():
+    return func.sum(case((Attempt.is_correct, 1), else_=0))
+
+
+def _all_student_stats(db: Session) -> _Stats:
+    global _stats
+    ttl = get_settings().difficulty_cache_seconds
+    with _stats_lock:
+        cached = _stats
+    if cached is not None and time.monotonic() - cached.at < ttl:
+        return cached
+    max_id = db.scalar(select(func.max(Attempt.id))) or 0
+    upto = Attempt.id <= max_id
+    items = {
+        ext: (int(n), int(k or 0))
+        for ext, n, k in db.execute(
+            select(Question.external_id, func.count(), _correct())
+            .join(Attempt, Attempt.question_id == Question.id)
+            .where(upto)
+            .group_by(Question.external_id)
+        )
+    }
+    concepts = {
+        cid: (int(n), int(k or 0))
+        for cid, n, k in db.execute(
+            select(Question.concept_id, func.count(), _correct())
+            .join(Attempt, Attempt.question_id == Question.id)
+            .where(upto)
+            .group_by(Question.concept_id)
+        )
+    }
+    author_mean = {
+        cid: float(m)
+        for cid, m in db.execute(
+            select(
+                Question.concept_id,
+                func.avg(
+                    case(*((Question.author_difficulty == d, p) for d, p in AUTHOR_PRIOR.items()))
+                ),
+            )
+            .where(Question.status == "active")
+            .group_by(Question.concept_id)
+        )
+    }
+    fresh = _Stats(max_id, items, concepts, author_mean, time.monotonic())
+    with _stats_lock:
+        _stats = fresh
+    return fresh
+
+
+def _own_stats(
+    db: Session, user_id: uuid.UUID, max_attempt_id: int
+) -> tuple[dict[str, tuple[int, int]], dict[int, tuple[int, int]]]:
+    """The student's own answers included in the cached totals (ids up to the snapshot)."""
+    rows = db.execute(
+        select(Question.external_id, Question.concept_id, Attempt.is_correct)
+        .join(Attempt, Attempt.question_id == Question.id)
+        .where(Attempt.user_id == user_id, Attempt.id <= max_attempt_id)
+    ).all()
+    items: dict[str, list[int]] = {}
+    concepts: dict[int, list[int]] = {}
+    for ext, cid, ok in rows:
+        for table, key in ((items, ext), (concepts, cid)):
+            n_k = table.setdefault(key, [0, 0])
+            n_k[0] += 1
+            n_k[1] += int(ok)
+    return (
+        {k: (v[0], v[1]) for k, v in items.items()},
+        {k: (v[0], v[1]) for k, v in concepts.items()},
+    )

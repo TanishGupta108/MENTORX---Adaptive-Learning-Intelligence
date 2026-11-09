@@ -63,6 +63,8 @@ class Settings(BaseSettings):
     practice_path_concepts: int = Field(default=3, ge=1)  # recommended practice draws from these
     mastery_stale_hours: float = Field(default=24, gt=0)  # FR-KT-04: recompute on read if older
     revision_projection_days: int = Field(default=180, ge=1)  # FR-REV-05 horizon
+    # Other students' answers feed question difficulty at most this many seconds late.
+    difficulty_cache_seconds: float = Field(default=60, ge=0)
 
     @field_validator("database_url")
     @classmethod

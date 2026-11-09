@@ -67,6 +67,7 @@ def clean_tables(migrated_database):
             )
         ).all()
         conn.execute(text(f"TRUNCATE {', '.join(tables)} RESTART IDENTITY CASCADE"))
+    from app.ml.knowledge import reset_stats_cache
     from app.ml.registry import reset_cache
     from app.services.auth import login_limiter, register_limiter
 
@@ -76,6 +77,7 @@ def clean_tables(migrated_database):
 
     feedback_limiter.reset()
     reset_cache()
+    reset_stats_cache()
 
 
 @pytest.fixture
