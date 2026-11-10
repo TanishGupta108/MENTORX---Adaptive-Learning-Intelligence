@@ -16,7 +16,7 @@ to each result so it can be reproduced.
 | API | Every endpoint through HTTP: auth, authorisation, validation, error shape, business rules | pytest + FastAPI TestClient | `backend/tests/api` |
 | ML | Data cleaning, leakage guards, feature equality between training and serving, metrics, BKT | pytest | `ml/tests` |
 | Frontend | Components and pages against a mocked API: routing, empty states, quiz flow, dashboard, feedback, study flow | Vitest + Testing Library | `frontend/src/**/*.test.tsx` |
-| System (end to end) | A real deployment: sign-up → enrol → answer → dashboard → path → streak → study status → feedback → delete | `backend/scripts/smoke.py` | CI (Docker image) and production |
+| System (end to end) | A real deployment: sign-up → enrol → answer → dashboard → path → streak → study status → feedback → delete | `backend/scripts/smoke.py` | CI (installed as on Render) and production |
 | Performance | Latency under concurrent students | `backend/scripts/loadtest.py` | local and production |
 | Security | Headers, rate limits, production config, dependency audit | pytest, npm audit | §5 |
 
@@ -28,8 +28,11 @@ migrated database.
 1. **backend:** lint, format check, migrations, tests with coverage;
 2. **ml:** lint, format check, tests;
 3. **frontend:** type check, tests, production build;
-4. **docker:** builds the production image, starts it in production mode against PostgreSQL, and
-   runs the end-to-end smoke test against it.
+4. **e2e:** installs the API exactly as Render does, starts it in production mode against
+   PostgreSQL with Render's start command, and runs the end-to-end smoke test against it.
+
+No Docker or containers are used anywhere: CI uses the PostgreSQL preinstalled on GitHub's
+Ubuntu runners, and Render runs the API as a native Python service.
 
 ## 2. Results
 
@@ -166,7 +169,7 @@ and proxy. The free instance has a fraction of one CPU.
 | ML-01 | Met | [ml-report.md](../ml-report.md) §8 |
 | ML-02 | Met | Leakage tests in `ml/tests/test_features.py` |
 | ML-04 | Met | ECE 0.004 |
-| PORT-01 | Met | README local setup; `docker-compose.yml` for PostgreSQL |
+| PORT-01 | Met | README local setup: Python, Node.js and a local PostgreSQL; no Docker |
 | OBS-01 | Partly met | Every request is logged with request ID and latency (JSON in production); user ID not included |
 
 ## 6. Not yet tested (honest gaps)

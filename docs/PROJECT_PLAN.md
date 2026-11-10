@@ -352,7 +352,7 @@ Each milestone ends with: tests passing in CI, deployed (if applicable), and a s
 
 | # | Milestone | Purpose | Done when |
 |---|---|---|---|
-| M0 | Repo scaffold + CI | Everyone works on one consistent base | `backend`, `frontend`, `ml` skeletons; lint + test GitHub Actions green; local Postgres via Docker |
+| M0 | Repo scaffold + CI | Everyone works on one consistent base | `backend`, `frontend`, `ml` skeletons; lint + test GitHub Actions green; local Postgres |
 | M1 | Requirements & design docs | Agree on *what* before *how* | SRS v1, user stories, use-case + ER + architecture diagrams merged to `docs/` |
 | M2 | Question bank v1 | The content that everything depends on | 19 ML concepts + prerequisite DAG; ≥250 reviewed MCQs in YAML; validator script passes |
 | M3 | ML data pipeline + EDA | Understand the data before modelling | Download/clean scripts for ASSISTments; EDA report with real numbers |
@@ -452,7 +452,6 @@ MENTORX/
 │  ├─ PROJECT_PLAN.md (this file)
 │  ├─ srs/  ├─ design/ (diagrams as Mermaid/PlantUML)  ├─ modules/
 │  ├─ datasets.md  ├─ testing/  ├─ deployment.md  └─ pilot/
-├─ docker-compose.yml             # local Postgres
 ├─ .gitignore  ├─ README.md  └─ LICENSE
 ```
 
@@ -465,7 +464,7 @@ The frontend uses **TypeScript** in strict mode. API types are generated from Fa
 ## 9. Initial setup instructions
 
 ### 9.1 Install (each team member)
-- Git, Python **3.12**, Node.js **22 LTS**, Docker Desktop (for local Postgres), VS Code
+- Git, Python **3.12**, Node.js **22 LTS**, PostgreSQL 16+ (see README), VS Code
 - Accounts: GitHub (add collaborators to the repo), Vercel, Render, Neon (or another managed Postgres)
 
 ### 9.2 Clone
@@ -477,8 +476,7 @@ Repo owner: Settings → Collaborators → invite teammates; Settings → Branch
 
 ### 9.3 What M0 will create (next step; not done yet)
 ```bash
-# local database
-docker compose up -d db
+# local database: PostgreSQL on localhost:5432 (README, local setup)
 
 # backend
 cd backend

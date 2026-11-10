@@ -247,7 +247,7 @@ Priority uses **MoSCoW**: **M**ust (MVP), **S**hould (MVP if time allows), **C**
 | NFR-ML-02 | ML integrity | No leakage: student-level splits; difficulty and other target statistics fitted on training data only; features use only past attempts | Unit tests on feature builder |
 | NFR-ML-03 | ML inference | Inference for 50 candidates ≤ 50 ms; artifact ≤ 50 MB | Benchmark test |
 | NFR-ML-04 | ML calibration | Selected model's expected calibration error ≤ 0.05 on validation data, or it's recalibrated | Evaluation report |
-| NFR-PORT-01 | Portability | Whole stack runs locally with documented commands and docker-compose | README check |
+| NFR-PORT-01 | Portability | Whole stack runs locally with documented commands (no Docker required) | README check |
 | NFR-OBS-01 | Observability | Structured logs with request ID, user ID (pseudonymous) and latency for every request | Log review |
 
 ---

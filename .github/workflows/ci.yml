@@ -11,22 +11,19 @@ jobs:
     defaults:
       run:
         working-directory: backend
-    services:
-      postgres:
-        image: postgres:17-alpine
-        env:
-          POSTGRES_USER: mentorx
-          POSTGRES_PASSWORD: mentorx
-          POSTGRES_DB: mentorx
-        ports: ["5432:5432"]
-        options: >-
-          --health-cmd "pg_isready -U mentorx" --health-interval 5s
-          --health-timeout 3s --health-retries 10
     env:
       DATABASE_URL: postgresql+psycopg://mentorx:mentorx@localhost:5432/mentorx
       ENVIRONMENT: test
     steps:
       - uses: actions/checkout@v4
+      # PostgreSQL comes preinstalled on GitHub's Ubuntu runners (no containers).
+      - name: Start PostgreSQL
+        working-directory: .
+        run: |
+          sudo systemctl start postgresql.service
+          until pg_isready -h localhost; do sleep 1; done
+          sudo -u postgres psql -c "CREATE ROLE mentorx LOGIN SUPERUSER PASSWORD 'mentorx'"
+          sudo -u postgres createdb -O mentorx mentorx
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
@@ -41,39 +38,47 @@ jobs:
       - run: alembic upgrade head
       - run: pytest --cov=app --cov-report=term-missing
 
-  # Builds the production image (backend/Dockerfile) and smoke-tests it against a real
-  # Postgres: migrations, seeding, model loading and the full student flow (M9).
-  docker:
+  # Installs the API exactly as Render does (render.yaml buildCommand), starts it in
+  # production mode with the same start script, and runs the end-to-end smoke test against
+  # a real Postgres: migrations, seeding, model loading and the full student flow.
+  e2e:
     runs-on: ubuntu-latest
-    services:
-      postgres:
-        image: postgres:17-alpine
-        env:
-          POSTGRES_USER: mentorx
-          POSTGRES_PASSWORD: mentorx
-          POSTGRES_DB: mentorx
-        ports: ["5432:5432"]
-        options: >-
-          --health-cmd "pg_isready -U mentorx" --health-interval 5s
-          --health-timeout 3s --health-retries 10
     steps:
       - uses: actions/checkout@v4
-      - run: docker build -f backend/Dockerfile -t mentorx-api .
-      - name: Start the container in production mode
+      # PostgreSQL comes preinstalled on GitHub's Ubuntu runners (no containers).
+      - name: Start PostgreSQL
+        working-directory: .
         run: |
-          docker run -d --name api --network host \
-            -e DATABASE_URL=postgres://mentorx:mentorx@localhost:5432/mentorx \
-            -e JWT_SECRET="$(openssl rand -hex 32)" \
-            -e COOKIE_SECURE=true \
-            -e SEED_INCLUDE_DRAFTS=true \
-            mentorx-api
+          sudo systemctl start postgresql.service
+          until pg_isready -h localhost; do sleep 1; done
+          sudo -u postgres psql -c "CREATE ROLE mentorx LOGIN SUPERUSER PASSWORD 'mentorx'"
+          sudo -u postgres createdb -O mentorx mentorx
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: |
+            backend/pyproject.toml
+            ml/pyproject.toml
+      - name: Install like Render (non-editable ml, editable backend)
+        run: pip install --upgrade pip && pip install ./ml && pip install -e ./backend
+      - name: Start the API in production mode
+        working-directory: backend
+        env:
+          ENVIRONMENT: production
+          DATABASE_URL: postgres://mentorx:mentorx@localhost:5432/mentorx
+          COOKIE_SECURE: "true"
+          PORT: "8000"
+        run: |
+          export JWT_SECRET="$(openssl rand -hex 32)"
+          nohup sh scripts/start.sh > ../api.log 2>&1 &
           for i in $(seq 1 60); do
             curl -fs http://127.0.0.1:8000/api/v1/health/ready && break
             sleep 2
           done
-      - run: python3 backend/scripts/smoke.py http://127.0.0.1:8000
+      - run: python backend/scripts/smoke.py http://127.0.0.1:8000
       - if: always()
-        run: docker logs api
+        run: cat api.log
 
   ml:
     runs-on: ubuntu-latest

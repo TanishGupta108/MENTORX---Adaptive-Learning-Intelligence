@@ -1,7 +1,7 @@
 """Test setup: a dedicated PostgreSQL database, migrated with Alembic, emptied between tests.
 
 Uses TEST_DATABASE_URL if set, otherwise a `mentorx_test` database on the local
-docker-compose server. Tests never touch the development database.
+PostgreSQL server (see README, local setup). Tests never touch the development database.
 """
 
 from __future__ import annotations

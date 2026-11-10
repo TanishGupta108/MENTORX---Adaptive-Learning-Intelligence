@@ -13,11 +13,25 @@ An ML-powered adaptive learning platform that teaches **Machine Learning**. It e
 
 ## Local setup
 
-Prerequisites: Git, Python 3.11+ (CI uses 3.12), Node.js 22+, Docker Desktop.
+Prerequisites: Git, Python 3.12+ (CI and Render use 3.12), Node.js 22+, PostgreSQL 16+.
+No Docker is needed anywhere in this project.
+
+**PostgreSQL**, either:
+- the installer from https://www.postgresql.org/download/ (needs admin rights; it runs as a service), or
+- without admin rights: the "zip archive" (binaries) for Windows from the same page, unzipped to e.g.
+  `%LOCALAPPDATA%\Programs\pgsql-17`, then once: `bin\initdb -D data -U postgres -A trust`
+  and on each start: `bin\pg_ctl -D data -l data\log.txt start`.
+
+Then create the role and database the app expects (same as CI):
 
 ```bash
-# 1. Database
-docker compose up -d db
+psql -U postgres -c "CREATE ROLE mentorx LOGIN SUPERUSER PASSWORD 'mentorx'"
+psql -U postgres -c "CREATE DATABASE mentorx OWNER mentorx"
+# (the tests create and reset their own `mentorx_test` database)
+```
+
+```bash
+# 1. Database: PostgreSQL running on localhost:5432 (above)
 
 # 2. Backend  (http://localhost:8000/docs)
 cd backend
@@ -44,16 +58,16 @@ pip install -e ".[dev,analysis]"
 ## Checks (the same ones CI runs)
 
 ```bash
-cd backend  && ruff check . && ruff format --check . && pytest   # needs the docker Postgres running
+cd backend  && ruff check . && ruff format --check . && pytest   # needs PostgreSQL running
 cd ml       && ruff check . && ruff format --check . && pytest
 cd frontend && npm run typecheck && npm test && npm run build
 ```
 
-CI also builds the production Docker image and runs [backend/scripts/smoke.py](backend/scripts/smoke.py) against it.
+CI also installs the API exactly as Render does, starts it in production mode and runs [backend/scripts/smoke.py](backend/scripts/smoke.py) against it.
 
 ## Deployment
 
-Vercel (frontend) + Render (API in Docker + managed Postgres). The checklist, environment variables and smoke test are in [docs/deployment.md](docs/deployment.md).
+Vercel (frontend) + Render (API as a native Python service + managed Postgres). The checklist, environment variables and smoke test are in [docs/deployment.md](docs/deployment.md).
 
 ## Contributing
 

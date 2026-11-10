@@ -119,7 +119,7 @@ status of every non-functional requirement.
 MENTORX is a **modular monolith** (design decision D-1):
 
 ```
-Browser ── HTTPS ──> Vercel: React SPA ── /api/* rewrite ──> Render: FastAPI (Docker) ──> PostgreSQL
+Browser ── HTTPS ──> Vercel: React SPA ── /api/* rewrite ──> Render: FastAPI (Python) ──> PostgreSQL
                                                                  │
                                                        mentorx_ml (shared feature code)
                                                        + model artifact (gradient boosting)
@@ -256,8 +256,8 @@ Summary of the [testing report](testing-report.md):
 
 - **228 automated tests**, all passing: backend 152 (unit 50, integration 26, API 76) on a real
   PostgreSQL database; ML 48; frontend 28. **Backend coverage 97%.**
-- **CI** on every push: lint, type checks, all suites, a production build, and a job that builds
-  the Docker image and runs the 17-step end-to-end smoke test against it. The smoke test also
+- **CI** on every push: lint, type checks, all suites, a production build, and a job that installs
+  the API exactly as Render does and runs the 17-step end-to-end smoke test against it. The smoke test also
   passes against the live production site.
 - **Performance** (NFR-PERF-01: p95 ≤ 300 ms with 50 concurrent students): met at 10 concurrent
   students (p95 79 / 169 ms), **not met at 50**. Profiling found per-request aggregation of all
@@ -275,11 +275,12 @@ Summary of the [testing report](testing-report.md):
 
 ## 8. Deployment and operations
 
-Frontend on Vercel, API as a Docker container on Render, managed PostgreSQL on Render. Each push
-to `main` that passes CI is deployed automatically. On start, the container migrates the
+Frontend on Vercel, API as a native Python web service on Render, managed PostgreSQL on Render.
+No Docker is used. Each push to `main` that passes CI is deployed automatically. On start, the
+service migrates the
 database, loads the question bank idempotently and serves the API. Production refuses insecure
-settings, hides the interactive API docs, sends JSON logs with a request ID on every line, and
-runs as a non-root user. A step-by-step guide is in [deployment.md](../deployment.md).
+settings, hides the interactive API docs, and sends JSON logs with a request ID on every
+line. A step-by-step guide is in [deployment.md](../deployment.md).
 
 **Known operational limits** (free plan): the server sleeps when idle (first request up to about a
 minute), there are no automated database backups, and the free database expires. These must be

@@ -1,17 +1,23 @@
-# Render Blueprint: the API (Docker) + a managed PostgreSQL database.
+# Render Blueprint: the API (native Python, no Docker) + a managed PostgreSQL database.
 # Deploy: Render dashboard -> New -> Blueprint -> pick this repository.
 # See docs/deployment.md for the full checklist.
 services:
   - type: web
-    name: mentorx-api
-    runtime: docker
-    dockerfilePath: ./backend/Dockerfile
-    dockerContext: .
+    name: mentorx-backend
+    runtime: python
+    # Built from the repository root: the API needs ml/ (shared feature code) and
+    # question_bank/ next to backend/. Editable install, so the backend finds the question
+    # bank and the model files relative to its own source.
+    buildCommand: pip install --upgrade pip && pip install ./ml && pip install -e ./backend
+    # Migrate, load the question bank (idempotent), serve on $PORT.
+    startCommand: cd backend && sh scripts/start.sh
     plan: free
     region: singapore
     healthCheckPath: /api/v1/health/ready
     autoDeploy: true
     envVars:
+      - key: PYTHON_VERSION  # the version CI tests with
+        value: "3.12.8"
       - key: ENVIRONMENT
         value: production
       - key: DATABASE_URL

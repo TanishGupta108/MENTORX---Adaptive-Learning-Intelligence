@@ -64,9 +64,9 @@ are pseudonymised: no names or emails."
 *(If the pilot hasn't started, say: "The numbers fill in once the pilot runs.")*
 
 ### Scene 8: Engineering (6:10–7:00)
-**Show:** the GitHub **Actions** tab with a green run, opening the `docker` job.
+**Show:** the GitHub **Actions** tab with a green run, opening the `e2e` job.
 **Say:** "Every push runs about 230 automated tests across the backend, the ML pipeline and the
-frontend, then builds the production Docker image and runs an end-to-end smoke test against it.
+frontend, then installs the server exactly as our host does and runs an end-to-end smoke test against it.
 Only then does it deploy. The model was chosen with a selection rule we wrote down before
 training, evaluated once on held-out students, and it beat every baseline on two public datasets."
 **End on:** the landing page. "Thank you."

@@ -1,5 +1,6 @@
 #!/bin/sh
-# Container entrypoint: migrate, load the question bank (idempotent), serve.
+# Server start (Render's start command, and CI's end-to-end job):
+# migrate, load the question bank (idempotent), serve. Run from backend/.
 set -eu
 
 alembic upgrade head

@@ -99,8 +99,8 @@ actually in use.
 ## C. Software engineering
 
 **16. Describe the architecture.**
-A modular monolith (D-1): a React + TypeScript single-page app on Vercel; a FastAPI backend in
-Docker on Render; managed PostgreSQL. The browser only talks to the Vercel origin, which forwards
+A modular monolith (D-1): a React + TypeScript single-page app on Vercel; a FastAPI backend as a
+native Python service on Render; managed PostgreSQL. The browser only talks to the Vercel origin, which forwards
 `/api/*` to Render, so cookies stay same-origin. ML feature code is a shared package used by both
 training and serving (D-3), which prevents train/serve skew.
 
@@ -119,16 +119,16 @@ cookie (D-8). Passwords are hashed. Rate limits on login (per account and IP) an
 (per IP). The answer key never reaches the browser, and the server holds the served-question
 state and timing (D-5). Security headers include a strict CSP and HSTS. The app refuses to start in
 production with an insecure secret or insecure cookies. Interactive API docs are off in
-production, and the container runs as a non-root user.
+production.
 
 **20. How did you test it?**
 See the [testing report](testing-report.md): unit, integration and API tests on a real PostgreSQL
 database, frontend component tests, ML leakage and correctness tests, a production smoke test run
-against the live site after every deploy, a CI job that builds and smoke-tests the Docker image,
+against the live site after every deploy, a CI job that installs the API exactly as Render does and smoke-tests it,
 and a 50-user load test against the latency requirement.
 
 **21. How is the database schema managed?**
-Alembic migrations, applied automatically when the container starts. A test checks that the
+Alembic migrations, applied automatically every time the server starts. A test checks that the
 SQLAlchemy models and the migrations describe exactly the same schema.
 
 **22. Tell us about a bug you found and fixed.**
@@ -184,3 +184,9 @@ question bank earlier.
 **30. What's next?**
 Run the pilot, retrain v2 on real data, add achievements and adaptive challenges (deferred "could
 have" requirements), and add more subjects. The content and model pipeline are subject-agnostic.
+
+**31. Why no Docker?**
+It isn't needed: Render runs the API as a native Python service from a build command and a start
+command in `render.yaml`, and Vercel builds the frontend itself. To keep the guarantee Docker gave
+us ("what we test is what we deploy"), CI installs the API with Render's exact build command and
+starts it with Render's exact start script before running the smoke test.
