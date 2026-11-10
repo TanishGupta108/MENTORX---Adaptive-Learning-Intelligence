@@ -6,7 +6,7 @@
   "rewrites": [
     {
       "source": "/api/:path*",
-      "destination": "https://mentorx-api-2a6a.onrender.com/api/:path*"
+      "destination": "https://mentorx-backend-uco2.onrender.com/api/:path*"
     },
     { "source": "/(.*)", "destination": "/index.html" }
   ],
