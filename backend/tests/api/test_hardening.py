@@ -98,3 +98,13 @@ def test_json_logs_carry_the_request_id():
     entry = json.loads(JsonFormatter().format(record))
     assert entry["request_id"] == "rid-42"
     assert entry["message"] == "hello world" and entry["level"] == "INFO"
+
+
+def test_empty_environment_variables_mean_default(monkeypatch):
+    """A cleared value in the hosting dashboard (e.g. SEED_INCLUDE_DRAFTS=) must not crash
+    start-up: empty counts as unset."""
+    for var in ("SEED_INCLUDE_DRAFTS", "EXPOSE_DOCS", "POSTTEST_OPEN", "ADMIN_EMAILS"):
+        monkeypatch.setenv(var, "")
+    s = Settings()
+    assert s.seed_include_drafts is None and s.expose_docs is None
+    assert s.posttest_open is False and s.admin_email_set == set()

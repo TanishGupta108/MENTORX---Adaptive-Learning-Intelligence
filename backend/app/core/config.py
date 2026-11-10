@@ -9,7 +9,11 @@ DEV_JWT_SECRET = "dev-only-insecure-secret-change-me-0123456789"
 
 
 class Settings(BaseSettings):
-    model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8", extra="ignore")
+    # env_ignore_empty: a variable that exists but is empty (as hosting dashboards store a
+    # cleared value) means "use the default", instead of failing to parse "" as a bool.
+    model_config = SettingsConfigDict(
+        env_file=".env", env_file_encoding="utf-8", extra="ignore", env_ignore_empty=True
+    )
 
     app_name: str = "MENTORX API"
     environment: str = Field(default="development", pattern="^(development|test|production)$")
