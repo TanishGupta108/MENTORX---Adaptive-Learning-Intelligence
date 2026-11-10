@@ -18,15 +18,27 @@ No Docker is needed anywhere in this project.
 
 **PostgreSQL**, either:
 - the installer from https://www.postgresql.org/download/ (needs admin rights; it runs as a service), or
-- without admin rights: the "zip archive" (binaries) for Windows from the same page, unzipped to e.g.
-  `%LOCALAPPDATA%\Programs\pgsql-17`, then once: `bin\initdb -D data -U postgres -A trust`
-  and on each start: `bin\pg_ctl -D data -l data\log.txt start`.
+- without admin rights (how the team laptop is set up): the Windows "zip archive" (binaries) from
+  https://www.enterprisedb.com/download-postgresql-binaries, with its `pgsql` folder unzipped to
+  `%LOCALAPPDATA%\Programs\pgsql-17`. Then, once, in PowerShell:
+
+  ```powershell
+  & "$env:LOCALAPPDATA\Programs\pgsql-17\bin\initdb.exe" -D "$env:LOCALAPPDATA\MENTORX\pgdata" -U postgres -A trust -E UTF8 --locale=C
+  ```
+
+  It is not a Windows service, so start it after every restart of the computer:
+
+  ```powershell
+  powershell -File backend\scripts\local-db.ps1 start    # also: stop, status
+  ```
+
+  (`-A trust` is fine for a development database: it only accepts connections from this computer.)
 
 Then create the role and database the app expects (same as CI):
 
 ```bash
-psql -U postgres -c "CREATE ROLE mentorx LOGIN SUPERUSER PASSWORD 'mentorx'"
-psql -U postgres -c "CREATE DATABASE mentorx OWNER mentorx"
+psql -h localhost -U postgres -c "CREATE ROLE mentorx LOGIN SUPERUSER PASSWORD 'mentorx'"
+psql -h localhost -U postgres -c "CREATE DATABASE mentorx OWNER mentorx"
 # (the tests create and reset their own `mentorx_test` database)
 ```
 
