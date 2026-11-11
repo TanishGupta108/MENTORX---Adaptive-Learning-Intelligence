@@ -1,179 +1,81 @@
 /**
- * Small hand-written SVG charts (no chart library keeps the bundle small, NFR-PERF-03).
- * Every value comes from the API; days without data are gaps, never zeros (FR-DASH-08).
+ * Charts (Recharts). Observed accuracy and model predictions are always DIFFERENT series with
+ * different marks and labels, so a prediction is never read as measured performance.
  */
-import type { Activity, Trends } from "../api/types";
-import { pct } from "./ui";
+import { Bar, BarChart, CartesianGrid, ComposedChart, Legend, Line, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
+import type { DayPoint, SkillSummary } from "../api/tutor";
 
-const W = 640;
-const H = 200;
-const PAD = { l: 36, r: 12, t: 12, b: 28 };
-
-/** Split a series into runs of consecutive non-null values (gaps stay gaps). */
-export function segments(values: (number | null)[]): { i: number; v: number }[][] {
-  const out: { i: number; v: number }[][] = [];
-  let cur: { i: number; v: number }[] = [];
-  values.forEach((v, i) => {
-    if (v == null) {
-      if (cur.length) out.push(cur);
-      cur = [];
-    } else cur.push({ i, v });
-  });
-  if (cur.length) out.push(cur);
-  return out;
-}
+const AXIS = { stroke: "#6b7697", fontSize: 12, tickLine: false, axisLine: false } as const;
+const GRID = <CartesianGrid stroke="#253150" strokeDasharray="3 4" vertical={false} />;
+const tooltipStyle = {
+  contentStyle: { background: "#172036", border: "1px solid #33416a", borderRadius: 12, color: "#e8ebf5", fontSize: 13 },
+  labelStyle: { color: "#9aa5c4" },
+  cursor: { fill: "#8b8cff14" },
+};
 
 function shortDate(iso: string) {
-  const [, m, d] = iso.split("-").map(Number);
-  return new Date(2000, (m ?? 1) - 1, d ?? 1).toLocaleDateString(undefined, {
-    day: "numeric",
-    month: "short",
-  });
+  const d = new Date(`${iso}T00:00:00`);
+  return d.toLocaleDateString(undefined, { day: "numeric", month: "short" });
 }
 
-export function TrendChart({ trends }: { trends: Trends }) {
-  const pts = trends.points;
-  const n = pts.length;
-  const x = (i: number) => PAD.l + (n <= 1 ? 0 : (i / (n - 1)) * (W - PAD.l - PAD.r));
-  const y = (v: number) => PAD.t + (1 - v) * (H - PAD.t - PAD.b);
-  const series = [
-    { key: "mean_mastery" as const, label: "Mean mastery", cls: "stroke-brand fill-brand" },
-    { key: "accuracy" as const, label: "Accuracy that day", cls: "stroke-success fill-success" },
-  ];
-  const first = pts[0];
-  const last = pts[n - 1];
-
+/** Questions answered per day (bars) and observed accuracy (line). */
+export function ActivityChart({ data, height = 240 }: { data: DayPoint[]; height?: number }) {
+  const rows = data.map((d) => ({ ...d, label: shortDate(d.date), accuracyPct: d.accuracy === null ? null : Math.round(100 * d.accuracy) }));
   return (
-    <figure>
-      <svg
-        viewBox={`0 0 ${W} ${H}`}
-        className="h-auto w-full"
-        role="img"
-        aria-label={`Mean mastery and daily accuracy over the last ${trends.days} days`}
-      >
-        {[0, 0.25, 0.5, 0.75, 1].map((v) => (
-          <g key={v}>
-            <line x1={PAD.l} x2={W - PAD.r} y1={y(v)} y2={y(v)} className="stroke-line" strokeWidth={1} />
-            <text x={PAD.l - 6} y={y(v) + 4} textAnchor="end" className="fill-ink-muted text-[11px]">
-              {v * 100}%
-            </text>
-          </g>
-        ))}
-        {series.map((s) =>
-          segments(pts.map((p) => p[s.key])).map((seg, k) =>
-            seg.length === 1 ? (
-              <circle key={`${s.key}${k}`} cx={x(seg[0]!.i)} cy={y(seg[0]!.v)} r={3} className={s.cls} />
-            ) : (
-              <polyline
-                key={`${s.key}${k}`}
-                points={seg.map((p) => `${x(p.i)},${y(p.v)}`).join(" ")}
-                fill="none"
-                strokeWidth={2.5}
-                strokeLinejoin="round"
-                className={s.cls.split(" ")[0]}
-              />
-            ),
-          ),
-        )}
-        {first && (
-          <text x={PAD.l} y={H - 8} className="fill-ink-muted text-[11px]">
-            {shortDate(first.day)}
-          </text>
-        )}
-        {last && (
-          <text x={W - PAD.r} y={H - 8} textAnchor="end" className="fill-ink-muted text-[11px]">
-            {shortDate(last.day)}
-          </text>
-        )}
-      </svg>
-      <figcaption className="mt-2 flex flex-wrap gap-4 text-xs text-ink-muted">
-        {series.map((s) => (
-          <span key={s.key} className="flex items-center gap-1.5">
-            <span className={`inline-block h-0.5 w-4 ${s.cls.includes("brand") ? "bg-brand" : "bg-success"}`} />
-            {s.label}
-          </span>
-        ))}
-      </figcaption>
-      {/* Screen-reader table with the same data. */}
-      <table className="sr-only">
-        <caption>Daily answers, accuracy and mean mastery</caption>
-        <thead>
-          <tr>
-            <th>Day</th>
-            <th>Answered</th>
-            <th>Accuracy</th>
-            <th>Mean mastery</th>
-          </tr>
-        </thead>
-        <tbody>
-          {pts
-            .filter((p) => p.answered > 0)
-            .map((p) => (
-              <tr key={p.day}>
-                <td>{p.day}</td>
-                <td>{p.answered}</td>
-                <td>{p.accuracy == null ? "—" : pct(p.accuracy)}</td>
-                <td>{p.mean_mastery == null ? "—" : pct(p.mean_mastery)}</td>
-              </tr>
-            ))}
-        </tbody>
-      </table>
-    </figure>
+    <ResponsiveContainer width="100%" height={height}>
+      <ComposedChart data={rows} margin={{ top: 8, right: 8, bottom: 0, left: -18 }}>
+        {GRID}
+        <XAxis dataKey="label" {...AXIS} interval="preserveStartEnd" minTickGap={16} />
+        <YAxis yAxisId="n" {...AXIS} allowDecimals={false} />
+        <YAxis yAxisId="acc" orientation="right" domain={[0, 100]} {...AXIS} unit="%" />
+        <Tooltip {...tooltipStyle} formatter={(v, name) => (name === "Observed accuracy" ? [`${v}%`, name] : [v, name])} />
+        <Legend wrapperStyle={{ fontSize: 12, color: "#9aa5c4" }} iconType="circle" />
+        <Bar yAxisId="n" dataKey="attempts" name="Questions answered" fill="#8b8cff" radius={[6, 6, 0, 0]} maxBarSize={28} opacity={0.85} />
+        <Line yAxisId="acc" type="monotone" dataKey="accuracyPct" name="Observed accuracy" stroke="#34d399" strokeWidth={2.5} dot={{ r: 3 }} connectNulls />
+      </ComposedChart>
+    </ResponsiveContainer>
   );
 }
 
-/** Bucket a day's count into 0–4 for colour intensity, relative to the busiest day. */
-export function level(count: number, max: number) {
-  if (count <= 0 || max <= 0) return 0;
-  return Math.min(4, Math.ceil((count / max) * 4));
+/** Per skill: what the student actually got right vs what the model predicts. */
+export function SkillComparisonChart({ skills, height }: { skills: SkillSummary[]; height?: number }) {
+  const rows = skills.slice(0, 10).map((s) => ({
+    name: s.code,
+    full: s.name,
+    observed: s.observed_accuracy === null ? null : Math.round(100 * s.observed_accuracy),
+    model: s.predicted_p === null ? null : Math.round(100 * s.predicted_p),
+  }));
+  return (
+    <ResponsiveContainer width="100%" height={height ?? Math.max(220, rows.length * 44)}>
+      <BarChart data={rows} layout="vertical" margin={{ top: 4, right: 16, bottom: 0, left: 8 }} barGap={3}>
+        <CartesianGrid stroke="#253150" strokeDasharray="3 4" horizontal={false} />
+        <XAxis type="number" domain={[0, 100]} unit="%" {...AXIS} />
+        <YAxis type="category" dataKey="name" width={84} {...AXIS} />
+        <Tooltip
+          {...tooltipStyle}
+          labelFormatter={(_, p) => (p?.[0]?.payload as { full?: string } | undefined)?.full ?? ""}
+          formatter={(v, name) => [v === null ? "—" : `${v}%`, name]}
+        />
+        <Legend wrapperStyle={{ fontSize: 12, color: "#9aa5c4" }} iconType="circle" />
+        <Bar dataKey="observed" name="Observed accuracy (your answers)" fill="#34d399" radius={[0, 6, 6, 0]} maxBarSize={14} />
+        <Bar dataKey="model" name="Model estimate (prediction)" fill="#5aa9ff" fillOpacity={0.45} stroke="#5aa9ff" strokeDasharray="4 3" radius={[0, 6, 6, 0]} maxBarSize={14} />
+      </BarChart>
+    </ResponsiveContainer>
+  );
 }
 
-const LEVEL_OPACITY = [0, 0.25, 0.5, 0.75, 1];
-
-export function ActivityHeatmap({ activity }: { activity: Activity }) {
-  const days = activity.days;
-  const max = Math.max(0, ...days.map((d) => d.answered));
-  const cell = 12;
-  const gap = 3;
-  // Columns are weeks ending today; the first column may be partial.
-  const cols = Math.ceil(days.length / 7);
-  const offset = cols * 7 - days.length;
-  const total = days.reduce((s, d) => s + d.answered, 0);
-  const active = days.filter((d) => d.answered > 0).length;
-
+/** Accuracy of each completed assessment/practice in order (observed only). */
+export function TimelineChart({ points, height = 220 }: { points: { label: string; accuracy: number; kind: string }[]; height?: number }) {
+  const rows = points.map((p, i) => ({ ...p, idx: i + 1, pct: Math.round(100 * p.accuracy) }));
   return (
-    <figure>
-      <div className="overflow-x-auto">
-        <svg
-          width={cols * (cell + gap)}
-          height={7 * (cell + gap)}
-          role="img"
-          aria-label={`${total} questions answered on ${active} of the last ${days.length} days`}
-        >
-          {days.map((d, i) => {
-            const j = i + offset;
-            const lv = level(d.answered, max);
-            return (
-              <rect
-                key={d.day}
-                x={Math.floor(j / 7) * (cell + gap)}
-                y={(j % 7) * (cell + gap)}
-                width={cell}
-                height={cell}
-                rx={2}
-                className={lv ? "fill-brand" : "fill-line"}
-                fillOpacity={lv ? LEVEL_OPACITY[lv] : 1}
-              >
-                <title>{`${d.day}: ${d.answered} answered`}</title>
-              </rect>
-            );
-          })}
-        </svg>
-      </div>
-      <figcaption className="mt-2 text-xs text-ink-muted">
-        {total} questions on {active} day{active === 1 ? "" : "s"} in the last {activity.weeks} weeks
-        ({activity.timezone} time)
-      </figcaption>
-    </figure>
+    <ResponsiveContainer width="100%" height={height}>
+      <ComposedChart data={rows} margin={{ top: 8, right: 8, bottom: 0, left: -18 }}>
+        {GRID}
+        <XAxis dataKey="idx" {...AXIS} />
+        <YAxis domain={[0, 100]} unit="%" {...AXIS} />
+        <Tooltip {...tooltipStyle} labelFormatter={(_, p) => (p?.[0]?.payload as { label?: string } | undefined)?.label ?? ""} formatter={(v) => [`${v}%`, "Observed accuracy"]} />
+        <Line type="monotone" dataKey="pct" name="Observed accuracy" stroke="#8b8cff" strokeWidth={2.5} dot={{ r: 4, fill: "#8b8cff" }} />
+      </ComposedChart>
+    </ResponsiveContainer>
   );
 }

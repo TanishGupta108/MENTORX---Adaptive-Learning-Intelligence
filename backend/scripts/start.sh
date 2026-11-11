@@ -5,6 +5,12 @@ set -eu
 
 alembic upgrade head
 python scripts/seed.py
+# Mathematics (FoundationalASSIST): the CSVs are licensed and never committed. If the server
+# has them (MATH_DATA_DIR), refresh the content on start; otherwise seed once from a laptop
+# (docs/deployment.md, "Mathematics content").
+if [ -n "${MATH_DATA_DIR:-}" ] && [ -f "${MATH_DATA_DIR}/Problems.csv" ]; then
+  python scripts/seed_math.py --data-dir "$MATH_DATA_DIR"
+fi
 
 # One worker: the login/registration rate limiters and the model cache live in memory
 # (see app/core/rate_limit.py). Scale with a shared store before adding workers.

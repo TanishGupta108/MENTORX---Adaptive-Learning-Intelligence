@@ -4,3 +4,11 @@ import { afterEach } from "vitest";
 
 // Vitest runs without globals, so Testing Library can't register its own cleanup.
 afterEach(() => cleanup());
+
+// Recharts' ResponsiveContainer measures its parent; jsdom has no layout engine.
+class ResizeObserverStub {
+  observe() {}
+  unobserve() {}
+  disconnect() {}
+}
+globalThis.ResizeObserver ??= ResizeObserverStub as unknown as typeof ResizeObserver;

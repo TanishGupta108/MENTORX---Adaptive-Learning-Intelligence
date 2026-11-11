@@ -1,0 +1,54 @@
+# Curated prerequisite links between Common Core standards (by code).
+# Each link follows the grade-to-grade progression of the Common Core State Standards for
+# Mathematics: the later standard builds directly on the earlier one. Links are NEVER created
+# from a student's performance. Admins can add or remove links on the Content page.
+# A code shared by several dataset skill IDs links all of them.
+source: "Curated by MENTORX from the Common Core grade progressions"
+links:
+  # Ratios & proportional relationships
+  - {skill: 6.RP.A.3d, requires: 6.RP.A.3b}
+  - {skill: 7.RP.A.1, requires: 6.RP.A.3b}
+  - {skill: 7.RP.A.1, requires: 6.NS.A.1}
+  - {skill: 7.RP.A.2a, requires: 6.RP.A.3a}
+  - {skill: 7.RP.A.2b, requires: 7.RP.A.2a}
+  - {skill: 7.RP.A.2c, requires: 7.RP.A.2b}
+  - {skill: 7.RP.A.3, requires: 6.RP.A.3c}
+  - {skill: 7.RP.A.3, requires: 6.RP.A.3b}
+  - {skill: 7.G.A.1, requires: 7.RP.A.2a}
+  # Expressions & equations
+  - {skill: 6.EE.A.4, requires: 6.EE.A.3}
+  - {skill: 6.EE.B.7, requires: 6.EE.B.5}
+  - {skill: 7.EE.A.1, requires: 6.EE.A.3}
+  - {skill: 7.EE.A.2, requires: 7.EE.A.1}
+  - {skill: 7.EE.B.4a, requires: 6.EE.B.7}
+  - {skill: 7.EE.B.4b, requires: 6.EE.B.8}
+  - {skill: 7.EE.B.4b, requires: 7.EE.B.4a}
+  - {skill: 8.EE.C.7a, requires: 7.EE.B.4a}
+  - {skill: 8.EE.C.7b, requires: 7.EE.B.4a}
+  - {skill: 8.EE.C.7b, requires: 7.EE.A.1}
+  - {skill: 8.EE.C.8b, requires: 8.EE.C.7b}
+  - {skill: 8.EE.C.8c, requires: 8.EE.C.8b}
+  - {skill: 8.EE.A.1, requires: 6.EE.A.1}
+  - {skill: 8.EE.A.3, requires: 8.EE.A.1}
+  - {skill: 8.EE.A.4, requires: 8.EE.A.3}
+  # Number system
+  - {skill: 6.NS.B.2, requires: 5.NBT.B.6}
+  - {skill: 6.NS.B.3, requires: 5.NBT.B.7}
+  - {skill: 7.NS.A.1b, requires: 6.NS.C.5}
+  - {skill: 7.NS.A.1d, requires: 7.NS.A.1b}
+  - {skill: 7.NS.A.1d, requires: 7.NS.A.1c}
+  - {skill: 7.NS.A.2c, requires: 6.NS.A.1}
+  # Geometry
+  - {skill: 7.G.B.6, requires: 6.G.A.2}
+  - {skill: 8.G.C.9, requires: 7.G.B.4}
+  - {skill: 8.G.B.7, requires: 8.EE.A.2}
+  # Functions
+  - {skill: 8.F.A.3, requires: 8.F.A.1}
+  - {skill: 8.F.B.4, requires: 8.EE.B.6}
+  # Statistics & probability
+  - {skill: 7.SP.A.2, requires: 7.SP.A.1}
+  - {skill: 7.SP.B.3, requires: 6.SP.B.5c}
+  - {skill: 7.SP.B.4, requires: 6.SP.B.5c}
+  - {skill: 7.SP.C.6, requires: 7.SP.C.5}
+  - {skill: 7.SP.C.7a, requires: 7.SP.C.5}
+  - {skill: 7.SP.C.8b, requires: 7.SP.C.7a}

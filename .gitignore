@@ -23,3 +23,6 @@ ml/data/
 ml/artifacts/*
 !ml/artifacts/.gitkeep
 *.tsbuildinfo
+
+# Notebook run outputs (model weights, logs): regenerate by running the notebook
+ml/notebooks/kt_outputs/

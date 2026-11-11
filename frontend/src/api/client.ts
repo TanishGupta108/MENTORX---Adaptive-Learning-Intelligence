@@ -11,6 +11,11 @@
 
 const BASE_URL = (import.meta.env.VITE_API_URL ?? "").replace(/\/$/, "");
 
+/** "/me" -> /api/v1/me (auth and account); "/api/v2/..." is used as given (the tutor API). */
+function apiUrl(path: string) {
+  return `${BASE_URL}${path.startsWith("/api/") ? path : `/api/v1${path}`}`;
+}
+
 export class ApiError extends Error {
   constructor(
     public readonly status: number,
@@ -105,7 +110,7 @@ export type RequestOptions = {
 
 export async function request<T>(method: string, path: string, opts: RequestOptions = {}) {
   const send = () =>
-    fetch(`${BASE_URL}/api/v1${path}`, {
+    fetch(apiUrl(path), {
       method,
       credentials: "include",
       signal: opts.signal,
@@ -133,7 +138,7 @@ export async function request<T>(method: string, path: string, opts: RequestOpti
 /** Download a file from the API with the user's credentials (e.g. CSV exports). */
 export async function downloadFile(path: string, filename: string) {
   const send = () =>
-    fetch(`${BASE_URL}/api/v1${path}`, {
+    fetch(apiUrl(path), {
       credentials: "include",
       headers: accessToken ? { Authorization: `Bearer ${accessToken}` } : {},
     });
@@ -154,6 +159,8 @@ export const api = {
   get: <T>(path: string, opts?: RequestOptions) => request<T>("GET", path, opts),
   post: <T>(path: string, body?: unknown, opts?: RequestOptions) =>
     request<T>("POST", path, { ...opts, body }),
+  put: <T>(path: string, body?: unknown, opts?: RequestOptions) =>
+    request<T>("PUT", path, { ...opts, body }),
   patch: <T>(path: string, body?: unknown, opts?: RequestOptions) =>
     request<T>("PATCH", path, { ...opts, body }),
   delete: <T>(path: string, body?: unknown, opts?: RequestOptions) =>

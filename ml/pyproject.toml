@@ -20,6 +20,8 @@ dependencies = [
 boost = ["xgboost>=2.1"]
 # Needed by the data/EDA/training scripts, not by the backend at serving time.
 analysis = ["pyarrow>=17", "matplotlib>=3.9"]
+# Deep knowledge tracing: training notebook and scripts/export_kt.py (not needed for serving).
+dl = ["torch>=2.4"]
 dev = ["pytest>=8.2", "ruff>=0.5"]
 
 [tool.hatch.build.targets.wheel]
@@ -31,6 +33,8 @@ addopts = "-q"
 
 [tool.ruff]
 line-length = 100
+# Notebooks are exploratory records of what was run; scripts and the package are linted.
+extend-exclude = ["notebooks"]
 target-version = "py311"
 
 [tool.ruff.lint]

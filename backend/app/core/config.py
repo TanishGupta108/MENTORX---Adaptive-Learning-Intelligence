@@ -70,6 +70,19 @@ class Settings(BaseSettings):
     # Other students' answers feed question difficulty at most this many seconds late.
     difficulty_cache_seconds: float = Field(default=60, ge=0)
 
+    # --- adaptive tutor (Mathematics on FoundationalASSIST, /api/v2) ---
+    kt_artifacts_dir: str = "model_artifacts/foundationalassist"
+    kt_model: str = Field(default="dkt_q", pattern="^(dkt_q|dkt)$")  # which exported model serves
+    diagnostic_length: int = Field(default=10, ge=3, le=30)  # overall diagnostic questions
+    skill_check_length: int = Field(default=6, ge=3, le=20)  # diagnostic for one chosen skill
+    reassessment_length: int = Field(default=5, ge=3, le=20)
+    tutor_practice_length: int = Field(default=8, ge=3, le=30)
+    strength_threshold: float = Field(default=0.75, gt=0, lt=1)  # observed accuracy
+    weakness_threshold: float = Field(default=0.45, gt=0, lt=1)  # observed accuracy
+    reassessment_pass: float = Field(default=0.8, gt=0, le=1)  # "completed" a skill
+    improvement_margin: float = Field(default=0.15, gt=0, lt=1)  # counts as improved
+    revision_after_days: int = Field(default=7, ge=1)
+
     @field_validator("database_url")
     @classmethod
     def use_psycopg_driver(cls, v: str) -> str:

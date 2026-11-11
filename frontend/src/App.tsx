@@ -1,22 +1,26 @@
+import { lazy } from "react";
 import { BrowserRouter, Navigate, Outlet, Route, Routes, useLocation } from "react-router";
-import { SUBJECT } from "./api/endpoints";
 import { AuthProvider, useAuth } from "./auth/AuthContext";
+import { AppShell, ProfileGate } from "./components/AppShell";
 import { ErrorBoundary } from "./components/ErrorBoundary";
-import { Layout } from "./components/Layout";
 import { Spinner } from "./components/ui";
-import { ConceptsPage } from "./pages/Concepts";
-import { DashboardPage } from "./pages/Dashboard";
-import { HistoryPage } from "./pages/History";
-import { LandingPage } from "./pages/Landing";
+import { AssessmentRunPage, AssessmentStartPage, ReassessmentResultPage } from "./pages/Assessment";
 import { LoginPage, RegisterPage } from "./pages/Auth";
+import { LandingPage } from "./pages/Landing";
 import { NotFoundPage } from "./pages/NotFound";
 import { OnboardingPage } from "./pages/Onboarding";
 import { PathPage } from "./pages/Path";
-import { RevisionPage } from "./pages/Revision";
-import { SessionPage } from "./pages/Session";
-import { SettingsPage } from "./pages/Settings";
-import { SurveyPage } from "./pages/Survey";
-import { AdminPage } from "./pages/Admin";
+import { PracticePage } from "./pages/Practice";
+import { ProfilePage } from "./pages/Profile";
+import { ResourcesPage } from "./pages/Resources";
+import { SkillPage } from "./pages/Skill";
+import { SkillsPage } from "./pages/Skills";
+
+// Chart-heavy and admin screens load on demand, so the landing and sign-in pages stay small.
+const DashboardPage = lazy(() => import("./pages/Dashboard").then((m) => ({ default: m.DashboardPage })));
+const DiagnosisPage = lazy(() => import("./pages/Diagnosis").then((m) => ({ default: m.DiagnosisPage })));
+const AnalyticsPage = lazy(() => import("./pages/Analytics").then((m) => ({ default: m.AnalyticsPage })));
+const AdminPage = lazy(() => import("./pages/Admin").then((m) => ({ default: m.AdminPage })));
 
 function Checking() {
   return (
@@ -37,12 +41,6 @@ function RequireAuth() {
   return <Outlet />;
 }
 
-function RequireEnrolled() {
-  const { user } = useAuth();
-  if (user && !user.enrolled_subjects.includes(SUBJECT)) return <Navigate to="/onboarding" replace />;
-  return <Outlet />;
-}
-
 function PublicOnly() {
   const { user } = useAuth();
   if (user === undefined) return <Checking />;
@@ -60,16 +58,20 @@ export function AppRoutes() {
       </Route>
       <Route element={<RequireAuth />}>
         <Route path="onboarding" element={<OnboardingPage />} />
-        <Route element={<RequireEnrolled />}>
-          <Route element={<Layout />}>
+        <Route element={<ProfileGate />}>
+          <Route element={<AppShell />}>
             <Route path="dashboard" element={<DashboardPage />} />
+            <Route path="diagnosis" element={<DiagnosisPage />} />
             <Route path="path" element={<PathPage />} />
-            <Route path="revision" element={<RevisionPage />} />
-            <Route path="concepts" element={<ConceptsPage />} />
-            <Route path="history" element={<HistoryPage />} />
-            <Route path="settings" element={<SettingsPage />} />
-            <Route path="session/:id" element={<SessionPage />} />
-            <Route path="survey" element={<SurveyPage />} />
+            <Route path="skills" element={<SkillsPage />} />
+            <Route path="skills/:id" element={<SkillPage />} />
+            <Route path="resources" element={<ResourcesPage />} />
+            <Route path="analytics" element={<AnalyticsPage />} />
+            <Route path="profile" element={<ProfilePage />} />
+            <Route path="assess/start" element={<AssessmentStartPage />} />
+            <Route path="assess/:id" element={<AssessmentRunPage />} />
+            <Route path="assess/:id/result" element={<ReassessmentResultPage />} />
+            <Route path="practice/:id" element={<PracticePage />} />
             <Route path="admin" element={<AdminPage />} />
           </Route>
         </Route>

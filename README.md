@@ -1,15 +1,18 @@
 # MENTORX — Adaptive Learning Intelligence
 
-An ML-powered adaptive learning platform that teaches **Machine Learning**. It estimates each student's concept mastery from their real attempts, then uses those predictions to choose the next question, build a learning path and schedule revision.
+**Learn Smarter. Improve Faster.** An AI-powered personal learning mentor for **Mathematics** (grades 6–8, Common Core). A short diagnostic finds what a student already knows. Then a trained deep knowledge-tracing model (DKT-Q, test AUC 0.81) plus transparent rules build a personal plan: skill diagnosis, recommendations with reasons, learning modules, adaptive practice and fresh reassessments, until the student reaches the goal.
 
-**Status:** M0 scaffold ✓ · M1 requirements & design ✓ · M2 question bank ✓ (285 questions, AI-checked, [review log](docs/question-review-log.md)) · M3 data pipeline + EDA ✓ · M4 models ✓ ([ML report](docs/ml-report.md)) · M5 database, auth & core API ✓ · M6 adaptive quiz engine ✓ · M7 learning paths & revision ✓ · M8 frontend MVP ✓ · M9 deployment & hardening ✓ (live at https://mentorx-adaptive-learning-intellige.vercel.app, [deployment guide](docs/deployment.md)) · M10 engagement ✓ (daily goal, streaks, weekly report, feedback; [module doc](docs/modules/engagement.md)) · M11 pilot features ✓, study not yet run ([pilot guide](docs/modules/pilot.md)) · M12 deliverables drafted ([report](docs/report/final-report.md), [testing](docs/report/testing-report.md), [viva Q&A](docs/report/viva-qa.md), [demo script](docs/report/demo-script.md)). See [docs/PROJECT_PLAN.md](docs/PROJECT_PLAN.md) for the feasibility analysis, scope, architecture, database schema, ML methodology and roadmap.
+**v2 (November 2026):** the adaptive Mathematics tutor on the [FoundationalASSIST](https://huggingface.co/datasets/ASSISTments/FoundationalASSIST) dataset ([module doc](docs/modules/tutor.md)). It answers five questions for every student: what do I understand, what am I struggling with, what next, how should I practise, am I improving? Observed performance and model predictions are always shown separately.
+
+**Earlier milestones (v1, Machine Learning subject):** M0 scaffold ✓ · M1 requirements & design ✓ · M2 question bank ✓ (285 questions, AI-checked, [review log](docs/question-review-log.md)) · M3 data pipeline + EDA ✓ · M4 models ✓ ([ML report](docs/ml-report.md)) · M5 database, auth & core API ✓ · M6 adaptive quiz engine ✓ · M7 learning paths & revision ✓ · M8 frontend MVP ✓ · M9 deployment & hardening ✓ (live at https://mentorx-adaptive-learning-intellige.vercel.app, [deployment guide](docs/deployment.md)) · M10 engagement ✓ (daily goal, streaks, weekly report, feedback; [module doc](docs/modules/engagement.md)) · M11 pilot features ✓, study not yet run ([pilot guide](docs/modules/pilot.md)) · M12 deliverables drafted ([report](docs/report/final-report.md), [testing](docs/report/testing-report.md), [viva Q&A](docs/report/viva-qa.md), [demo script](docs/report/demo-script.md)). See [docs/PROJECT_PLAN.md](docs/PROJECT_PLAN.md) for the feasibility analysis, scope, architecture, database schema, ML methodology and roadmap.
 
 | Part | Stack | Folder |
 |---|---|---|
 | Frontend | React 19 · TypeScript · Vite · Tailwind CSS v4 · Vitest | [frontend/](frontend/) |
 | Backend | FastAPI · Pydantic v2 · SQLAlchemy 2 · Alembic · PostgreSQL | [backend/](backend/) |
-| ML | pandas · scikit-learn · XGBoost · BKT | [ml/](ml/) |
-| Content | YAML question bank + prerequisite graph | [question_bank/](question_bank/) |
+| ML | PyTorch (training) · NumPy (serving) · pandas · scikit-learn · BKT | [ml/](ml/), [backend/app/ml/dkt.py](backend/app/ml/dkt.py) |
+| Content | FoundationalASSIST maths questions (seeded, never committed) + curated notes and prerequisites | [backend/app/tutor/seeddata/](backend/app/tutor/seeddata/) |
+| UI | Lucide icons · Recharts · dark navy design system | [frontend/src/components/](frontend/src/components/) |
 
 ## Local setup
 
@@ -52,7 +55,8 @@ python -m venv .venv
 pip install -e ../ml -e ".[dev]"  # the backend shares the feature code in ml/
 copy .env.example .env            # macOS/Linux: cp .env.example .env
 alembic upgrade head
-python scripts/seed.py           # loads the question bank
+python scripts/seed.py           # loads the v1 question bank
+python scripts/seed_math.py --data-dir "C:/path/to/FoundationalASSIST"  # Mathematics (needs Problems.csv + Skills.csv)
 uvicorn app.main:app --reload
 
 # 3. Frontend  (http://localhost:5173)

@@ -3,18 +3,24 @@ import type { FormEvent, ReactNode } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router";
 import { ApiError } from "../api/client";
 import { useAuth } from "../auth/AuthContext";
-import { Button, Field, inputClass } from "../components/ui";
+import { Button, Field, inputClass, Logo } from "../components/ui";
 
-function AuthShell({ title, children, footer }: { title: string; children: ReactNode; footer: ReactNode }) {
+function AuthShell({ title, subtitle, children, footer }: { title: string; subtitle: string; children: ReactNode; footer: ReactNode }) {
   return (
-    <main className="mx-auto flex min-h-screen max-w-sm flex-col justify-center px-4 py-10">
-      <Link to="/" className="mb-8 text-lg font-semibold tracking-tight">
-        MENTOR<span className="text-brand">X</span>
-      </Link>
-      <h1 className="text-2xl font-semibold">{title}</h1>
-      <div className="mt-6">{children}</div>
-      <p className="mt-6 text-sm text-ink-muted">{footer}</p>
-    </main>
+    <div className="relative grid min-h-screen place-items-center px-4 py-10">
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(50%_40%_at_50%_0%,#6d6ef72b,transparent)]" />
+      <main className="relative w-full max-w-md">
+        <Link to="/" className="mb-8 inline-block">
+          <Logo />
+        </Link>
+        <div className="rounded-3xl border border-line bg-surface p-7 shadow-[0_30px_80px_-40px_#6d6ef766]">
+          <h1 className="text-2xl font-semibold tracking-tight">{title}</h1>
+          <p className="mt-1 text-sm text-ink-muted">{subtitle}</p>
+          <div className="mt-6">{children}</div>
+        </div>
+        <p className="mt-5 text-center text-sm text-ink-muted">{footer}</p>
+      </main>
+    </div>
   );
 }
 
@@ -40,169 +46,95 @@ export function LoginPage() {
       await login(email, password);
       navigate(safeNext(params.get("next")), { replace: true });
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : "Couldn't reach the server.");
+      setError(err instanceof ApiError ? err.message : "Couldn't sign in. Check your connection and try again.");
     } finally {
       setBusy(false);
     }
   }
 
   return (
-    <AuthShell
-      title="Log in"
-      footer={
-        <>
-          New here?{" "}
-          <Link className="font-medium text-brand" to="/register">
-            Create an account
-          </Link>
-        </>
-      }
-    >
-      <form className="space-y-4" onSubmit={submit} noValidate>
+    <AuthShell title="Welcome back" subtitle="Sign in to continue your learning journey." footer={<>New to MENTORX? <Link to="/register" className="font-medium text-brand hover:underline">Create an account</Link></>}>
+      <form onSubmit={submit} className="space-y-4" noValidate>
         <Field label="Email">
-          <input
-            className={inputClass}
-            type="email"
-            autoComplete="email"
-            required
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-          />
+          <input className={inputClass} type="email" autoComplete="email" required value={email} onChange={(e) => setEmail(e.target.value)} />
         </Field>
         <Field label="Password">
-          <input
-            className={inputClass}
-            type="password"
-            autoComplete="current-password"
-            required
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-          />
+          <input className={inputClass} type="password" autoComplete="current-password" required value={password} onChange={(e) => setPassword(e.target.value)} />
         </Field>
-        {error && (
-          <p role="alert" className="text-sm text-danger">
-            {error}
-          </p>
-        )}
-        <Button type="submit" className="w-full" disabled={busy || !email || !password}>
-          {busy ? "Logging in…" : "Log in"}
+        {error && <p className="rounded-xl bg-danger/10 px-3 py-2 text-sm text-danger" role="alert">{error}</p>}
+        <Button type="submit" size="lg" className="w-full" loading={busy}>
+          Sign in
         </Button>
       </form>
     </AuthShell>
   );
 }
 
-function browserTimezone() {
-  try {
-    return Intl.DateTimeFormat().resolvedOptions().timeZone || undefined;
-  } catch {
-    return undefined;
-  }
-}
-
 export function RegisterPage() {
   const { register } = useAuth();
   const navigate = useNavigate();
-  const [form, setForm] = useState({ full_name: "", email: "", password: "", privacy: false });
-  const [errors, setErrors] = useState<Record<string, string>>({});
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [accepted, setAccepted] = useState(false);
+  const [fields, setFields] = useState<Record<string, string>>({});
   const [error, setError] = useState<string>();
   const [busy, setBusy] = useState(false);
-  const set = (k: keyof typeof form) => (v: string | boolean) => setForm((f) => ({ ...f, [k]: v }));
 
   async function submit(e: FormEvent) {
     e.preventDefault();
     const local: Record<string, string> = {};
-    if (!form.full_name.trim()) local.full_name = "Please enter your name.";
-    if (!/^\S+@\S+\.\S+$/.test(form.email)) local.email = "Please enter a valid email address.";
-    if (form.password.length < 8) local.password = "Use at least 8 characters.";
-    if (!form.privacy) local.privacy_accepted = "You need to accept the privacy notice.";
-    setErrors(local);
+    if (!name.trim()) local.full_name = "Tell us your name.";
+    if (!/^\S+@\S+\.\S+$/.test(email)) local.email = "Enter a valid email address.";
+    if (password.length < 8) local.password = "Use at least 8 characters.";
+    if (!accepted) local.privacy_accepted = "Please accept to continue.";
+    setFields(local);
     if (Object.keys(local).length) return;
-
     setBusy(true);
     setError(undefined);
     try {
       await register({
-        full_name: form.full_name,
-        email: form.email,
-        password: form.password,
-        privacy_accepted: form.privacy,
-        timezone: browserTimezone(),
+        email,
+        password,
+        full_name: name,
+        privacy_accepted: true,
+        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
       });
       navigate("/onboarding", { replace: true });
     } catch (err) {
       if (err instanceof ApiError) {
-        setErrors(err.fields);
-        setError(err.message);
-      } else setError("Couldn't reach the server.");
+        setFields(err.fields);
+        setError(Object.keys(err.fields).length ? undefined : err.message);
+      } else {
+        setError("Couldn't create your account. Check your connection and try again.");
+      }
     } finally {
       setBusy(false);
     }
   }
 
   return (
-    <AuthShell
-      title="Create your account"
-      footer={
-        <>
-          Already have one?{" "}
-          <Link className="font-medium text-brand" to="/login">
-            Log in
-          </Link>
-        </>
-      }
-    >
-      <form className="space-y-4" onSubmit={submit} noValidate>
-        <Field label="Name" error={errors.full_name}>
-          <input
-            className={inputClass}
-            autoComplete="name"
-            value={form.full_name}
-            onChange={(e) => set("full_name")(e.target.value)}
-          />
+    <AuthShell title="Create your account" subtitle="It takes less than a minute." footer={<>Already have an account? <Link to="/login" className="font-medium text-brand hover:underline">Sign in</Link></>}>
+      <form onSubmit={submit} className="space-y-4" noValidate>
+        <Field label="Full name" error={fields.full_name}>
+          <input className={inputClass} autoComplete="name" value={name} onChange={(e) => setName(e.target.value)} />
         </Field>
-        <Field label="Email" error={errors.email}>
-          <input
-            className={inputClass}
-            type="email"
-            autoComplete="email"
-            value={form.email}
-            onChange={(e) => set("email")(e.target.value)}
-          />
+        <Field label="Email" error={fields.email}>
+          <input className={inputClass} type="email" autoComplete="email" value={email} onChange={(e) => setEmail(e.target.value)} />
         </Field>
-        <Field label="Password" hint="At least 8 characters." error={errors.password}>
-          <input
-            className={inputClass}
-            type="password"
-            autoComplete="new-password"
-            value={form.password}
-            onChange={(e) => set("password")(e.target.value)}
-          />
+        <Field label="Password" error={fields.password} hint="At least 8 characters.">
+          <input className={inputClass} type="password" autoComplete="new-password" value={password} onChange={(e) => setPassword(e.target.value)} />
         </Field>
-        <div>
-          <label className="flex items-start gap-3 text-sm">
-            <input
-              type="checkbox"
-              className="mt-0.5 size-5 shrink-0 accent-brand"
-              checked={form.privacy}
-              onChange={(e) => set("privacy")(e.target.checked)}
-            />
-            <span>
-              I accept the privacy notice: MENTORX stores my answers and response times to estimate
-              what I know. I can download or delete my data at any time from Settings.
-            </span>
-          </label>
-          {errors.privacy_accepted && (
-            <p className="mt-1 text-xs text-danger">{errors.privacy_accepted}</p>
-          )}
-        </div>
-        {error && !Object.keys(errors).length && (
-          <p role="alert" className="text-sm text-danger">
-            {error}
-          </p>
-        )}
-        <Button type="submit" className="w-full" disabled={busy}>
-          {busy ? "Creating account…" : "Create account"}
+        <label className="flex items-start gap-3 text-sm text-ink-muted">
+          <input type="checkbox" className="mt-1 size-4 accent-[#8b8cff]" checked={accepted} onChange={(e) => setAccepted(e.target.checked)} />
+          <span>
+            I agree that MENTORX stores my answers to personalise my learning. My data is never sold or shared.
+            {fields.privacy_accepted && <span className="block text-danger">{fields.privacy_accepted}</span>}
+          </span>
+        </label>
+        {error && <p className="rounded-xl bg-danger/10 px-3 py-2 text-sm text-danger" role="alert">{error}</p>}
+        <Button type="submit" size="lg" className="w-full" loading={busy}>
+          Create account
         </Button>
       </form>
     </AuthShell>

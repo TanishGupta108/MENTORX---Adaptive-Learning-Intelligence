@@ -87,3 +87,26 @@ Row counts at each step are in the [cleaning table](../ml/reports/eda/assist2009
 ## 3. MENTORX pilot data (M11)
 
 The pilot export is written in the same canonical schema (`ml/mentorx_ml/data/schema.py`), contains only users who opted in to research use, and replaces user IDs with a salted hash (see [database design §4](design/database.md#4-pseudonymised-training-export-fr-pilot-05-nfr-priv-02)).
+
+## 4. FoundationalASSIST (Mathematics tutor, MENTORX v2)
+
+| | |
+|---|---|
+| Purpose in MENTORX | The Mathematics subject: skills, questions, answer keys, historical difficulty, and the training data of the DKT-Q / DKT models served by `/api/v2` |
+| Source | https://huggingface.co/datasets/ASSISTments/FoundationalASSIST (gated: log in and accept the terms) |
+| Paper | Worden, Heffernan, Heffernan & Sonkar. *FoundationalASSIST: An Educational Dataset for Foundational Knowledge Tracing and Pedagogical Grounding of LLMs.* AIED 2026, arXiv:2602.00070 |
+| Licence | **CC BY-NC 4.0**, research and educational use, following the providers' responsible-use guidelines |
+| Size | 5,000 students, ~1.72M first attempts, 3,395 problems (Illustrative Mathematics, grades 6–8), 224 skills (Common Core codes) |
+| Files used | `Problems.csv` and `Skills.csv` (seeding the app); `Interactions.csv` (model training and difficulty statistics only) |
+| Label | `discrete_score = 1` only for a first-attempt correct answer with **no hint and the answer not shown** |
+
+### What the app keeps and why
+- The raw CSVs are **never committed**. `backend/scripts/seed_math.py --data-dir <folder>` loads them. CI uses a small synthetic dataset in the same format (`backend/tests/tutor/conftest.py`).
+- Every question is stored. A question is **served** only if it maps to exactly one skill, is Numeric (one blank), Multiple Choice or Check All That Apply, has a parseable answer key, and has no image or unrenderable maths layout. That leaves 1,942 of 3,368 questions; the admin page lists the reason for every exclusion.
+- A skill is offered when it has at least 5 servable questions (90 of 224 skills).
+- Question difficulty comes from **training students only** (`model_artifacts/foundationalassist/question_stats.json`): easy ≥ 75% first-attempt success, medium 45–75%, hard < 45%, and "unrated" with fewer than 10 training answers.
+- Question HTML is rebuilt from an allowlist (`app/tutor/html.py`): no links, images, scripts, styles or event handlers survive. MathML is kept.
+
+### Known limitations
+- Grade 6–8 maths only. The trained models know these skill and question IDs, so they cannot score other subjects.
+- The dataset has no per-question hints, videos or worked solutions. Hints are skill-level concept reminders, and notes and worked examples are original MENTORX content for 18 core standards.

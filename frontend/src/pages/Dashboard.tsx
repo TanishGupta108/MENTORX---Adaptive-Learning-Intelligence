@@ -1,384 +1,235 @@
+import { Activity as ActivityIcon, ArrowRight, BookOpen, CalendarClock, ClipboardCheck, Flame, Goal, Layers3, LineChart, Map, Play, Sparkles, Target, TrendingUp } from "lucide-react";
 import { Link } from "react-router";
-import { dashboard, engagement, learning, pilot } from "../api/endpoints";
-import type { Dashboard, Streak, Weekly } from "../api/types";
-import { useAuth } from "../auth/AuthContext";
-import { ActivityHeatmap, TrendChart } from "../components/charts";
-import { ReasonBadge } from "../components/ReasonBadge";
-import { pretestPending, StudyCard } from "../components/StudyCard";
-import {
-  Button,
-  ButtonLink,
-  Card,
-  EmptyState,
-  ErrorState,
-  MasteryBar,
-  PageHeader,
-  pct,
-  Spinner,
-  Stat,
-} from "../components/ui";
+import { tutor } from "../api/tutor";
+import type { Activity, Recommendation, Status } from "../api/tutor";
 import { useApi } from "../hooks/useApi";
-import { useStartSession } from "../hooks/useStartSession";
+import { ActivityChart } from "../components/charts";
+import { Button, Card, CardTitle, EmptyState, ErrorState, ModeBadge, ModelEstimate, PageLoader, ProgressBar, Stat, STATUS_META, StatusBadge, timeAgo } from "../components/ui";
 
-const SESSION_LABEL = {
-  diagnostic: "diagnostic",
-  practice: "practice session",
-  revision: "revision",
-  pretest: "pre-test",
-  posttest: "post-test",
+function greeting() {
+  const h = new Date().getHours();
+  return h < 12 ? "Good morning" : h < 17 ? "Good afternoon" : "Good evening";
+}
+
+const REASON_LABEL: Record<string, string> = {
+  focus: "Your focus",
+  weakness: "Needs attention",
+  developing: "Keep building",
+  needs_assessment: "Check this next",
+  revision: "Time to review",
+  prerequisite: "Building block",
+  next_objective: "Next objective",
 };
 
-export function DashboardPage() {
-  const { user } = useAuth();
-  const summary = useApi((s) => dashboard.summary(s));
-  const path = useApi((s) => learning.path(s));
-  const revision = useApi((s) => learning.revision(s));
-  const trends = useApi((s) => dashboard.trends(30, s));
-  const activity = useApi((s) => dashboard.activity(12, s));
-  const streak = useApi((s) => engagement.streak(s));
-  const weekly = useApi((s) => engagement.weekly(s));
-  const study = useApi((s) => pilot.status(s));
-  const starter = useStartSession();
-
-  if (summary.loading && !summary.data) return <Spinner />;
-  if (summary.error) return <ErrorState error={summary.error} onRetry={summary.reload} />;
-  const d = summary.data as Dashboard;
-
+export function RecommendationCard({ rec, highlight = false }: { rec: Recommendation; highlight?: boolean }) {
   return (
-    <>
-      <PageHeader title={`Hi, ${user?.full_name.split(" ")[0] ?? "there"}`}>
-        Here's where you stand in Machine Learning.
-      </PageHeader>
-
-      {starter.error && (
-        <p role="alert" className="mb-4 text-sm text-danger">
-          {starter.error}
-        </p>
-      )}
-
-      {d.active_sessions.map((s) => (
-        <div
-          key={s.id}
-          className="mb-4 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-brand/40 bg-brand/5 p-4"
-        >
-          <p>
-            You have an unfinished {SESSION_LABEL[s.type]} ({s.answered} of {s.target} answered).
-          </p>
-          <ButtonLink to={`/session/${s.id}`}>Resume</ButtonLink>
-        </div>
-      ))}
-
-      {study.data && <StudyCard s={study.data} onChange={study.reload} />}
-
-      {!d.diagnostic_completed &&
-        !pretestPending(study.data) &&
-        !d.active_sessions.some((s) => s.type === "diagnostic") && (
-        <Card className="mb-6 border-brand/40">
-          <h2 className="font-semibold">Take the diagnostic to get your starting profile</h2>
-          <p className="mt-1 text-sm text-ink-muted">
-            {d.concepts_total} questions, one per concept. Your learning path and dashboard fill in
-            from your answers.
-          </p>
-          <Button
-            className="mt-4"
-            disabled={starter.busy !== null}
-            onClick={() => starter.start("diagnostic")}
-          >
-            Start the diagnostic
-          </Button>
-        </Card>
-      )}
-
-      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
-        <Stat
-          label="Mean mastery"
-          value={d.mean_mastery == null ? "—" : pct(d.mean_mastery)}
-          hint={
-            d.concepts_assessed
-              ? `across ${d.concepts_assessed} assessed concept${d.concepts_assessed === 1 ? "" : "s"}`
-              : "after your first answers"
-          }
-        />
-        <Stat
-          label="Concepts mastered"
-          value={`${d.concepts_mastered} / ${d.concepts_total}`}
-          hint={`mastery ≥ ${pct(d.mastered_threshold)}`}
-        />
-        <Stat label="Questions answered" value={d.questions_answered} />
-        <Stat
-          label="Accuracy"
-          value={d.accuracy == null ? "—" : pct(d.accuracy)}
-          hint={`${d.sessions_completed} session${d.sessions_completed === 1 ? "" : "s"} completed`}
-        />
+    <div className={`flex h-full flex-col rounded-2xl border p-4 ${highlight ? "border-brand/40 bg-brand-soft" : "border-line bg-surface-2/60"}`}>
+      <div className="flex items-center justify-between gap-2">
+        <span className="text-[11px] font-semibold uppercase tracking-wider text-brand">{REASON_LABEL[rec.reason_code] ?? "Recommended"}</span>
+        <StatusBadge status={rec.skill.status} />
       </div>
-
-      <div className="mt-6 grid gap-6 lg:grid-cols-2">
-        <Card
-          title="Daily goal"
-          action={
-            <Link to="/settings" className="text-sm font-medium text-brand">
-              Change goal
-            </Link>
-          }
-        >
-          {streak.loading && !streak.data && <Spinner />}
-          {streak.error && <ErrorState error={streak.error} onRetry={streak.reload} />}
-          {streak.data && <GoalCard s={streak.data} />}
-        </Card>
-        <Card title="This week">
-          {weekly.loading && !weekly.data && <Spinner />}
-          {weekly.error && <ErrorState error={weekly.error} onRetry={weekly.reload} />}
-          {weekly.data && <WeeklyCard w={weekly.data} />}
-        </Card>
+      <p className="mt-2 font-semibold">{rec.skill.name}</p>
+      <p className="mt-1 flex-1 text-sm text-ink-muted">{rec.reason}</p>
+      <div className="mt-3 flex flex-wrap gap-1.5">
+        {rec.activities.slice(0, 3).map((a) => (
+          <span key={a} className="rounded-md bg-surface-3 px-2 py-0.5 text-xs text-ink-muted">
+            {a}
+          </span>
+        ))}
       </div>
-
-      <div className="mt-6 grid gap-6 lg:grid-cols-3">
-        <Card
-          className="lg:col-span-2"
-          title="Next up"
-          action={
-            <Link to="/path" className="text-sm font-medium text-brand">
-              Full path
-            </Link>
-          }
-        >
-          {path.loading && !path.data && <Spinner />}
-          {path.error && <ErrorState error={path.error} onRetry={path.reload} />}
-          {path.data && path.data.items.length === 0 && (
-            <EmptyState title="Nothing to recommend right now">
-              Every concept is at or above mastery. Practise any concept from the concept map.
-            </EmptyState>
-          )}
-          {path.data && path.data.items.length > 0 && (
-            <>
-              <ol className="space-y-3">
-                {path.data.items.slice(0, 3).map((i) => (
-                  <li key={i.concept} className="flex flex-wrap items-start justify-between gap-3">
-                    <div className="min-w-0 flex-1">
-                      <p className="font-medium">
-                        {i.name} <ReasonBadge reason={i.reason} />
-                      </p>
-                      <p className="mt-0.5 text-sm text-ink-muted">{i.explanation}</p>
-                    </div>
-                    <Button
-                      variant="secondary"
-                      disabled={starter.busy !== null}
-                      onClick={() =>
-                        starter.start(i.reason === "revision" ? "revision" : "practice", i.reason === "revision" ? undefined : i.concept)
-                      }
-                    >
-                      Practise
-                    </Button>
-                  </li>
-                ))}
-              </ol>
-              <Button
-                className="mt-5"
-                disabled={starter.busy !== null}
-                onClick={() => starter.start("practice")}
-              >
-                {starter.isBusy("practice") ? "Starting…" : "Start recommended practice"}
-              </Button>
-            </>
-          )}
-        </Card>
-
-        <Card
-          title="Revision"
-          action={
-            <Link to="/revision" className="text-sm font-medium text-brand">
-              Details
-            </Link>
-          }
-        >
-          {revision.loading && !revision.data && <Spinner />}
-          {revision.error && <ErrorState error={revision.error} onRetry={revision.reload} />}
-          {revision.data &&
-            (revision.data.due.length ? (
-              <>
-                <p>
-                  <strong>{revision.data.due.length}</strong> concept
-                  {revision.data.due.length === 1 ? " is" : "s are"} due for revision.
-                </p>
-                <ul className="mt-2 space-y-1 text-sm text-ink-muted">
-                  {revision.data.due.slice(0, 3).map((r) => (
-                    <li key={r.concept}>
-                      {r.name}: {pct(r.peak)} → {pct(r.mastery)}
-                    </li>
-                  ))}
-                </ul>
-                <Button
-                  className="mt-4"
-                  disabled={starter.busy !== null}
-                  onClick={() => starter.start("revision")}
-                >
-                  Revise now (5 questions)
-                </Button>
-              </>
-            ) : (
-              <EmptyState title="Nothing due">
-                Concepts become due when you've reached 80% and the model predicts you've dropped
-                below 60%.
-              </EmptyState>
-            ))}
-        </Card>
-      </div>
-
-      <div className="mt-6 grid gap-6 lg:grid-cols-2">
-        <Card title="Strongest">
-          <ConceptRanking items={d.strongest} />
-        </Card>
-        <Card title="Most room to grow">
-          <ConceptRanking items={d.weakest} />
-        </Card>
-      </div>
-
-      <div className="mt-6 grid gap-6 lg:grid-cols-2">
-        <Card title="Last 30 days">
-          {trends.error && <ErrorState error={trends.error} onRetry={trends.reload} />}
-          {trends.data &&
-            (trends.data.points.some((p) => p.answered > 0 || p.mean_mastery != null) ? (
-              <TrendChart trends={trends.data} />
-            ) : (
-              <EmptyState title="No activity yet">Your progress chart starts with your first answer.</EmptyState>
-            ))}
-        </Card>
-        <Card title="Activity">
-          {activity.error && <ErrorState error={activity.error} onRetry={activity.reload} />}
-          {activity.data && <ActivityHeatmap activity={activity.data} />}
-        </Card>
-      </div>
-    </>
-  );
-}
-
-function ConceptRanking({ items }: { items: Dashboard["strongest"] }) {
-  if (!items.length)
-    return (
-      <EmptyState title="Not enough answers yet">
-        Concepts appear here after 3 or more answers on them.
-      </EmptyState>
-    );
-  return (
-    <ul className="space-y-3">
-      {items.map((c) => (
-        <li key={c.concept}>
-          <p className="text-sm font-medium">{c.name}</p>
-          <MasteryBar value={c.mastery} label={`${c.name} mastery`} />
-        </li>
-      ))}
-    </ul>
-  );
-}
-
-/** FR-ENG-03: today's progress, current and longest streak. */
-function GoalCard({ s }: { s: Streak }) {
-  const done = Math.min(s.today_valid, s.daily_goal);
-  return (
-    <div>
-      <p>
-        {s.goal_met_today ? (
-          <strong className="text-success">Goal reached today.</strong>
-        ) : (
-          <>
-            <strong className="tabular-nums">{s.daily_goal - done}</strong> more question
-            {s.daily_goal - done === 1 ? "" : "s"} to reach today's goal.
-          </>
-        )}
-      </p>
-      <div
-        className="mt-3 h-2 overflow-hidden rounded-full bg-canvas"
-        role="progressbar"
-        aria-label="Today's goal"
-        aria-valuemin={0}
-        aria-valuemax={s.daily_goal}
-        aria-valuenow={done}
-        aria-valuetext={`${s.today_valid} of ${s.daily_goal} questions`}
-      >
-        <div
-          className={s.goal_met_today ? "h-full bg-success" : "h-full bg-brand"}
-          style={{ width: `${(done / s.daily_goal) * 100}%` }}
-        />
-      </div>
-      <p className="mt-1 text-xs text-ink-muted tabular-nums">
-        {s.today_valid} / {s.daily_goal} today
-      </p>
-      <dl className="mt-4 grid grid-cols-2 gap-3">
-        <div>
-          <dt className="text-sm text-ink-muted">Current streak</dt>
-          <dd className="text-2xl font-semibold tabular-nums">
-            {s.current_streak} day{s.current_streak === 1 ? "" : "s"}
-          </dd>
-        </div>
-        <div>
-          <dt className="text-sm text-ink-muted">Longest streak</dt>
-          <dd className="text-2xl font-semibold tabular-nums">
-            {s.longest_streak} day{s.longest_streak === 1 ? "" : "s"}
-          </dd>
-        </div>
-      </dl>
-      <p className="mt-3 text-xs text-ink-muted">
-        Answers count when you spend at least 3 seconds on them. Days follow your time zone (
-        {s.timezone}).
-      </p>
+      <Button to={`/skills/${rec.skill.id}`} variant={highlight ? "primary" : "secondary"} size="sm" className="mt-4 self-start" icon={<Play className="size-3.5" />}>
+        Start learning
+      </Button>
     </div>
   );
 }
 
-/** FR-ENG-05: the last 7 days. */
-function WeeklyCard({ w }: { w: Weekly }) {
-  if (w.questions === 0 && w.mastery_change == null)
-    return (
-      <EmptyState title="No activity this week">
-        Your weekly summary appears after your first answers.
-      </EmptyState>
-    );
-  const change = w.mastery_change;
+const ACT_ICON: Record<string, typeof Target> = { diagnostic: ClipboardCheck, skill_check: ClipboardCheck, reassessment: TrendingUp, practice: Target, resource: BookOpen };
+
+export function ActivityList({ items }: { items: Activity[] }) {
+  if (!items.length) return <p className="text-sm text-ink-muted">Nothing yet. Your assessments, practice and completed resources will appear here.</p>;
   return (
-    <div>
-      <dl className="grid grid-cols-3 gap-3">
-        <div>
-          <dt className="text-sm text-ink-muted">Questions</dt>
-          <dd className="text-2xl font-semibold tabular-nums">{w.questions}</dd>
-        </div>
-        <div>
-          <dt className="text-sm text-ink-muted">Accuracy</dt>
-          <dd className="text-2xl font-semibold tabular-nums">
-            {w.accuracy == null ? "—" : pct(w.accuracy)}
-          </dd>
-        </div>
-        <div>
-          <dt className="text-sm text-ink-muted">Goal days</dt>
-          <dd className="text-2xl font-semibold tabular-nums">{w.goal_days_met} / 7</dd>
-        </div>
-      </dl>
-      <p className="mt-4 text-sm">
-        {change == null ? (
-          <span className="text-ink-muted">
-            Mastery change shows from your second week, once there's a starting point to compare.
-          </span>
-        ) : (
-          <>
-            Mean mastery {pct(w.mean_mastery_start ?? 0)} → <strong>{pct(w.mean_mastery_end ?? 0)}</strong>{" "}
-            <span className={change >= 0 ? "text-success" : "text-danger"}>
-              ({change >= 0 ? "+" : "−"}
-              {Math.round(Math.abs(change) * 100)} pts)
-            </span>
-          </>
-        )}
-      </p>
-      {w.concepts_improved.length > 0 && (
-        <>
-          <p className="mt-3 text-sm font-medium">Improved this week</p>
-          <ul className="mt-1 space-y-1 text-sm text-ink-muted">
-            {w.concepts_improved.slice(0, 3).map((c) => (
-              <li key={c.concept}>
-                {c.name}: {pct(c.before)} → {pct(c.after)}
-              </li>
-            ))}
-          </ul>
-        </>
+    <ul className="space-y-1">
+      {items.map((a) => {
+        const Icon = ACT_ICON[a.kind] ?? ActivityIcon;
+        const to = a.skill_id ? `/skills/${a.skill_id}` : a.kind === "diagnostic" ? "/diagnosis" : "/analytics";
+        return (
+          <li key={`${a.kind}-${a.id}`}>
+            <Link to={to} className="flex items-center gap-3 rounded-xl px-2 py-2.5 hover:bg-surface-2">
+              <span className="grid size-9 shrink-0 place-items-center rounded-lg bg-surface-3 text-brand">
+                <Icon className="size-4" />
+              </span>
+              <span className="min-w-0 flex-1">
+                <span className="block truncate text-sm font-medium">{a.title}</span>
+                <span className="block text-xs text-ink-faint">{a.detail}</span>
+              </span>
+              <span className="shrink-0 text-xs text-ink-faint">{timeAgo(a.at)}</span>
+            </Link>
+          </li>
+        );
+      })}
+    </ul>
+  );
+}
+
+export function DashboardPage() {
+  const d = useApi(() => tutor.dashboard(), []);
+  if (d.loading) return <PageLoader label="Getting your dashboard ready…" />;
+  if (d.error) return <ErrorState error={d.error} onRetry={d.reload} />;
+  const data = d.data!;
+  const map = data.skill_map;
+  const mapOrder: Status[] = ["potential_weakness", "developing", "likely_strength"];
+  const cont = data.continue;
+
+  return (
+    <div className="space-y-6">
+      <header className="flex flex-col gap-1">
+        <h1 className="text-2xl font-semibold tracking-tight sm:text-[28px]">
+          {greeting()}, {data.name}
+        </h1>
+        <p className="text-ink-muted">Let's make progress today.</p>
+      </header>
+
+      {!data.diagnostic_completed ? (
+        <Card className="border-brand/40 bg-gradient-to-br from-brand-soft to-transparent p-7">
+          <div className="flex flex-col gap-5 md:flex-row md:items-center md:justify-between">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-wider text-brand">Step 1</p>
+              <h2 className="mt-1 text-xl font-semibold">Let's find out what you already know</h2>
+              <p className="mt-1 max-w-xl text-ink-muted">Your personal plan, skill map and recommendations appear after a short diagnostic of about 10 questions.</p>
+            </div>
+            <Button size="lg" to="/assess/start?kind=diagnostic" icon={<ArrowRight className="size-4" />}>
+              Start the diagnostic
+            </Button>
+          </div>
+        </Card>
+      ) : (
+        cont && (
+          <Card className="relative overflow-hidden border-brand/30 p-0">
+            <div className="pointer-events-none absolute -right-20 -top-20 size-72 rounded-full bg-brand/15 blur-3xl" />
+            <div className="relative flex flex-col gap-6 p-6 md:flex-row md:items-center md:justify-between md:p-7">
+              <div className="min-w-0">
+                <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-brand">
+                  <Play className="size-3.5" /> Continue learning
+                </p>
+                <h2 className="mt-2 text-xl font-semibold sm:text-2xl">{cont.skill.name}</h2>
+                <p className="mt-1.5 max-w-2xl text-sm text-ink-muted">{cont.reason}</p>
+                <div className="mt-3 flex flex-wrap items-center gap-2">
+                  <StatusBadge status={cont.skill.status} />
+                  <ModeBadge mode={cont.skill.mode} />
+                  <ModelEstimate p={cont.skill.predicted_p} />
+                </div>
+              </div>
+              <Button size="lg" to={`/skills/${cont.skill.id}`} icon={<ArrowRight className="size-4" />} className="shrink-0">
+                Continue
+              </Button>
+            </div>
+          </Card>
+        )
       )}
+
+      <section aria-label="Your learning overview" className="grid grid-cols-2 gap-3 lg:grid-cols-5">
+        <Stat label="Skills assessed" value={data.overview.skills_assessed} hint={`of ${data.overview.skills_available} available`} icon={<Layers3 className="size-4" />} />
+        <Stat label="Likely strengths" value={data.overview.likely_strengths} icon={<Sparkles className="size-4 text-strength" />} />
+        <Stat label="Need improvement" value={data.overview.needs_improvement} hint="Potential weakness + developing" icon={<Target className="size-4 text-developing" />} />
+        <Stat label="Practice sessions" value={data.overview.practice_sessions} hint="completed" icon={<Flame className="size-4 text-weakness" />} />
+        <Stat label="This week" value={data.overview.questions_this_week} hint="questions answered" icon={<ActivityIcon className="size-4 text-accent" />} />
+      </section>
+
+      <div className="grid gap-6 lg:grid-cols-[1.6fr_1fr]">
+        <Card>
+          <CardTitle icon={<Sparkles className="size-4" />} title="Recommended for you" subtitle="Picked from your evidence. Each one says why." action={<Link to="/path" className="text-sm text-brand hover:underline">Learning path →</Link>} />
+          {data.recommendations.length ? (
+            <div className="grid gap-3 md:grid-cols-2">
+              {data.recommendations.slice(0, 4).map((r, i) => (
+                <RecommendationCard key={r.skill.id} rec={r} highlight={i === 0} />
+              ))}
+            </div>
+          ) : (
+            <EmptyState title="No recommendations yet">Complete the diagnostic to get personalised recommendations.</EmptyState>
+          )}
+        </Card>
+
+        <div className="space-y-6">
+          <Card>
+            <CardTitle icon={<Goal className="size-4" />} title="Learning goal" action={<Link to="/profile" className="text-sm text-brand hover:underline">Change</Link>} />
+            {data.goal ? (
+              <div>
+                <p className="font-medium">{data.goal.label}</p>
+                <div className="mt-3 flex items-center gap-3">
+                  <ProgressBar value={data.goal.value} max={data.goal.target} tone={data.goal.achieved ? "strength" : "brand"} />
+                  <span className="shrink-0 text-sm font-semibold">
+                    {data.goal.value}/{data.goal.target}
+                  </span>
+                </div>
+                {data.goal.achieved && <p className="mt-2 text-sm text-strength">Goal reached. Brilliant work! 🎉</p>}
+              </div>
+            ) : (
+              <p className="text-sm text-ink-muted">No goal set.</p>
+            )}
+          </Card>
+
+          {data.revision_due.length > 0 && (
+            <Card>
+              <CardTitle icon={<CalendarClock className="size-4" />} title="Due for revision" />
+              <ul className="space-y-2">
+                {data.revision_due.map((s) => (
+                  <li key={s.id}>
+                    <Link to={`/skills/${s.id}`} className="flex items-center justify-between rounded-xl bg-surface-2 px-3 py-2.5 text-sm hover:bg-surface-3">
+                      {s.name}
+                      <ArrowRight className="size-4 text-ink-faint" />
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </Card>
+          )}
+
+          <Card>
+            <CardTitle icon={<ActivityIcon className="size-4" />} title="Recent activity" />
+            <ActivityList items={data.activity} />
+          </Card>
+        </div>
+      </div>
+
+      <div className="grid gap-6 lg:grid-cols-[1fr_1.2fr]">
+        <Card>
+          <CardTitle icon={<Map className="size-4" />} title="Your skill map" subtitle={`${data.unassessed_count} skills still need assessment`} action={<Link to="/skills" className="text-sm text-brand hover:underline">All skills →</Link>} />
+          <div className="space-y-4">
+            {mapOrder.map((st) => {
+              const list = map[st] ?? [];
+              return (
+                <div key={st}>
+                  <p className={`mb-2 flex items-center gap-2 text-xs font-semibold uppercase tracking-wider ${STATUS_META[st].text}`}>
+                    <span className={`size-1.5 rounded-full ${STATUS_META[st].dot}`} /> {STATUS_META[st].label} · {list.length}
+                  </p>
+                  {list.length ? (
+                    <div className="flex flex-wrap gap-2">
+                      {list.map((s) => (
+                        <Link key={s.id} to={`/skills/${s.id}`} className="rounded-lg border border-line bg-surface-2 px-2.5 py-1.5 text-xs hover:border-line-strong" title={`${s.name}: ${s.correct}/${s.attempts} correct`}>
+                          {s.name.length > 38 ? `${s.name.slice(0, 36)}…` : s.name}
+                        </Link>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-xs text-ink-faint">None yet</p>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </Card>
+
+        <Card>
+          <CardTitle icon={<LineChart className="size-4" />} title="Learning progress" subtitle="Questions answered and your observed accuracy, last 14 days" />
+          {data.progress.some((p) => p.attempts > 0) ? <ActivityChart data={data.progress} /> : <p className="text-sm text-ink-muted">Your progress chart appears after your first answers.</p>}
+          {data.model.available && (
+            <p className="mt-3 text-xs text-ink-faint">
+              Model predictions come from {data.model.display_name} (test AUC {data.model.test_auc?.toFixed(3)} on held-out students) and are always shown separately from your observed results.
+            </p>
+          )}
+        </Card>
+      </div>
     </div>
   );
 }

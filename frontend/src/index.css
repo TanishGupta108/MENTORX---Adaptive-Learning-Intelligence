@@ -1,47 +1,114 @@
 @import "tailwindcss";
 
-/* Design tokens. Components use these via Tailwind classes like bg-surface, text-ink. */
+/*
+ * MENTORX design tokens. One dark navy theme with violet/blue accents.
+ * Components use these through Tailwind classes such as bg-surface, text-ink, border-line.
+ * Status colours are fixed per diagnosis so a skill always looks the same everywhere.
+ */
 @theme {
-  --color-canvas: #f7f7f5;
-  --color-surface: #ffffff;
-  --color-ink: #1c1c1a;
-  --color-ink-muted: #5f5f5a;
-  --color-line: #e4e4df;
-  --color-brand: #3b5bdb;
-  --color-brand-ink: #ffffff;
-  --color-success: #2b8a3e;
-  --color-danger: #c92a2a;
-  --color-warning: #e67700;
+  --color-canvas: #0a0f1e;
+  --color-surface: #11182b;
+  --color-surface-2: #172036;
+  --color-surface-3: #1e2943;
+  --color-line: #253150;
+  --color-line-strong: #33416a;
+  --color-ink: #e8ebf5;
+  --color-ink-muted: #9aa5c4;
+  --color-ink-faint: #6b7697;
+  --color-brand: #8b8cff;
+  --color-brand-strong: #6d6ef7;
+  --color-brand-soft: #8b8cff26;
+  --color-accent: #5aa9ff;
+  --color-brand-ink: #0a0f1e;
 
-  --font-sans: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --color-strength: #34d399;
+  --color-developing: #fbbf24;
+  --color-weakness: #fb7185;
+  --color-unassessed: #94a3b8;
+  --color-success: #34d399;
+  --color-danger: #fb7185;
+  --color-warning: #fbbf24;
+
+  --font-sans: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --radius-card: 1rem;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --color-canvas: #141413;
-    --color-surface: #1e1e1c;
-    --color-ink: #ececea;
-    --color-ink-muted: #a3a39d;
-    --color-line: #33332f;
-    --color-brand: #748ffc;
-    --color-brand-ink: #10131f;
-    --color-success: #69db7c;
-    --color-danger: #ff8787;
-    --color-warning: #ffa94d;
-  }
+html {
+  -webkit-text-size-adjust: 100%;
+  color-scheme: dark;
 }
 
 body {
   background: var(--color-canvas);
   color: var(--color-ink);
   font-family: var(--font-sans);
+  font-feature-settings: "cv11", "ss01";
+  -webkit-font-smoothing: antialiased;
 }
 
-html {
-  -webkit-text-size-adjust: 100%;
+::selection {
+  background: #8b8cff55;
 }
 
-/* Respect users who ask for less motion. */
+:focus-visible {
+  outline: 2px solid var(--color-brand);
+  outline-offset: 2px;
+}
+
+/* Question content from the dataset (sanitised server-side). */
+.question-html {
+  line-height: 1.7;
+  font-size: 1.05rem;
+}
+.question-html p {
+  margin: 0.4rem 0;
+}
+.question-html ul,
+.question-html ol {
+  margin: 0.4rem 0 0.4rem 1.4rem;
+  list-style: disc;
+}
+.question-html table {
+  border-collapse: collapse;
+  margin: 0.75rem 0;
+  font-size: 0.95rem;
+}
+.question-html td,
+.question-html th {
+  border: 1px solid var(--color-line-strong);
+  padding: 0.35rem 0.75rem;
+  text-align: center;
+}
+.question-html math {
+  font-size: 1.1em;
+}
+.answer-blank {
+  display: inline-block;
+  min-width: 3.5rem;
+  margin: 0 0.25rem;
+  border-bottom: 2px dashed var(--color-brand);
+  color: transparent;
+  line-height: 1.2;
+}
+.option-html p {
+  margin: 0;
+}
+
+/* Gentle entrance for cards and steps. */
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.animate-rise {
+  animation: rise 0.35s ease-out both;
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,

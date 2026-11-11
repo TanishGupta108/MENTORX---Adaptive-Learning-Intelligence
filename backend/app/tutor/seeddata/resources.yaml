@@ -1,0 +1,621 @@
+# Original MENTORX demo learning content, keyed by Common Core code. Written for this project
+# (not copied from any source) and labelled "MENTORX original demo content" in the app.
+# Markdown subset: "### heading", "- bullet", "1. step", **bold**, blank line = new paragraph.
+# Every available skill also gets a genuine link to its standard on thecorestandards.org.
+resources:
+  # ------------------------------------------------------------ 6.RP.A.3a
+  - key: notes-ratio-tables
+    skill: 6.RP.A.3a
+    kind: notes
+    title: "Equivalent ratios and ratio tables"
+    minutes: 6
+    content: |
+      ### Key idea
+      A ratio compares two quantities, like 3 cups of flour for every 2 eggs (3 : 2). **Equivalent ratios** describe the same relationship at a different size: 6 : 4 and 9 : 6 are equivalent to 3 : 2.
+
+      ### How a ratio table works
+      - Each row is an equivalent ratio.
+      - You move between rows by **multiplying or dividing both quantities by the same number**.
+      - Adding the same number to both columns does NOT keep the ratio the same.
+
+      ### Steps
+      1. Write the known ratio as the first row.
+      2. Ask: what number turns the known value into the target value? (for example ×4)
+      3. Apply that same factor to the other column.
+
+      ### Watch out
+      - 3 : 2 is not the same as 2 : 3. Keep the order of the quantities.
+      - Check your answer: dividing the two columns should give the same value in every row.
+  - key: example-ratio-tables
+    skill: 6.RP.A.3a
+    kind: worked_example
+    title: "Worked example: completing a ratio table"
+    minutes: 4
+    content: |
+      **Problem.** A paint mix uses 2 cans of blue for every 5 cans of white. How much white paint is needed with 8 cans of blue?
+
+      1. Known ratio: blue : white = 2 : 5.
+      2. From 2 cans of blue to 8 cans is **×4**.
+      3. Multiply white by the same factor: 5 × 4 = 20.
+      4. Check: 8 ÷ 20 = 0.4 and 2 ÷ 5 = 0.4. Same ratio.
+
+      **Answer:** 20 cans of white paint.
+
+  # ------------------------------------------------------------ 6.RP.A.3b
+  - key: notes-unit-rate
+    skill: 6.RP.A.3b
+    kind: notes
+    title: "Unit rates"
+    minutes: 6
+    content: |
+      ### Key idea
+      A **unit rate** tells you how much of one quantity there is for **1** of another: dollars per item, miles per hour, words per minute.
+
+      ### Finding a unit rate
+      Divide the first quantity by the second. If 4 notebooks cost $10, the unit price is 10 ÷ 4 = $2.50 per notebook.
+
+      ### Using a unit rate
+      - Multiply to scale up: 7 notebooks cost 7 × 2.50 = $17.50.
+      - To compare deals, find each unit rate and compare them. The lower price per item is the better buy.
+
+      ### Watch out
+      - Decide which quantity is "per 1" before dividing. Dollars per notebook and notebooks per dollar are different rates.
+      - Keep the units in your answer (dollars per notebook, km per hour).
+  - key: example-unit-rate
+    skill: 6.RP.A.3b
+    kind: worked_example
+    title: "Worked example: which is the better buy?"
+    minutes: 4
+    content: |
+      **Problem.** Store A sells 6 juice boxes for $4.20. Store B sells 10 juice boxes for $6.50. Which store has the lower price per box?
+
+      1. Store A: 4.20 ÷ 6 = $0.70 per box.
+      2. Store B: 6.50 ÷ 10 = $0.65 per box.
+      3. Compare the unit prices: 0.65 < 0.70.
+
+      **Answer:** Store B is cheaper by $0.05 per box.
+
+  # ------------------------------------------------------------ 6.RP.A.3c
+  - key: notes-percents
+    skill: 6.RP.A.3c
+    kind: notes
+    title: "Percents as rates per 100"
+    minutes: 6
+    content: |
+      ### Key idea
+      **Percent** means "per hundred". 35% means 35 out of every 100, which is 0.35 or 35/100.
+
+      ### Three kinds of percent problems
+      - **Find the part:** 20% of 60 = 0.20 × 60 = 12.
+      - **Find the percent:** 12 is what percent of 60? 12 ÷ 60 = 0.2 = 20%.
+      - **Find the whole:** 12 is 20% of what number? 12 ÷ 0.20 = 60.
+
+      ### A reliable method
+      Write part / whole = percent / 100 and fill in the two values you know.
+
+      ### Watch out
+      - Convert the percent to a decimal before multiplying: 5% is 0.05, not 0.5.
+      - "Of" usually points to the whole.
+  - key: example-percents
+    skill: 6.RP.A.3c
+    kind: worked_example
+    title: "Worked example: finding the whole"
+    minutes: 4
+    content: |
+      **Problem.** A class has 9 students who walk to school. That is 30% of the class. How many students are in the class?
+
+      1. Part = 9, percent = 30, whole = ?
+      2. Set up part / whole = percent / 100: 9 / whole = 30 / 100.
+      3. 30% as a decimal is 0.30, so whole = 9 ÷ 0.30 = 30.
+      4. Check: 30% of 30 = 0.30 × 30 = 9. ✓
+
+      **Answer:** 30 students.
+
+  # ------------------------------------------------------------ 6.RP.A.3d
+  - key: notes-unit-conversion
+    skill: 6.RP.A.3d
+    kind: notes
+    title: "Converting units with ratios"
+    minutes: 5
+    content: |
+      ### Key idea
+      A unit conversion is a ratio that equals 1, such as 12 inches / 1 foot. Multiplying by it changes the units but not the amount.
+
+      ### Steps
+      1. Write the conversion as a fraction with the unit you want to **cancel** in the denominator.
+      2. Multiply and cancel the units.
+
+      Example: 5 feet × (12 inches / 1 foot) = 60 inches.
+
+      ### Watch out
+      - Converting to a **smaller** unit gives a **bigger** number (5 feet = 60 inches).
+      - Converting to a **larger** unit gives a **smaller** number (60 inches = 5 feet).
+  - key: example-unit-conversion
+    skill: 6.RP.A.3d
+    kind: worked_example
+    title: "Worked example: cups to quarts"
+    minutes: 3
+    content: |
+      **Problem.** A recipe needs 10 cups of water. There are 4 cups in 1 quart. How many quarts is that?
+
+      1. We want quarts, so put cups in the denominator: 1 quart / 4 cups.
+      2. 10 cups × (1 quart / 4 cups) = 10 ÷ 4 quarts.
+      3. 10 ÷ 4 = 2.5.
+
+      **Answer:** 2.5 quarts. (A quart is bigger than a cup, so the number got smaller. That makes sense.)
+
+  # ------------------------------------------------------------ 7.RP.A.2a
+  - key: notes-proportional
+    skill: 7.RP.A.2a
+    kind: notes
+    title: "Is it a proportional relationship?"
+    minutes: 6
+    content: |
+      ### Key idea
+      Two quantities are **proportional** when one is always the same number times the other: y = k × x.
+
+      ### Three tests
+      - **Table:** y ÷ x gives the same value in every row.
+      - **Graph:** the points lie on a straight line **through the origin (0, 0)**.
+      - **Situation:** doubling one quantity always doubles the other.
+
+      ### Watch out
+      - A straight line that does NOT pass through (0, 0), like y = 2x + 3, is not proportional.
+      - A fixed starting fee (for example a $5 entry fee plus $2 per ride) breaks proportionality.
+  - key: example-proportional
+    skill: 7.RP.A.2a
+    kind: worked_example
+    title: "Worked example: testing a table"
+    minutes: 4
+    content: |
+      **Problem.** Is the relationship in this table proportional? x: 2, 5, 8 and y: 7, 17.5, 28.
+
+      1. Divide y by x for each row: 7 ÷ 2 = 3.5, 17.5 ÷ 5 = 3.5, 28 ÷ 8 = 3.5.
+      2. The value is always 3.5.
+
+      **Answer:** Yes, it is proportional, with y = 3.5x.
+
+  # ------------------------------------------------------------ 7.RP.A.2c
+  - key: notes-proportional-equations
+    skill: 7.RP.A.2c
+    kind: notes
+    title: "Writing equations for proportional relationships"
+    minutes: 5
+    content: |
+      ### Key idea
+      Every proportional relationship can be written as **y = kx**, where **k** is the constant of proportionality: the amount of y for 1 unit of x.
+
+      ### Steps
+      1. Find k from any known pair: k = y ÷ x.
+      2. Write y = kx with that value of k.
+      3. Use the equation to find missing values.
+
+      ### Watch out
+      - Decide which quantity is x and which is y before you divide.
+      - k is the unit rate: if 3 pounds cost $7.50, then k = 2.50 dollars per pound.
+  - key: example-proportional-equations
+    skill: 7.RP.A.2c
+    kind: worked_example
+    title: "Worked example: from a situation to y = kx"
+    minutes: 4
+    content: |
+      **Problem.** A printer prints 45 pages in 3 minutes at a steady rate. Write an equation for pages p after m minutes, then find p after 8 minutes.
+
+      1. k = 45 ÷ 3 = 15 pages per minute.
+      2. Equation: p = 15m.
+      3. After 8 minutes: p = 15 × 8 = 120.
+
+      **Answer:** p = 15m, and 120 pages after 8 minutes.
+
+  # ------------------------------------------------------------ 7.RP.A.3
+  - key: notes-multistep-percent
+    skill: 7.RP.A.3
+    kind: notes
+    title: "Multistep ratio and percent problems"
+    minutes: 7
+    content: |
+      ### Key idea
+      Many real problems are percent changes: discounts, tax, tips, markups, percent increase and decrease.
+
+      ### Useful shortcuts
+      - Increase by p%: multiply by (1 + p/100). A 15% tip on $40 gives 40 × 1.15 = $46.
+      - Decrease by p%: multiply by (1 − p/100). A 20% discount on $35 gives 35 × 0.80 = $28.
+      - Percent change = (new − original) ÷ original × 100.
+
+      ### Steps
+      1. Identify the original amount (the "whole").
+      2. Decide whether it is an increase or a decrease.
+      3. Apply each step in order. With a discount and then tax, apply the discount first.
+
+      ### Watch out
+      - Percent change is always measured against the **original** value.
+      - Two changes in a row don't simply add: +10% then −10% does not return to the start.
+  - key: example-multistep-percent
+    skill: 7.RP.A.3
+    kind: worked_example
+    title: "Worked example: discount, then tax"
+    minutes: 5
+    content: |
+      **Problem.** A jacket costs $60. It is on sale for 25% off, and then 8% sales tax is added. What is the final price?
+
+      1. Discount: 60 × (1 − 0.25) = 60 × 0.75 = $45.
+      2. Tax on the sale price: 45 × (1 + 0.08) = 45 × 1.08 = $48.60.
+
+      **Answer:** $48.60.
+
+  # ------------------------------------------------------------ 7.G.A.1
+  - key: notes-scale-drawings
+    skill: 7.G.A.1
+    kind: notes
+    title: "Scale drawings"
+    minutes: 6
+    content: |
+      ### Key idea
+      A **scale** links lengths in a drawing to real lengths, for example 1 cm : 5 m. Every length in the drawing uses the same scale factor.
+
+      ### Steps
+      1. Write the scale as a ratio: drawing : actual.
+      2. Use it like a ratio table to find the missing length.
+
+      ### Area is different
+      When lengths are multiplied by a factor k, **areas are multiplied by k²**. Doubling every side makes the area 4 times as large.
+
+      ### Watch out
+      - Keep units consistent (convert m to cm if needed).
+      - Scale the lengths first, then compute the area. Don't multiply the area by k.
+  - key: example-scale-drawings
+    skill: 7.G.A.1
+    kind: worked_example
+    title: "Worked example: a floor plan"
+    minutes: 4
+    content: |
+      **Problem.** On a floor plan, 2 cm represents 3 m. A room is 8 cm by 6 cm on the plan. What is the actual area of the room?
+
+      1. Scale: 2 cm → 3 m, so 1 cm → 1.5 m.
+      2. Actual length: 8 × 1.5 = 12 m. Actual width: 6 × 1.5 = 9 m.
+      3. Area: 12 × 9 = 108 m².
+
+      **Answer:** 108 square metres.
+
+  # ------------------------------------------------------------ 7.G.B.4
+  - key: notes-circles
+    skill: 7.G.B.4
+    kind: notes
+    title: "Circumference and area of circles"
+    minutes: 6
+    content: |
+      ### Formulas
+      - **Circumference** (distance around): C = 2πr = πd.
+      - **Area** (space inside): A = πr².
+      - The diameter is twice the radius: d = 2r.
+
+      ### Steps
+      1. Find the radius. If you are given the diameter, halve it.
+      2. Choose the formula for what is asked: distance around → circumference, space inside → area.
+      3. Use π ≈ 3.14 (or the value the question gives).
+
+      ### Watch out
+      - Square the radius **before** multiplying by π.
+      - Area units are squared (cm²); circumference units are not (cm).
+  - key: example-circles
+    skill: 7.G.B.4
+    kind: worked_example
+    title: "Worked example: area from a diameter"
+    minutes: 4
+    content: |
+      **Problem.** A circular rug has a diameter of 10 feet. Find its area. Use 3.14 for π.
+
+      1. Radius = 10 ÷ 2 = 5 feet.
+      2. A = πr² = 3.14 × 5² = 3.14 × 25.
+      3. 3.14 × 25 = 78.5.
+
+      **Answer:** 78.5 square feet.
+
+  # ------------------------------------------------------------ 6.NS.A.1
+  - key: notes-fraction-division
+    skill: 6.NS.A.1
+    kind: notes
+    title: "Dividing fractions"
+    minutes: 6
+    content: |
+      ### Key idea
+      a ÷ b asks "how many groups of b fit into a?" So 3 ÷ ½ = 6, because six halves fit into 3.
+
+      ### The method
+      Multiply by the **reciprocal** of the divisor: a/b ÷ c/d = a/b × d/c.
+
+      Example: 2/3 ÷ 4/5 = 2/3 × 5/4 = 10/12 = 5/6.
+
+      ### Steps
+      1. Rewrite any mixed numbers as fractions (1 ½ = 3/2).
+      2. Keep the first fraction, flip the second, multiply.
+      3. Simplify.
+
+      ### Watch out
+      - Flip the divisor (the second fraction), not the first.
+      - Dividing by a fraction smaller than 1 makes the answer **bigger**.
+  - key: example-fraction-division
+    skill: 6.NS.A.1
+    kind: worked_example
+    title: "Worked example: how many servings?"
+    minutes: 4
+    content: |
+      **Problem.** You have 3 ¾ cups of rice. One serving is ⅝ cup. How many servings is that?
+
+      1. Convert: 3 ¾ = 15/4.
+      2. Divide: 15/4 ÷ 5/8 = 15/4 × 8/5.
+      3. Multiply: (15 × 8) / (4 × 5) = 120/20 = 6.
+
+      **Answer:** 6 servings.
+
+  # ------------------------------------------------------------ 6.NS.B.3
+  - key: notes-decimals
+    skill: 6.NS.B.3
+    kind: notes
+    title: "Operations with multi-digit decimals"
+    minutes: 6
+    content: |
+      ### Adding and subtracting
+      Line up the **decimal points**. Fill empty places with zeros: 4.5 − 1.27 = 4.50 − 1.27 = 3.23.
+
+      ### Multiplying
+      Multiply as whole numbers, then count the total decimal places in both factors.
+      0.6 × 0.15: 6 × 15 = 90, and there are 1 + 2 = 3 decimal places, so the answer is 0.090 = 0.09.
+
+      ### Dividing
+      Make the divisor a whole number by moving both decimal points the same number of places.
+      4.8 ÷ 0.06 = 480 ÷ 6 = 80.
+
+      ### Watch out
+      - Estimate first: 4.8 ÷ 0.06 should be large, because 0.06 is small.
+  - key: example-decimals
+    skill: 6.NS.B.3
+    kind: worked_example
+    title: "Worked example: decimal division"
+    minutes: 3
+    content: |
+      **Problem.** A 7.2 m ribbon is cut into pieces of 0.45 m. How many pieces?
+
+      1. 7.2 ÷ 0.45: move both decimal points 2 places to get 720 ÷ 45.
+      2. 720 ÷ 45 = 16.
+      3. Estimate check: about 7 ÷ 0.5 = 14, which is close.
+
+      **Answer:** 16 pieces.
+
+  # ------------------------------------------------------------ 6.NS.C.5
+  - key: notes-signed-numbers
+    skill: 6.NS.C.5
+    kind: notes
+    title: "Positive and negative numbers in context"
+    minutes: 5
+    content: |
+      ### Key idea
+      Positive and negative numbers describe quantities in **opposite directions** from zero:
+      - temperature above / below 0°;
+      - elevation above / below sea level;
+      - money deposited (+) / withdrawn (−).
+
+      ### What zero means
+      Zero is the reference point, such as sea level or no change.
+
+      ### Watch out
+      - −8 is less than −3, even though 8 is bigger than 3: −8 is further below zero.
+      - Read the context to decide which direction is positive.
+  - key: example-signed-numbers
+    skill: 6.NS.C.5
+    kind: worked_example
+    title: "Worked example: elevation"
+    minutes: 3
+    content: |
+      **Problem.** A diver is 25 m below sea level and a bird is 12 m above it. Write both elevations, and say which is further from sea level.
+
+      1. Below sea level is negative: diver = −25 m.
+      2. Above sea level is positive: bird = +12 m.
+      3. Distance from sea level is the absolute value: |−25| = 25 and |12| = 12.
+
+      **Answer:** −25 m and +12 m. The diver is further from sea level.
+
+  # ------------------------------------------------------------ 7.NS.A.2c
+  - key: notes-rational-mult-div
+    skill: 7.NS.A.2c
+    kind: notes
+    title: "Multiplying and dividing rational numbers"
+    minutes: 5
+    content: |
+      ### Sign rules
+      - Same signs → positive: (−4) × (−3) = 12.
+      - Different signs → negative: (−20) ÷ 5 = −4.
+      - With several factors, count the negatives: an **even** number gives a positive result, an **odd** number gives a negative one.
+
+      ### Steps
+      1. Work out the sign first.
+      2. Multiply or divide the absolute values, using fraction or decimal rules.
+
+      ### Watch out
+      - (−2)² = 4 but −2² = −4: the exponent applies only to what is inside the brackets.
+  - key: example-rational-mult-div
+    skill: 7.NS.A.2c
+    kind: worked_example
+    title: "Worked example: mixed signs"
+    minutes: 3
+    content: |
+      **Problem.** Evaluate (−3/4) × (−8) ÷ (−2).
+
+      1. Count the negatives: 3 (odd), so the result is negative.
+      2. Absolute values: 3/4 × 8 = 6, then 6 ÷ 2 = 3.
+
+      **Answer:** −3.
+
+  # ------------------------------------------------------------ 6.EE.A.1
+  - key: notes-exponents
+    skill: 6.EE.A.1
+    kind: notes
+    title: "Numerical expressions with exponents"
+    minutes: 5
+    content: |
+      ### Key idea
+      An exponent counts repeated multiplication: 2⁵ = 2 × 2 × 2 × 2 × 2 = 32. It is NOT 2 × 5.
+
+      ### Order of operations
+      1. Brackets
+      2. Exponents
+      3. Multiplication and division, left to right
+      4. Addition and subtraction, left to right
+
+      Example: 3 + 2 × 4² = 3 + 2 × 16 = 3 + 32 = 35.
+
+      ### Watch out
+      - (½)² = ¼: square the whole fraction.
+      - 10³ = 1,000, so the exponent tells you how many zeros follow the 1.
+  - key: example-exponents
+    skill: 6.EE.A.1
+    kind: worked_example
+    title: "Worked example: order of operations"
+    minutes: 3
+    content: |
+      **Problem.** Evaluate (5 − 2)³ + 4 × 2².
+
+      1. Brackets: 5 − 2 = 3.
+      2. Exponents: 3³ = 27 and 2² = 4.
+      3. Multiplication: 4 × 4 = 16.
+      4. Addition: 27 + 16 = 43.
+
+      **Answer:** 43.
+
+  # ------------------------------------------------------------ 6.EE.B.5
+  - key: notes-substitution
+    skill: 6.EE.B.5
+    kind: notes
+    title: "Checking solutions by substitution"
+    minutes: 4
+    content: |
+      ### Key idea
+      A **solution** is a value that makes an equation or inequality **true**. To check a value, substitute it for the variable and evaluate.
+
+      ### Steps
+      1. Replace the variable with the value.
+      2. Evaluate both sides.
+      3. Equation: are the sides equal? Inequality: is the statement true?
+
+      ### Watch out
+      - An inequality like x > 4 has many solutions, but 4 itself is not one of them.
+      - x ≥ 4 does include 4.
+  - key: example-substitution
+    skill: 6.EE.B.5
+    kind: worked_example
+    title: "Worked example: which values work?"
+    minutes: 3
+    content: |
+      **Problem.** Which of 3, 5 and 7 are solutions of 2x + 1 > 9?
+
+      1. x = 3: 2(3) + 1 = 7. Is 7 > 9? No.
+      2. x = 5: 2(5) + 1 = 11. Is 11 > 9? Yes.
+      3. x = 7: 2(7) + 1 = 15. Is 15 > 9? Yes.
+
+      **Answer:** 5 and 7.
+
+  # ------------------------------------------------------------ 6.EE.B.7
+  - key: notes-one-step
+    skill: 6.EE.B.7
+    kind: notes
+    title: "Solving one-step equations"
+    minutes: 5
+    content: |
+      ### Key idea
+      An equation is a balance. Whatever you do to one side, do the **same** to the other side, so it stays balanced.
+
+      ### Undo the operation
+      - x + 7 = 12 → subtract 7 from both sides → x = 5.
+      - 4x = 18 → divide both sides by 4 → x = 4.5.
+      - x ÷ 3 = 6 → multiply both sides by 3 → x = 18.
+
+      ### Writing the equation
+      Name the unknown, then turn the words into symbols: "5 more than a number is 12" becomes n + 5 = 12.
+
+      ### Watch out
+      - Check your answer by substituting it back into the original equation.
+  - key: example-one-step
+    skill: 6.EE.B.7
+    kind: worked_example
+    title: "Worked example: from words to an equation"
+    minutes: 3
+    content: |
+      **Problem.** Maya bought 6 identical notebooks for $16.50. Write and solve an equation for the price p of one notebook.
+
+      1. Equation: 6p = 16.50.
+      2. Divide both sides by 6: p = 16.50 ÷ 6 = 2.75.
+      3. Check: 6 × 2.75 = 16.50. ✓
+
+      **Answer:** $2.75 per notebook.
+
+  # ------------------------------------------------------------ 7.EE.B.4a
+  - key: notes-two-step
+    skill: 7.EE.B.4a
+    kind: notes
+    title: "Solving two-step equations"
+    minutes: 6
+    content: |
+      ### Key idea
+      Equations like px + q = r take two moves. Undo them in **reverse order** of how x was used.
+
+      ### Steps for 3x + 5 = 20
+      1. Undo the addition: 3x = 20 − 5 = 15.
+      2. Undo the multiplication: x = 15 ÷ 3 = 5.
+
+      ### Equations with brackets: p(x + q) = r
+      Either divide by p first, or expand the brackets.
+      2(x + 4) = 18 → x + 4 = 9 → x = 5.
+
+      ### Watch out
+      - With a negative coefficient, −2x = 10 gives x = −5.
+      - Check by substituting your answer back in.
+  - key: example-two-step
+    skill: 7.EE.B.4a
+    kind: worked_example
+    title: "Worked example: a phone plan"
+    minutes: 4
+    content: |
+      **Problem.** A phone plan costs $15 a month plus $0.10 per text. One month's bill was $23.40. How many texts were sent?
+
+      1. Equation: 0.10t + 15 = 23.40.
+      2. Subtract 15: 0.10t = 8.40.
+      3. Divide by 0.10: t = 84.
+      4. Check: 0.10 × 84 + 15 = 8.40 + 15 = 23.40. ✓
+
+      **Answer:** 84 texts.
+
+  # ------------------------------------------------------------ 8.EE.C.7b
+  - key: notes-multistep-linear
+    skill: 8.EE.C.7b
+    kind: notes
+    title: "Multi-step linear equations"
+    minutes: 7
+    content: |
+      ### Strategy
+      1. **Expand** brackets (distribute).
+      2. **Collect like terms** on each side.
+      3. Move all x-terms to one side and numbers to the other.
+      4. Divide by the coefficient of x.
+
+      ### Fractions
+      Multiply every term by a common denominator to clear the fractions first.
+      x/2 + x/3 = 10 → multiply by 6 → 3x + 2x = 60 → x = 12.
+
+      ### Watch out
+      - Distribute a negative to **every** term: −2(x − 3) = −2x + 6.
+      - If the x-terms cancel, the equation has either no solution or infinitely many.
+  - key: example-multistep-linear
+    skill: 8.EE.C.7b
+    kind: worked_example
+    title: "Worked example: variables on both sides"
+    minutes: 5
+    content: |
+      **Problem.** Solve 3(x − 2) + 4 = 5x − 10.
+
+      1. Distribute: 3x − 6 + 4 = 5x − 10.
+      2. Combine like terms: 3x − 2 = 5x − 10.
+      3. Subtract 3x from both sides: −2 = 2x − 10.
+      4. Add 10: 8 = 2x, so x = 4.
+      5. Check: 3(2) + 4 = 10 and 5(4) − 10 = 10. ✓
+
+      **Answer:** x = 4.

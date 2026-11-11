@@ -1,5 +1,8 @@
 """FastAPI application factory."""
 
+from collections.abc import AsyncIterator
+from contextlib import asynccontextmanager
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -14,9 +17,17 @@ from app.api.v1 import (
     sessions,
     subjects,
 )
+from app.api.v2 import tutor
 from app.core import errors, headers
 from app.core.config import get_settings
 from app.core.logging import configure_logging
+from app.tutor import kt
+
+
+@asynccontextmanager
+async def lifespan(_: FastAPI) -> AsyncIterator[None]:
+    kt.get_model()  # load the knowledge-tracing model once, at startup
+    yield
 
 
 def create_app() -> FastAPI:
@@ -27,7 +38,8 @@ def create_app() -> FastAPI:
     docs = settings.expose_docs if settings.expose_docs is not None else not settings.is_production
     app = FastAPI(
         title=settings.app_name,
-        version="0.6.0",
+        version="2.0.0",
+        lifespan=lifespan,
         docs_url="/docs" if docs else None,
         redoc_url=None,
         openapi_url="/openapi.json" if docs else None,
@@ -36,7 +48,7 @@ def create_app() -> FastAPI:
         CORSMiddleware,
         allow_origins=settings.cors_origin_list,
         allow_credentials=True,
-        allow_methods=["GET", "POST", "PATCH", "DELETE"],
+        allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE"],
         allow_headers=["Authorization", "Content-Type", "X-Request-ID"],
         expose_headers=["X-Request-ID"],
     )
@@ -54,6 +66,7 @@ def create_app() -> FastAPI:
         pilot.router,
     ):
         app.include_router(router, prefix="/api/v1")
+    app.include_router(tutor.router, prefix="/api/v2")
     return app
 
 

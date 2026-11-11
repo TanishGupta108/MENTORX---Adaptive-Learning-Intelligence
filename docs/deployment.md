@@ -62,6 +62,32 @@ The script creates a throwaway account, enrols, answers one diagnostic question,
 
 CI runs the same script in its `e2e` job ([.github/workflows/ci.yml](../.github/workflows/ci.yml)): it installs the API with Render's build command, starts it with Render's start command in production mode against PostgreSQL, and runs the smoke test. Every push to `main` is therefore checked for a working install, migrations, seeding and model loading before Render auto-deploys it.
 
+## Mathematics content (MENTORX v2)
+
+The Mathematics subject comes from FoundationalASSIST, which is licensed and never committed,
+so a fresh database has no maths content until it is seeded once. The app then answers
+`503 content_missing` on onboarding.
+
+**Seed the production database from your own computer (recommended):**
+1. Render dashboard -> `mentorx-db` -> **Connect** -> copy the **External Database URL**.
+2. In a terminal on your computer, in `backend/` with the virtual environment active:
+   ```
+   set DATABASE_URL=<paste the external URL>        (PowerShell: $env:DATABASE_URL="<url>")
+   python scripts/seed_math.py --data-dir "C:/path/to/folder/with/Problems.csv"
+   ```
+3. It prints the number of skills, usable questions, prerequisite links and resources.
+   It's safe to run again: admin edits are kept.
+
+Alternatively, if the CSVs are available on the server, set `MATH_DATA_DIR`; `scripts/start.sh`
+then refreshes the content on every start.
+
+The model files (`backend/model_artifacts/foundationalassist/`, about 7 MB) are committed and
+served with NumPy, so the API needs no PyTorch. `GET /api/v1/health/model` reports whether the
+model loaded. If it didn't, the app shows observed performance only and never labels anything
+as a model prediction.
+
+Admins: set `ADMIN_EMAILS` to give accounts the Content admin page.
+
 ## Environment variables
 
 | Variable | Production value | Notes |
