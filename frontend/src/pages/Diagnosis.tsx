@@ -1,6 +1,6 @@
-import { ArrowRight, BrainCircuit, CheckCircle2, Compass, Info, Sparkles } from "lucide-react";
+import { ArrowRight, BrainCircuit, CheckCircle2, Compass, GitBranch, Info, Route, Sparkles, X, Check } from "lucide-react";
 import { tutor } from "../api/tutor";
-import type { Status } from "../api/tutor";
+import type { Status, TraceStep } from "../api/tutor";
 import { useApi } from "../hooks/useApi";
 import { SkillCard } from "../components/SkillCard";
 import { RecommendationCard } from "./Dashboard";
@@ -13,6 +13,39 @@ const EXPLAIN: Record<Status, string> = {
   potential_weakness: "Your answers suggest this needs more practice.",
   needs_assessment: "Not tested yet. We won't guess a weakness without evidence.",
 };
+
+const KIND_LABEL: Record<TraceStep["kind"], string> = {
+  start: "Starting point",
+  model: "Most informative",
+  prerequisite: "Building block",
+};
+
+export function SelectionTrace({ steps }: { steps: TraceStep[] }) {
+  return (
+    <ol className="space-y-2">
+      {steps.map((t) => (
+        <li key={t.position} className="flex gap-3 rounded-xl border border-line bg-surface-2/60 p-3">
+          <span className="grid size-7 shrink-0 place-items-center rounded-full bg-surface-3 text-xs font-semibold">{t.position}</span>
+          <div className="min-w-0 flex-1">
+            <p className="flex flex-wrap items-center gap-2 text-sm font-medium">
+              {t.skill}
+              <span className="inline-flex items-center gap-1 rounded-md bg-accent/10 px-1.5 py-0.5 text-[11px] font-medium text-accent">
+                {t.kind === "prerequisite" ? <GitBranch className="size-3" /> : <Route className="size-3" />}
+                {KIND_LABEL[t.kind]}
+              </span>
+            </p>
+            <p className="mt-0.5 text-xs text-ink-muted">{t.reason}</p>
+          </div>
+          {t.correct !== null && (
+            <span className="shrink-0" aria-label={t.correct ? "correct" : "incorrect"}>
+              {t.correct ? <Check className="size-4 text-strength" /> : <X className="size-4 text-weakness" />}
+            </span>
+          )}
+        </li>
+      ))}
+    </ol>
+  );
+}
 
 export function DiagnosisPage() {
   const d = useApi(() => tutor.diagnosis(), []);
@@ -62,6 +95,17 @@ export function DiagnosisPage() {
           ))}
         </div>
       </Card>
+
+      {data.selection_trace.length > 0 && (
+        <Card>
+          <CardTitle
+            icon={<Route className="size-4" />}
+            title="How MENTORX chose your questions"
+            subtitle="The diagnostic adapts: after each answer the model picks the question it is least sure about, and a wrong answer leads to a check of a curated building block."
+          />
+          <SelectionTrace steps={data.selection_trace} />
+        </Card>
+      )}
 
       {data.recommendations.length > 0 && (
         <Card>

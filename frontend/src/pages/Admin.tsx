@@ -6,9 +6,10 @@ import { adminApi } from "../api/tutor";
 import type { AdminSkill } from "../api/tutor";
 import { useApi } from "../hooks/useApi";
 import { useProfile } from "../components/AppShell";
+import { AiTexts, ModelMonitor } from "../components/AdminMonitor";
 import { Button, Card, CardTitle, cx, ErrorState, Field, inputClass, PageHeader, Spinner, Stat } from "../components/ui";
 
-const TABS = ["Overview", "Skills & questions", "Resources", "Prerequisites"] as const;
+const TABS = ["Overview", "Model monitor", "AI tutor", "Skills & questions", "Resources", "Prerequisites"] as const;
 
 function Overview() {
   const o = useApi(() => adminApi.overview(), []);
@@ -19,7 +20,7 @@ function Overview() {
     <div className="space-y-6">
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
         <Stat label="Skills available" value={`${d.available_skills}/${d.skills}`} />
-        <Stat label="Usable questions" value={`${d.usable_items}/${d.items}`} />
+        <Stat label="Usable questions" value={`${d.usable_items}/${d.items}`} hint={`${d.usable_mixed_items} of them multi-skill (Mixed practice)`} />
         <Stat label="Resources" value={d.resources} />
         <Stat label="Prerequisite links" value={d.prerequisites} />
       </div>
@@ -211,6 +212,8 @@ export function AdminPage() {
         ))}
       </div>
       {tab === "Overview" && <Overview />}
+      {tab === "Model monitor" && <ModelMonitor />}
+      {tab === "AI tutor" && <AiTexts />}
       {tab === "Skills & questions" && <SkillsTab />}
       {tab === "Resources" && <ResourcesTab />}
       {tab === "Prerequisites" && <PrereqTab />}

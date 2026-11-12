@@ -209,8 +209,10 @@ def test_admin_content_management(client, math_keys, db):
     db.query(User).filter(User.email == "admin@example.com").update({"role": "admin"})
     db.commit()
     ov = client.get("/api/v2/admin/overview", headers=h).json()
-    assert ov["available_skills"] == 10 and ov["usable_items"] == 240
-    assert any(e["reason"] == "multi_skill" for e in ov["exclusions"])
+    # 240 single-skill questions + 1 multi-skill question (usable in Mixed practice only)
+    assert ov["available_skills"] == 10 and ov["usable_items"] == 241
+    assert ov["usable_mixed_items"] == 1
+    assert any(e["reason"] == "image_not_verified" for e in ov["exclusions"])
     items = client.get("/api/v2/admin/skills/129/items", headers=h).json()
     target = next(i for i in items if i["exclusion_reason"] is None)
     r = client.patch(

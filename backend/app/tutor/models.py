@@ -97,7 +97,8 @@ class Item(Base):
     __tablename__ = "items"
     __table_args__ = (
         CheckConstraint(
-            "answer_type IN ('numeric', 'multiple_choice', 'check_all', 'other')",
+            "answer_type IN ('numeric', 'multiple_choice', 'check_all', 'algebraic', "
+            "'numeric_expression', 'exact_fraction', 'exact_match', 'other')",
             name="answer_type",
         ),
         CheckConstraint("difficulty IN ('easy', 'medium', 'hard', 'unrated')", name="difficulty"),
@@ -114,7 +115,8 @@ class Item(Base):
     body_html: Mapped[str] = mapped_column(Text, nullable=False)  # sanitised
     answer_type: Mapped[str] = mapped_column(String(20), nullable=False)
     options: Mapped[list] = mapped_column(JSON, nullable=False, default=list)  # [{"id", "html"}]
-    answer_key: Mapped[list] = mapped_column(JSON, nullable=False, default=list)  # SERVER ONLY
+    # SERVER ONLY. A list for numeric/choice questions, {"alts", "form"} for typed answers.
+    answer_key: Mapped[list | dict] = mapped_column(JSON, nullable=False, default=list)
     difficulty: Mapped[str] = mapped_column(String(10), nullable=False, server_default="unrated")
     success_rate: Mapped[float | None] = mapped_column(Float)  # training students only
     train_attempts: Mapped[int] = mapped_column(Integer, nullable=False, server_default="0")
@@ -182,6 +184,7 @@ class StudentProfile(Base):
         CheckConstraint(
             "pace_preference IN ('more_support', 'balanced', 'challenge')", name="pace_preference"
         ),
+        CheckConstraint("daily_goal BETWEEN 1 AND 200", name="daily_goal"),
     )
 
     user_id: Mapped[uuid.UUID] = mapped_column(Uuid, _user_fk(), primary_key=True)
@@ -194,6 +197,7 @@ class StudentProfile(Base):
     hints_enabled: Mapped[bool] = mapped_column(
         Boolean, nullable=False, server_default=text("true")
     )
+    daily_goal: Mapped[int] = mapped_column(SmallInteger, nullable=False, server_default="10")
     onboarded_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     diagnostic_completed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     current_skill_id: Mapped[int | None] = mapped_column(
@@ -242,12 +246,15 @@ class Assessment(Base):
     current_served_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     current_predicted_p: Mapped[float | None] = mapped_column(Float)
     result: Mapped[dict] = mapped_column(JSON, nullable=False, default=dict)
+    # Adaptive diagnostic: questions are chosen one at a time, so the length is stored here
+    # and planned_item_ids grows as questions are served. Other kinds plan everything upfront.
+    target_n: Mapped[int | None] = mapped_column(SmallInteger)
     started_at: Mapped[datetime] = _created()
     completed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
 
     @property
     def target_count(self) -> int:
-        return len(self.planned_item_ids)
+        return self.target_n or len(self.planned_item_ids)
 
 
 class PracticeSession(Base):
@@ -256,14 +263,17 @@ class PracticeSession(Base):
         CheckConstraint("status IN ('active', 'completed', 'abandoned')", name="status"),
         CheckConstraint("difficulty IN ('easy', 'medium', 'hard')", name="difficulty"),
         CheckConstraint("mode IN ('foundation', 'guided', 'independent', 'advanced')", name="mode"),
+        CheckConstraint("kind IN ('skill', 'mixed')", name="kind"),
+        CheckConstraint("(kind = 'mixed') = (skill_id IS NULL)", name="mixed_has_no_skill"),
         Index("ix_practice_sessions_user_started", "user_id", "started_at"),
     )
 
     id: Mapped[uuid.UUID] = mapped_column(Uuid, primary_key=True, default=uuid.uuid4)
     user_id: Mapped[uuid.UUID] = mapped_column(Uuid, _user_fk(), nullable=False)
-    skill_id: Mapped[int] = mapped_column(
-        ForeignKey("skills.id", ondelete="CASCADE"), nullable=False
-    )
+    # 'skill': one skill (single-skill questions). 'mixed': multi-skill questions across
+    # the skills the student has worked on (skill_id is NULL).
+    kind: Mapped[str] = mapped_column(String(8), nullable=False, server_default="skill")
+    skill_id: Mapped[int | None] = mapped_column(ForeignKey("skills.id", ondelete="CASCADE"))
     mode: Mapped[str] = mapped_column(String(12), nullable=False)
     guided: Mapped[bool] = mapped_column(Boolean, nullable=False, server_default=text("false"))
     difficulty: Mapped[str] = mapped_column(String(10), nullable=False)
@@ -298,7 +308,10 @@ class Interaction(Base):
     id: Mapped[int] = mapped_column(BigInteger().with_variant(Integer, "sqlite"), primary_key=True)
     user_id: Mapped[uuid.UUID] = mapped_column(Uuid, _user_fk(), nullable=False)
     item_id: Mapped[int] = mapped_column(ForeignKey("items.id"), nullable=False)
-    skill_id: Mapped[int] = mapped_column(ForeignKey("skills.id"), nullable=False)
+    skill_id: Mapped[int] = mapped_column(ForeignKey("skills.id"), nullable=False)  # primary skill
+    # >1 = a multi-skill question: never counted as per-skill evidence (one shared score),
+    # but given to the model with all its skills.
+    n_skills: Mapped[int] = mapped_column(SmallInteger, nullable=False, server_default="1")
     context: Mapped[str] = mapped_column(String(12), nullable=False)
     assessment_id: Mapped[uuid.UUID | None] = mapped_column(
         Uuid, ForeignKey("assessments.id", ondelete="CASCADE")
@@ -354,6 +367,9 @@ class SkillState(Base):
     reassessed_accuracy: Mapped[float | None] = mapped_column(Float)
     completed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     revision_due_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    # spaced revision: 0 = not yet revised; each successful revision moves one step further
+    # along REVISION_INTERVALS (7, 14, 30, 60 days)
+    revision_stage: Mapped[int] = mapped_column(SmallInteger, nullable=False, server_default="0")
     last_practiced_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     updated_at: Mapped[datetime] = _created()
 
@@ -392,4 +408,30 @@ class Recommendation(Base):
     activities: Mapped[list] = mapped_column(JSON, nullable=False, default=list)
     trigger: Mapped[str] = mapped_column(String(20), nullable=False)
     is_current: Mapped[bool] = mapped_column(Boolean, nullable=False, server_default=text("true"))
+    created_at: Mapped[datetime] = _created()
+
+
+class AiExplanation(Base):
+    """Cached AI tutor text (an explanation of a question, or a hint that must not give the
+    answer away). Generated once per question (and, for explanations, per wrong answer),
+    clearly labelled as AI-generated, and hideable by admins."""
+
+    __tablename__ = "ai_explanations"
+    __table_args__ = (
+        CheckConstraint("kind IN ('explanation', 'hint')", name="kind"),
+        CheckConstraint("status IN ('ok', 'hidden')", name="status"),
+        UniqueConstraint("item_id", "kind", "answer_sig", name="uq_ai_explanations_item_kind_sig"),
+    )
+
+    id: Mapped[int] = mapped_column(BigInteger().with_variant(Integer, "sqlite"), primary_key=True)
+    item_id: Mapped[int] = mapped_column(ForeignKey("items.id", ondelete="CASCADE"), nullable=False)
+    kind: Mapped[str] = mapped_column(String(12), nullable=False)
+    answer_sig: Mapped[str] = mapped_column(String(64), nullable=False, server_default="")
+    content: Mapped[str] = mapped_column(Text, nullable=False)
+    model: Mapped[str] = mapped_column(String(120), nullable=False)
+    status: Mapped[str] = mapped_column(String(8), nullable=False, server_default="ok")
+    requested_by: Mapped[uuid.UUID | None] = mapped_column(
+        Uuid, ForeignKey("users.id", ondelete="SET NULL"), index=True
+    )
+    latency_ms: Mapped[int | None] = mapped_column(Integer)
     created_at: Mapped[datetime] = _created()

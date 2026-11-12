@@ -10,6 +10,11 @@ preferred; among them the model picks the one whose predicted success is closest
 mode's target (foundation 0.80 ... advanced 0.50). Difficulty levels are historical
 (training students' first-attempt success). When the ideal question doesn't exist, a
 labelled fallback is used and the reason is shown to the student.
+
+Mixed practice (kind="mixed") uses the dataset's multi-skill questions, preferring those whose
+skills the student has already worked on. The same difficulty rule and model-based choice
+apply (the model is given every skill of the question). Mixed answers never count as
+per-skill evidence; they appear as their own "mixed problems" accuracy.
 """
 
 from __future__ import annotations
@@ -17,13 +22,13 @@ from __future__ import annotations
 import random
 import uuid
 
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 from app.core.config import get_settings
 from app.core.errors import AppError
 from app.db.models import User
-from app.tutor import engine, kt, recommend, resources, state
+from app.tutor import ai, engine, kt, recommend, resources, state
 from app.tutor import profile as profile_service
 from app.tutor.models import Interaction, Item, PracticeSession, Skill, SkillState
 
@@ -53,18 +58,76 @@ def _own(db: Session, user: User, session_id: uuid.UUID, lock: bool = False) -> 
     return s
 
 
-def start(db: Session, user: User, skill_id: int, guided: bool) -> PracticeSession:
-    profile_service.require(db, user)
-    skill = db.get(Skill, skill_id)
-    if skill is None or not skill.is_available:
-        raise AppError(404, "skill_not_found", "That skill isn't available.")
-    active = db.scalar(
+PACE_TO_MIXED_MODE = {"more_support": "guided", "balanced": "independent", "challenge": "advanced"}
+MIXED_MIN_SKILLS = 2
+
+
+def practised_skills(db: Session, user_id: uuid.UUID) -> set[int]:
+    return set(
+        db.scalars(
+            select(Interaction.skill_id)
+            .where(Interaction.user_id == user_id, Interaction.n_skills == 1)
+            .distinct()
+        )
+    )
+
+
+def _close_active(db: Session, user: User) -> PracticeSession | None:
+    return db.scalar(
         select(PracticeSession)
         .where(PracticeSession.user_id == user.id, PracticeSession.status == "active")
         .with_for_update()
     )
+
+
+def start_mixed(db: Session, user: User) -> PracticeSession:
+    prof = profile_service.require(db, user)
+    if len(practised_skills(db, user.id)) < MIXED_MIN_SKILLS:
+        raise AppError(
+            409,
+            "mixed_locked",
+            "Mixed practice opens once you've answered questions in at least two skills. "
+            "Take the diagnostic first.",
+        )
+    if not db.scalar(
+        select(func.count()).select_from(engine.usable_items(db, mixed=True).subquery())
+    ):
+        raise AppError(409, "no_content", "There are no mixed questions available yet.")
+    active = _close_active(db, user)
     if active:
-        if active.skill_id == skill_id and active.guided == guided:
+        if active.kind == "mixed":
+            return active
+        active.status, active.ended_at = "abandoned", engine.now()
+    mode = PACE_TO_MIXED_MODE.get(prof.pace_preference, "independent")
+    s = PracticeSession(
+        user_id=user.id,
+        kind="mixed",
+        skill_id=None,
+        mode=mode,
+        guided=False,
+        difficulty=state.MODE_POLICY[mode]["start"],
+        target_count=get_settings().mixed_practice_length,
+        recent=[],
+        current_selection={},
+    )
+    db.add(s)
+    db.commit()
+    db.refresh(s)
+    return s
+
+
+def start(
+    db: Session, user: User, skill_id: int | None, guided: bool, kind: str = "skill"
+) -> PracticeSession:
+    if kind == "mixed":
+        return start_mixed(db, user)
+    profile_service.require(db, user)
+    skill = db.get(Skill, skill_id) if skill_id is not None else None
+    if skill is None or not skill.is_available:
+        raise AppError(404, "skill_not_found", "That skill isn't available.")
+    active = _close_active(db, user)
+    if active:
+        if active.kind == "skill" and active.skill_id == skill_id and active.guided == guided:
             return active
         active.status, active.ended_at = "abandoned", engine.now()
     st = db.get(SkillState, (user.id, skill_id))
@@ -76,6 +139,7 @@ def start(db: Session, user: User, skill_id: int, guided: bool) -> PracticeSessi
         mode = "guided"
     s = PracticeSession(
         user_id=user.id,
+        kind="skill",
         skill_id=skill_id,
         mode=mode,
         guided=guided,
@@ -90,10 +154,30 @@ def start(db: Session, user: User, skill_id: int, guided: bool) -> PracticeSessi
     return s
 
 
+def _mixed_pool(db: Session, user: User) -> tuple[list[Item], dict[int, list[int]]]:
+    """Multi-skill questions, best first: those whose skills the student has practised most."""
+    pool = list(db.scalars(engine.usable_items(db, mixed=True)))
+    skills_of = engine.item_skills(db, [i.id for i in pool])
+    tried = practised_skills(db, user.id)
+
+    def overlap(i: Item) -> int:
+        return len(set(skills_of.get(i.id, [i.skill_id])) & tried)
+
+    best = max((overlap(i) for i in pool), default=0)
+    if best > 0:
+        pool = [i for i in pool if overlap(i) == best]
+    return pool, skills_of
+
+
 def _choose(db: Session, user: User, s: PracticeSession) -> tuple[Item, dict]:
     seen = engine.attempted_item_ids(db, user.id)
-    pool = list(db.scalars(engine.usable_items(db, s.skill_id)))
+    skills_of: dict[int, list[int]] = {}
+    if s.kind == "mixed":
+        pool, skills_of = _mixed_pool(db, user)
+    else:
+        pool = list(db.scalars(engine.usable_items(db, s.skill_id)))
     fresh = [i for i in pool if i.id not in seen]
+    scope = "mixed set" if s.kind == "mixed" else "skill"
     note = None
     cands = [i for i in fresh if i.difficulty == s.difficulty]
     served = s.difficulty
@@ -106,7 +190,7 @@ def _choose(db: Session, user: User, s: PracticeSession) -> tuple[Item, dict]:
             cands = [i for i in fresh if i.difficulty == lv]
             if cands:
                 served = lv
-                note = f"No unused {s.difficulty} questions are left in this skill, so this one is {lv}."
+                note = f"No unused {s.difficulty} questions are left in this {scope}, so this one is {lv}."
                 break
     if not cands:
         in_session = set(
@@ -116,7 +200,7 @@ def _choose(db: Session, user: User, s: PracticeSession) -> tuple[Item, dict]:
             db.scalars(
                 select(Interaction.item_id).where(
                     Interaction.user_id == user.id,
-                    Interaction.skill_id == s.skill_id,
+                    Interaction.item_id.in_([i.id for i in pool]),
                     ~Interaction.is_correct,
                 )
             )
@@ -126,13 +210,13 @@ def _choose(db: Session, user: User, s: PracticeSession) -> tuple[Item, dict]:
         ]
         if not cands:
             raise AppError(
-                409, "no_content", "You've answered every question in this skill. Great effort!"
+                409, "no_content", f"You've answered every question in this {scope}. Great effort!"
             )
         served = "review"
-        note = "You've answered every new question in this skill. This is one you've seen before, as review."
+        note = f"You've answered every new question in this {scope}. This is one you've seen before, as review."
     target = state.MODE_POLICY[s.mode]["target_p"]
     h = kt.state_for(db, user.id)
-    preds = kt.predict_items(h, cands)
+    preds = kt.predict_items(h, cands, skills_of)
     if preds and preds[0] is not None:
         ranked = sorted(zip(cands, preds, strict=True), key=lambda ip: abs(ip[1] - target))
         item, p = _rng.choice(ranked[:2])
@@ -171,13 +255,32 @@ def next_item(db: Session, user: User, session_id: uuid.UUID) -> dict:
     return out
 
 
-def hint(db: Session, user: User, session_id: uuid.UUID) -> dict:
+def hint(db: Session, user: User, session_id: uuid.UUID, use_ai: bool = False) -> dict:
+    """The skill's key idea, or (use_ai) an AI hint for this exact question. Either way the
+    answer is recorded as "hint used". If the AI hint isn't available, or gave the answer
+    away, the skill hint is returned with a note saying so."""
     s = _own(db, user, session_id, lock=True)
     if s.status != "active" or s.current_item_id is None:
         raise AppError(409, "no_question", "There's no question to give a hint for.")
+    item = db.get(Item, s.current_item_id)
     s.current_hint_used = True
     db.commit()
-    return resources.hint_for(db, s.skill_id)
+    if use_ai:
+        out = ai.hint(db, user, item)
+        if out is not None:
+            return {
+                "kind": "ai",
+                "text": out["content"],
+                "source": "AI tutor",
+                "label": out["label"],
+            }
+        fallback = resources.hint_for(db, item.skill_id)
+        return {
+            **fallback,
+            "note": "The AI tutor couldn't give a safe hint for this question right now, "
+            "so here is the key idea instead.",
+        }
+    return resources.hint_for(db, item.skill_id)
 
 
 def _feedback(correct: bool, change: str | None, mode: str, revealed: bool) -> str:
@@ -239,6 +342,7 @@ def answer(
         recommend.generate(db, user.id, "practice")
     db.commit()
     return {
+        "interaction_id": inter.id,
         "correct": inter.is_correct,
         "hint_used": inter.hint_used,
         "revealed": reveal,
@@ -254,8 +358,36 @@ def answer(
     }
 
 
+def mixed_accuracy(db: Session, user_id: uuid.UUID) -> tuple[int, int]:
+    n, c = db.execute(
+        select(func.count(), func.count().filter(Interaction.is_correct)).where(
+            Interaction.user_id == user_id, Interaction.n_skills > 1
+        )
+    ).one()
+    return int(c), int(n)
+
+
 def _summary(db: Session, user: User, s: PracticeSession, st: SkillState | None) -> dict:
     acc = s.correct_count / max(s.answered_count, 1)
+    if s.kind == "mixed":
+        c, n = mixed_accuracy(db, user.id)
+        return {
+            "accuracy": acc,
+            "correct": s.correct_count,
+            "answered": s.answered_count,
+            "skill_accuracy": c / n if n else None,
+            "skill_attempts": n,
+            "predicted_p": None,
+            "mode": s.mode,
+            "mixed": True,
+            "next": {
+                "action": "mixed" if acc >= 0.5 else "practice",
+                "label": "Another mixed round" if acc >= 0.5 else "Back to your focus skill",
+                "why": "Mixing skills is how real problems look. You're handling it well."
+                if acc >= 0.5
+                else "Mixed problems are hard. Strengthening one skill at a time will help.",
+            },
+        }
     c, n = engine.skill_accuracy(db, user.id, s.skill_id)
     if acc >= 0.7 and n >= 5:
         nxt = {

@@ -22,6 +22,7 @@ from sqlalchemy.orm import Session
 
 from app.core.config import get_settings
 from app.ml.dkt import Attempt, KTInference
+from app.tutor import engine
 from app.tutor.models import Interaction, Item, Skill
 
 logger = logging.getLogger(__name__)
@@ -95,10 +96,12 @@ def history(db: Session, user_id: uuid.UUID) -> list[Attempt]:
         .where(Interaction.user_id == user_id)
         .order_by(Interaction.created_at, Interaction.id)
     ).all()
+    multi = engine.item_skills(db, {r[0] for r in rows if r[6] > 1})
     out, prev = [], None
     for item_id, skill_id, label, hint, saw, ts, _ in rows:
         gap = (ts - prev).total_seconds() if prev is not None else 0.0
-        out.append(Attempt(item_id, [skill_id], bool(label), int(hint), bool(saw), gap))
+        skills = multi.get(item_id, [skill_id])
+        out.append(Attempt(item_id, skills, bool(label), int(hint), bool(saw), gap))
         prev = ts
     return out
 
@@ -110,12 +113,17 @@ def state_for(db: Session, user_id: uuid.UUID) -> np.ndarray | None:
     return m.state(history(db, user_id))
 
 
-def predict_items(h: np.ndarray | None, items: list[Item]) -> list[float | None]:
-    """P(correct) for each item, or None when there is no model or no history yet."""
+def predict_items(
+    h: np.ndarray | None, items: list[Item], skills: dict[int, list[int]] | None = None
+) -> list[float | None]:
+    """P(correct) for each item, or None when there is no model or no history yet.
+    `skills` gives multi-skill questions all their skills (else the primary skill is used)."""
     m = get_model()
     if m is None or h is None or not items:
         return [None] * len(items)
-    return [float(p) for p in m.predict_questions(h, [(i.id, [i.skill_id]) for i in items])]
+    skills = skills or {}
+    pairs = [(i.id, skills.get(i.id, [i.skill_id])) for i in items]
+    return [float(p) for p in m.predict_questions(h, pairs)]
 
 
 def skill_predictions(
@@ -136,7 +144,12 @@ def skill_predictions(
     items = db.execute(
         select(Item.id, Item.skill_id)
         .join(Skill, Skill.id == Item.skill_id)
-        .where(Skill.is_available, Item.is_active, Item.exclusion_reason.is_(None))
+        .where(
+            Skill.is_available,
+            Item.is_active,
+            Item.exclusion_reason.is_(None),
+            Item.n_skills == 1,
+        )
     ).all()
     if not items:
         return {}

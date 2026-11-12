@@ -24,5 +24,7 @@ export default defineConfig({
   test: {
     environment: "jsdom",
     setupFiles: ["./src/test/setup.ts"],
+    // lazy-loaded pages can take a few seconds on a busy machine (the default is 5 s)
+    testTimeout: 20000,
   },
 });

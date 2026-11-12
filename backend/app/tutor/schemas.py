@@ -35,6 +35,7 @@ class ProfileUpdate(Strict):
     hints_enabled: bool | None = None
     goal_type: GoalType | None = None
     focus_skill_id: int | None = None
+    daily_goal: int | None = Field(default=None, ge=1, le=200)  # questions per day
 
 
 class GoalRequest(Strict):
@@ -60,7 +61,7 @@ class StartAssessment(Strict):
 
 class AnswerRequest(Strict):
     item_id: int
-    value: str | None = Field(default=None, max_length=60)  # numeric
+    value: str | None = Field(default=None, max_length=60)  # numeric or typed answer
     choice: str | None = Field(default=None, max_length=8)  # multiple choice
     choices: list[str] | None = Field(default=None, max_length=12)  # check all that apply
 
@@ -73,8 +74,23 @@ class AnswerRequest(Strict):
 
 
 class StartPractice(Strict):
-    skill_id: int
+    kind: Literal["skill", "mixed"] = "skill"
+    skill_id: int | None = None
     guided: bool = False
+
+    @model_validator(mode="after")
+    def skill_for_skill_practice(self) -> StartPractice:
+        if self.kind == "skill" and self.skill_id is None:
+            raise ValueError("skill_id is required for skill practice")
+        return self
+
+
+class ExplainRequest(Strict):
+    interaction_id: int
+
+
+class AiStatusUpdate(Strict):
+    status: Literal["ok", "hidden"]
 
 
 class PracticeAnswer(AnswerRequest):

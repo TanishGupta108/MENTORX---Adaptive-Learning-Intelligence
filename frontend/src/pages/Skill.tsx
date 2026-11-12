@@ -8,6 +8,7 @@ import type { Mode, SkillDetail } from "../api/tutor";
 import { useApi } from "../hooks/useApi";
 import { useProfile } from "../components/AppShell";
 import { Html } from "../components/QuestionView";
+import { AiExplain } from "../components/AiTutor";
 import { Markdown } from "../components/Markdown";
 import { ResourceCard } from "../components/ResourceCard";
 import { SkillCard } from "../components/SkillCard";
@@ -281,9 +282,10 @@ export function SkillPage() {
                     <p className="text-xs text-ink-muted">
                       Correct:{" "}
                       <span className="text-strength">
-                        {m.correct_answer.type === "numeric" ? m.correct_answer.values.join(" or ") : m.correct_answer.option_ids.map((c) => String.fromCharCode(65 + Number(c))).join(", ")}
+                        {m.correct_answer.type === "numeric" || m.correct_answer.type === "text" ? m.correct_answer.values.join(" or ") : m.correct_answer.option_ids.map((c) => String.fromCharCode(65 + Number(c))).join(", ")}
                       </span>
                     </p>
+                    <AiExplain interactionId={m.interaction_id} label="Explain my mistake" className="mt-3" />
                   </li>
                 ))}
               </ul>

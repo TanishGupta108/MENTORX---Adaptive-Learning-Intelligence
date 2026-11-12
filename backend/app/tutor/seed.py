@@ -5,14 +5,20 @@ the folder that holds Problems.csv and Skills.csv. Difficulty comes from the exp
 artifacts (question_stats.json: training students only), so it matches what the model saw.
 
 Every dataset question is stored. Questions the app cannot serve reliably keep an
-`exclusion_reason` (multi-skill, unsupported answer type, image, several blanks, ...), so the
-admin page can show exactly why something is unavailable.
+`exclusion_reason` (unsupported answer type, image that doesn't load, several blanks, ...), so
+the admin page can show exactly why something is unavailable.
+
+Multi-skill questions (n_skills > 1) are usable, but only in Mixed practice: their single
+correctness score is never counted as separate evidence for each skill.
+Images are served only if scripts/check_images.py confirmed they load (image_check.json in
+the data folder); WIRIS formula images are converted to MathML and need no check.
 """
 
 from __future__ import annotations
 
 import json
 import logging
+import re
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -23,7 +29,7 @@ from sqlalchemy.orm import Session
 
 from app.db.models import Subject
 from app.tutor import answers
-from app.tutor.html import count_blanks, has_unrenderable, sanitize
+from app.tutor.html import count_blanks, has_unrenderable, sanitize, scan_images
 from app.tutor.models import Item, ItemSkill, Resource, Skill, SkillPrerequisite
 
 logger = logging.getLogger(__name__)
@@ -52,9 +58,33 @@ TYPE_MAP = {
     "Numeric": "numeric",
     "Multiple Choice": "multiple_choice",
     "Check All That Apply": "check_all",
+    "Drop Down": "multiple_choice",  # one choice from a list: served as multiple choice
+    "Algebraic Expression": "algebraic",
+    "Numeric Expression": "numeric_expression",
+    "Exact Fraction": "exact_fraction",
+    "Exact Match": "exact_match",
 }
+# "Ordering" answers are lists whose items may themselves contain ", ", so the correct
+# order can't be split reliably; those questions stay excluded.
 MIN_RATED_ATTEMPTS = 10  # a question's difficulty needs at least this many training answers
-MIN_ITEMS_FOR_SKILL = 5  # a skill is offered only with enough usable questions
+MIN_ITEMS_FOR_SKILL = 5  # a skill is offered only with enough usable single-skill questions
+MAX_SKILLS = 3  # the model reads at most 3 skills per question
+
+
+def load_image_check(data_dir: Path) -> dict[str, bool] | None:
+    path = data_dir / "image_check.json"
+    if not path.exists():
+        return None
+    results = json.loads(path.read_text())["results"]
+    return {url: bool(r["ok"]) for url, r in results.items()}
+
+
+def split_dropdown(raw: str) -> list[str]:
+    """Drop-down options: HTML ones are split between tags, plain ones on ", "."""
+    raw = str(raw).strip()
+    if raw.startswith("<"):
+        return [o.strip() for o in re.split(r"(?<=>)\s*,\s+(?=<)", raw) if o.strip()]
+    return answers.split_alternatives(raw)
 
 
 def difficulty_level(rate: float | None, attempts: int) -> str:
@@ -91,50 +121,76 @@ class ItemRow:
     skills: list[int]
 
 
-def build_items(problems: pd.DataFrame, skills: pd.DataFrame, stats: dict) -> list[ItemRow]:
+def _text(v) -> str:
+    return "" if pd.isna(v) else str(v)
+
+
+def build_items(
+    problems: pd.DataFrame,
+    skills: pd.DataFrame,
+    stats: dict,
+    image_ok: dict[str, bool] | None = None,
+) -> list[ItemRow]:
     by_problem = skills.groupby("problem_id")["skill_id"].apply(
         lambda s: sorted(set(int(x) for x in s))
     )
+
+    def img_ok(url: str) -> bool:
+        return bool(image_ok and image_ok.get(url))
+
     rows: list[ItemRow] = []
     for _, p in problems.drop_duplicates("problem_id").iterrows():
         pid = int(p["problem_id"])
         sk = by_problem.get(pid, [])
         if not sk:
             continue
-        body_raw = str(p["Problem Body"])
-        kind = TYPE_MAP.get(str(p["Answer Types"]).strip(), "other")
+        body_raw = _text(p["Problem Body"])
+        answer_type = str(p["Answer Types"]).strip()
+        kind = TYPE_MAP.get(answer_type, "other")
+        dropdown = answer_type == "Drop Down"
+        option_src = _text(p["Fill-in Options"] if dropdown else p["Multiple Choice Options"])
         options: list[dict] = []
-        key: list[str] | None = []
+        key: list[str] | dict | None = []
+        urls, unresolvable = scan_images(body_raw + " " + option_src)
         reason = None
-        if len(sk) > 1:
-            reason = "multi_skill"
+        if len(sk) > MAX_SKILLS:
+            reason = "too_many_skills"
         elif kind == "other":
-            reason = f"unsupported_answer_type: {str(p['Answer Types']).strip()}"[:80]
-        elif has_unrenderable(body_raw) or has_unrenderable(str(p["Multiple Choice Options"])):
-            reason = "image_or_unrenderable_math"
-        if kind == "numeric":
+            reason = f"unsupported_answer_type: {answer_type}"[:80]
+        elif has_unrenderable(body_raw) or has_unrenderable(option_src):
+            reason = "unrenderable_math_layout"
+        elif unresolvable:
+            reason = "image_unavailable"
+        elif urls and not all(img_ok(u) for u in urls):
+            reason = "image_not_verified"
+        if kind == "numeric" or kind in answers.TEXT_TYPES:
             if reason is None and count_blanks(body_raw) != 1:
                 reason = "not_one_answer_blank"
-            key = (
-                answers.numeric_key(p["Fill-in Answers"])
-                if pd.notna(p["Fill-in Answers"])
-                else None
-            )
+            raw_key = _text(p["Fill-in Answers"])
+            if not raw_key:
+                key = None
+            elif kind == "numeric":
+                key = answers.numeric_key(raw_key)
+            else:
+                key = answers.text_key(kind, raw_key, body_raw)
+        elif dropdown:
+            if reason is None and count_blanks(body_raw) != 1:
+                reason = "not_one_answer_blank"
+            raw_opts = split_dropdown(option_src)
+            options = [{"id": str(i), "html": sanitize(o, img_ok)} for i, o in enumerate(raw_opts)]
+            raw_ans = [_text(p["Fill-in Answers"]).strip()]
+            key = answers.choice_key(raw_opts, raw_ans) if len(raw_opts) >= 2 else None
         elif kind in ("multiple_choice", "check_all"):
-            raw_opts = (
-                answers.split_options(p["Multiple Choice Options"])
-                if pd.notna(p["Multiple Choice Options"])
-                else []
-            )
+            raw_opts = answers.split_options(option_src) if option_src else []
             raw_ans = (
                 answers.split_options(p["Multiple Choice Answers"])
                 if pd.notna(p["Multiple Choice Answers"])
                 else []
             )
-            options = [{"id": str(i), "html": sanitize(o)} for i, o in enumerate(raw_opts)]
+            options = [{"id": str(i), "html": sanitize(o, img_ok)} for i, o in enumerate(raw_opts)]
             key = answers.choice_key(raw_opts, raw_ans) if len(raw_opts) >= 2 else None
-            if kind == "multiple_choice" and key and len(key) != 1:
-                key = None
+        if kind == "multiple_choice" and key and len(key) != 1:
+            key = None
         if reason is None and not key:
             reason = "missing_or_unparseable_answer_key"
         st = stats.get(str(pid), {})
@@ -144,7 +200,7 @@ def build_items(problems: pd.DataFrame, skills: pd.DataFrame, stats: dict) -> li
                 item={
                     "id": pid,
                     "skill_id": sk[0],
-                    "body_html": sanitize(body_raw),
+                    "body_html": sanitize(body_raw, img_ok),
                     "answer_type": kind,
                     "options": options,
                     "answer_key": key or [],
@@ -207,7 +263,8 @@ def seed_math(
     db.flush()
 
     # items and the full question-skill mapping (admin availability toggles are preserved)
-    rows = build_items(problems, skills_df, stats)
+    image_ok = load_image_check(data_dir)
+    rows = build_items(problems, skills_df, stats, image_ok)
     current = {i.id: i for i in db.scalars(select(Item))}
     db.execute(delete(ItemSkill))
     for r in rows:
@@ -219,9 +276,9 @@ def seed_math(
     db.flush()
     db.add_all(ItemSkill(item_id=r.item["id"], skill_id=s) for r in rows for s in r.skills)
 
-    usable: dict[int, int] = {}
+    usable: dict[int, int] = {}  # single-skill usable questions per skill
     for r in rows:
-        if r.item["exclusion_reason"] is None:
+        if r.item["exclusion_reason"] is None and r.item["n_skills"] == 1:
             usable[r.item["skill_id"]] = usable.get(r.item["skill_id"], 0) + 1
     for s in db.scalars(select(Skill)):
         s.n_items = usable.get(s.id, 0)
@@ -235,6 +292,10 @@ def seed_math(
         "available_skills": sum(1 for v in usable.values() if v >= MIN_ITEMS_FOR_SKILL),
         "items": len(rows),
         "usable_items": sum(usable.values()),
+        "usable_mixed_items": sum(
+            1 for r in rows if r.item["exclusion_reason"] is None and r.item["n_skills"] > 1
+        ),
+        "images_checked": image_ok is not None,
         "prerequisites": prereqs,
         "resources": resources,
     }

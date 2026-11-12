@@ -3,14 +3,17 @@ curated prerequisites. Admins are users with role 'admin' or listed in ADMIN_EMA
 
 from __future__ import annotations
 
+import numpy as np
+from sklearn.metrics import brier_score_loss, log_loss, roc_auc_score
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 from app.core.errors import AppError
 from app.db.models import User
+from app.tutor import kt
 from app.tutor import resources as res_service
 from app.tutor.html import plain_text
-from app.tutor.models import Item, Resource, Skill, SkillPrerequisite
+from app.tutor.models import Interaction, Item, Resource, Skill, SkillPrerequisite
 from app.tutor.profile import is_admin
 from app.tutor.seed import MIN_ITEMS_FOR_SKILL
 
@@ -36,6 +39,11 @@ def overview(db: Session) -> dict:
             select(func.count())
             .select_from(Item)
             .where(Item.is_active, Item.exclusion_reason.is_(None))
+        ),
+        "usable_mixed_items": db.scalar(
+            select(func.count())
+            .select_from(Item)
+            .where(Item.is_active, Item.exclusion_reason.is_(None), Item.n_skills > 1)
         ),
         "disabled_by_admin": db.scalar(
             select(func.count()).select_from(Item).where(~Item.is_active)
@@ -89,6 +97,7 @@ def items(db: Session, skill_id: int) -> list[dict]:
             "success_rate": i.success_rate,
             "train_attempts": i.train_attempts,
             "exclusion_reason": i.exclusion_reason,
+            "n_skills": i.n_skills,
             "is_active": i.is_active,
         }
         for i in rows
@@ -105,7 +114,12 @@ def set_item_active(db: Session, item_id: int, active: bool) -> dict:
     s.n_items = db.scalar(
         select(func.count())
         .select_from(Item)
-        .where(Item.skill_id == s.id, Item.is_active, Item.exclusion_reason.is_(None))
+        .where(
+            Item.skill_id == s.id,
+            Item.n_skills == 1,
+            Item.is_active,
+            Item.exclusion_reason.is_(None),
+        )
     )
     s.is_available = s.n_items >= MIN_ITEMS_FOR_SKILL and s.model_supported
     db.commit()
@@ -202,3 +216,82 @@ def remove_prerequisite(db: Session, skill_id: int, prereq_id: int) -> None:
         raise AppError(404, "not_found", "Link not found.")
     db.delete(p)
     db.commit()
+
+
+# ---------------------------------------------------------------- live model monitoring
+
+MIN_FOR_METRICS = 20
+
+
+def _metrics(p: np.ndarray, y: np.ndarray) -> dict:
+    out: dict = {
+        "n": int(len(y)),
+        "observed_rate": float(y.mean()) if len(y) else None,
+        "mean_predicted": float(p.mean()) if len(p) else None,
+        "auc": None,
+        "log_loss": None,
+        "brier": None,
+        "accuracy": None,
+    }
+    if len(y) >= MIN_FOR_METRICS:
+        pc = np.clip(p, 1e-6, 1 - 1e-6)
+        out["log_loss"] = float(log_loss(y, pc, labels=[0, 1]))
+        out["brier"] = float(brier_score_loss(y, p))
+        out["accuracy"] = float(((p >= 0.5) == (y == 1)).mean())
+        if 0 < y.sum() < len(y):
+            out["auc"] = float(roc_auc_score(y, p))
+    return out
+
+
+def model_monitor(db: Session) -> dict:
+    """How well the served model predicts REAL students' answers in this app.
+
+    Every prediction is stored before the answer is seen, so this is an honest out-of-sample
+    check. The label is the model's own target (correct first time, no hint, answer not
+    shown). Caveat shown in the UI: practice deliberately serves questions near a target
+    success rate, which narrows the spread of predictions and usually lowers AUC compared
+    with the offline test set.
+    """
+    rows = db.execute(
+        select(
+            Interaction.predicted_p,
+            Interaction.model_label,
+            Interaction.context,
+            Interaction.n_skills,
+        ).where(Interaction.predicted_p.is_not(None))
+    ).all()
+    info = kt.info()
+    if not rows:
+        return {
+            "model": info.__dict__,
+            "overall": _metrics(np.array([]), np.array([])),
+            "by_context": {},
+            "calibration": [],
+            "min_for_metrics": MIN_FOR_METRICS,
+        }
+    p = np.array([r[0] for r in rows], dtype=float)
+    y = np.array([int(r[1]) for r in rows], dtype=int)
+    ctx = np.array([r[2] for r in rows])
+    mixed = np.array([r[3] > 1 for r in rows])
+    by_context = {c: _metrics(p[ctx == c], y[ctx == c]) for c in ("assessment", "practice")}
+    by_context["mixed_questions"] = _metrics(p[mixed], y[mixed])
+    bins = np.linspace(0, 1, 11)
+    calibration = []
+    for lo, hi in zip(bins[:-1], bins[1:], strict=True):
+        m = (p >= lo) & (p < hi if hi < 1 else p <= hi)
+        if m.sum():
+            calibration.append(
+                {
+                    "bin": f"{int(lo * 100)}-{int(hi * 100)}%",
+                    "mean_predicted": float(p[m].mean()),
+                    "observed_rate": float(y[m].mean()),
+                    "n": int(m.sum()),
+                }
+            )
+    return {
+        "model": info.__dict__,
+        "overall": _metrics(p, y),
+        "by_context": by_context,
+        "calibration": calibration,
+        "min_for_metrics": MIN_FOR_METRICS,
+    }

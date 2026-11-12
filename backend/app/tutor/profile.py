@@ -136,6 +136,7 @@ def out(db: Session, user: User) -> dict:
         "focus_skill": {"id": focus.id, "name": focus.name, "code": focus.code} if focus else None,
         "pace_preference": p.pace_preference if p else "balanced",
         "hints_enabled": p.hints_enabled if p else True,
+        "daily_goal": p.daily_goal if p else 10,
         "goal": goal_progress(db, user) if p else None,
         "is_admin": is_admin(user),
     }

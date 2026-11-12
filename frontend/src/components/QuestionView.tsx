@@ -7,6 +7,7 @@
 import { useEffect, useRef, useState } from "react";
 import type { FormEvent } from "react";
 import { Check, CheckCircle2, Lightbulb, X, XCircle } from "lucide-react";
+import { CHOICE_TYPES } from "../api/tutor";
 import type { AnswerBody, CorrectAnswer, Question } from "../api/tutor";
 import { Button, cx } from "./ui";
 
@@ -42,34 +43,36 @@ export function QuestionView({ question, onSubmit, submitting, locked, feedback,
   const [choices, setChoices] = useState<string[]>([]);
   const inputRef = useRef<HTMLInputElement>(null);
 
+  const typed = !CHOICE_TYPES.includes(question.answer_type);
+
   useEffect(() => {
     setValue("");
     setChoice(null);
     setChoices([]);
-    if (question.answer_type === "numeric") inputRef.current?.focus();
-  }, [question.item_id, question.answer_type]);
+    if (typed) inputRef.current?.focus();
+  }, [question.item_id, typed]);
 
-  const ready =
-    question.answer_type === "numeric" ? value.trim().length > 0 : question.answer_type === "multiple_choice" ? choice !== null : choices.length > 0;
+  const ready = typed ? value.trim().length > 0 : question.answer_type === "multiple_choice" ? choice !== null : choices.length > 0;
 
   function submit(e: FormEvent) {
     e.preventDefault();
     if (!ready || locked || submitting) return;
     const body: AnswerBody = { item_id: question.item_id };
-    if (question.answer_type === "numeric") body.value = value.trim();
+    if (typed) body.value = value.trim();
     else if (question.answer_type === "multiple_choice") body.choice = choice!;
     else body.choices = choices;
     onSubmit(body);
   }
 
-  const correctIds = feedback && feedback.correct_answer.type !== "numeric" ? feedback.correct_answer.option_ids : [];
+  const ca = feedback?.correct_answer;
+  const correctIds = ca && ca.type !== "numeric" && ca.type !== "text" ? ca.option_ids : [];
 
   return (
     <form onSubmit={submit} className="space-y-5">
       <Html html={question.body_html} className="question-html" />
 
-      {question.answer_type === "numeric" && (
-        <div className="max-w-sm">
+      {typed && (
+        <div className="max-w-md">
           <label className="mb-1.5 block text-sm font-medium text-ink-muted" htmlFor="answer">
             Your answer
           </label>
@@ -79,18 +82,24 @@ export function QuestionView({ question, onSubmit, submitting, locked, feedback,
             value={value}
             onChange={(e) => setValue(e.target.value)}
             disabled={locked}
-            inputMode="decimal"
+            inputMode={question.answer_type === "numeric" ? "decimal" : "text"}
             autoComplete="off"
-            placeholder="e.g. 12, 0.5, 3/4 or 1 1/2"
+            autoCapitalize="off"
+            autoCorrect="off"
+            spellCheck={false}
+            placeholder={question.input_hint ?? "e.g. 12, 0.5, 3/4 or 1 1/2"}
             className={cx(
               "h-12 w-full rounded-xl border bg-surface-2 px-4 text-lg tracking-wide focus:outline-none",
               feedback ? (feedback.correct ? "border-strength" : "border-weakness") : "border-line-strong focus:border-brand",
             )}
           />
+          {question.answer_type === "algebraic" && (
+            <p className="mt-1.5 text-xs text-ink-faint">Type powers as x^2, roots as sqrt(5), π as pi. Any equivalent answer counts unless the question asks for a particular form.</p>
+          )}
         </div>
       )}
 
-      {question.answer_type !== "numeric" && (
+      {!typed && (
         <fieldset className="space-y-2.5">
           <legend className="mb-2 text-sm font-medium text-ink-muted">
             {question.answer_type === "check_all" ? "Select all that apply" : "Choose one answer"}
@@ -172,7 +181,7 @@ export function FeedbackPanel({ feedback }: { feedback: { correct: boolean; corr
         {!feedback.correct && (
           <div className="text-sm text-ink-muted">
             Correct answer:{" "}
-            {ca.type === "numeric" ? (
+            {ca.type === "numeric" || ca.type === "text" ? (
               <span className="font-mono text-ink">{ca.values.join(" or ")}</span>
             ) : (
               <span className="inline-flex flex-wrap gap-2 align-middle">
@@ -188,13 +197,15 @@ export function FeedbackPanel({ feedback }: { feedback: { correct: boolean; corr
   );
 }
 
-export function HintBox({ text, source }: { text: string; source: string }) {
+export function HintBox({ text, source, label, note }: { text: string; source: string; label?: string; note?: string }) {
   return (
     <div className="flex gap-3 rounded-2xl border border-accent/30 bg-accent/8 p-4 text-sm animate-rise">
       <Lightbulb className="mt-0.5 size-5 shrink-0 text-accent" />
       <div>
         <p className="mb-1 text-xs font-semibold uppercase tracking-wider text-accent">Hint · {source}</p>
+        {note && <p className="mb-1.5 text-xs text-developing">{note}</p>}
         <p className="leading-6 text-ink/90">{text.replace(/\*\*/g, "")}</p>
+        {label && <p className="mt-2 text-[11px] text-ink-faint">{label}</p>}
       </div>
     </div>
   );

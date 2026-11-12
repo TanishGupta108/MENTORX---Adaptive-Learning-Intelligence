@@ -7,12 +7,14 @@ import uuid
 from fastapi import APIRouter, Query, status
 
 from app.api.deps import DB, CurrentUser
-from app.tutor import admin, assess, practice, recommend, resources, state, views
+from app.tutor import admin, ai, assess, practice, recommend, resources, state, views
 from app.tutor import profile as profile_service
 from app.tutor.models import SkillState
 from app.tutor.schemas import (
+    AiStatusUpdate,
     AnswerRequest,
     CompletionRequest,
+    ExplainRequest,
     GoalRequest,
     ItemActive,
     ModeRequest,
@@ -150,9 +152,10 @@ def assessment_answer(
 
 @router.post("/practice", status_code=status.HTTP_201_CREATED)
 def start_practice(req: StartPractice, user: CurrentUser, db: DB) -> dict:
-    s = practice.start(db, user, req.skill_id, req.guided)
+    s = practice.start(db, user, req.skill_id, req.guided, req.kind)
     return {
         "id": s.id,
+        "kind": s.kind,
         "skill_id": s.skill_id,
         "mode": s.mode,
         "guided": s.guided,
@@ -168,8 +171,13 @@ def practice_next(session_id: uuid.UUID, user: CurrentUser, db: DB) -> dict:
 
 
 @router.post("/practice/{session_id}/hint")
-def practice_hint(session_id: uuid.UUID, user: CurrentUser, db: DB) -> dict:
-    return practice.hint(db, user, session_id)
+def practice_hint(
+    session_id: uuid.UUID,
+    user: CurrentUser,
+    db: DB,
+    ai_hint: bool = Query(default=False, alias="ai"),
+) -> dict:
+    return practice.hint(db, user, session_id, use_ai=ai_hint)
 
 
 @router.post("/practice/{session_id}/answer")
@@ -180,6 +188,19 @@ def practice_answer(session_id: uuid.UUID, req: PracticeAnswer, user: CurrentUse
 @router.post("/practice/{session_id}/end")
 def practice_end(session_id: uuid.UUID, user: CurrentUser, db: DB) -> dict:
     return practice.end(db, user, session_id)
+
+
+# ---------------------------------------------------------------- AI tutor
+
+
+@router.get("/ai/status")
+def ai_status(user: CurrentUser, db: DB) -> dict:
+    return ai.status(db, user)
+
+
+@router.post("/ai/explain")
+def ai_explain(req: ExplainRequest, user: CurrentUser, db: DB) -> dict:
+    return ai.explain(db, user, req.interaction_id)
 
 
 # ---------------------------------------------------------------- resources
@@ -207,6 +228,24 @@ def complete_resource(resource_id: int, req: CompletionRequest, user: CurrentUse
 def admin_overview(user: CurrentUser, db: DB) -> dict:
     admin.require_admin(user)
     return admin.overview(db)
+
+
+@router.get("/admin/model")
+def admin_model(user: CurrentUser, db: DB) -> dict:
+    admin.require_admin(user)
+    return admin.model_monitor(db)
+
+
+@router.get("/admin/ai")
+def admin_ai(user: CurrentUser, db: DB) -> list[dict]:
+    admin.require_admin(user)
+    return ai.admin_list(db)
+
+
+@router.patch("/admin/ai/{row_id}")
+def admin_ai_status(row_id: int, req: AiStatusUpdate, user: CurrentUser, db: DB) -> dict:
+    admin.require_admin(user)
+    return ai.admin_set_status(db, row_id, req.status)
 
 
 @router.get("/admin/skills")

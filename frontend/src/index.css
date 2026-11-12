@@ -82,6 +82,23 @@ body {
 .question-html math {
   font-size: 1.1em;
 }
+/* Dataset diagrams are drawn for a white page: keep them on white in the dark theme. */
+.question-html img,
+.option-html img {
+  display: inline-block;
+  max-width: 100%;
+  height: auto;
+  margin: 0.5rem 0;
+  border-radius: 0.5rem;
+  background: #fff;
+  padding: 0.25rem;
+  vertical-align: middle;
+}
+.question-html table {
+  display: block;
+  max-width: 100%;
+  overflow-x: auto;
+}
 .answer-blank {
   display: inline-block;
   min-width: 3.5rem;

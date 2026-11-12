@@ -163,6 +163,11 @@ export function AssessmentRunPage() {
           <span className="text-ink-muted">{question.skill.name}</span>
           <DifficultyTag level={question.difficulty} />
         </div>
+        {question.selection?.how && (
+          <p className="-mt-2 mb-5 flex items-start gap-1.5 text-xs text-ink-faint">
+            <Info className="mt-px size-3.5 shrink-0" /> {question.selection.how}
+          </p>
+        )}
         {loadingQ ? (
           <Spinner />
         ) : (

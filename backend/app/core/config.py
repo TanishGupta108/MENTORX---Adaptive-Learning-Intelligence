@@ -81,7 +81,30 @@ class Settings(BaseSettings):
     weakness_threshold: float = Field(default=0.45, gt=0, lt=1)  # observed accuracy
     reassessment_pass: float = Field(default=0.8, gt=0, le=1)  # "completed" a skill
     improvement_margin: float = Field(default=0.15, gt=0, lt=1)  # counts as improved
-    revision_after_days: int = Field(default=7, ge=1)
+    revision_after_days: int = Field(default=7, ge=1)  # first revision; later ones double
+    mixed_practice_length: int = Field(default=8, ge=3, le=30)
+
+    # --- AI tutor explanations (OpenRouter, OpenAI-compatible chat API) ---
+    # Empty key = the feature is switched off and the buttons are hidden.
+    openrouter_api_key: str = ""
+    ai_model: str = "google/gemma-4-26b-a4b-it:free"
+    # Free models are often rate-limited upstream; these are tried in order when the main
+    # model is busy or returns nothing. Comma-separated; empty = no fallback.
+    ai_fallback_models: str = (
+        "nvidia/nemotron-3-ultra-550b-a55b:free,baidu/ernie-5.5-flash-preview:free"
+    )
+    ai_base_url: str = "https://openrouter.ai/api/v1"
+    ai_timeout_seconds: float = Field(default=60, gt=0, le=180)
+    ai_daily_limit: int = Field(default=40, ge=0)  # new AI texts one student may request per day
+
+    @property
+    def ai_enabled(self) -> bool:
+        return bool(self.openrouter_api_key.strip())
+
+    @property
+    def ai_models(self) -> list[str]:
+        extra = [m.strip() for m in self.ai_fallback_models.split(",") if m.strip()]
+        return list(dict.fromkeys([self.ai_model.strip(), *extra]))
 
     @field_validator("database_url")
     @classmethod

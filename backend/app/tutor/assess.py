@@ -17,7 +17,7 @@ import random
 import uuid
 from datetime import timedelta
 
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 from app.core.config import get_settings
@@ -25,7 +25,14 @@ from app.core.errors import AppError
 from app.db.models import User
 from app.tutor import engine, kt, recommend, state
 from app.tutor import profile as profile_service
-from app.tutor.models import Assessment, Interaction, Item, Skill, SkillState
+from app.tutor.models import (
+    Assessment,
+    Interaction,
+    Item,
+    Skill,
+    SkillPrerequisite,
+    SkillState,
+)
 
 _rng = random.SystemRandom()
 CORE_MIN_ITEMS = 20
@@ -37,7 +44,130 @@ def _pick(cands: list[Item], target_rate: float = 0.6, k: int = 3) -> Item:
     return _rng.choice(ranked[:k])
 
 
+MAX_PREREQ_PROBES = 2
+MAX_REVISION_DAYS = 60
+
+
+def revision_interval(stage: int, cfg) -> int:
+    return min(cfg.revision_after_days * 2**stage, MAX_REVISION_DAYS)
+
+
+def _info(p: float) -> float:
+    """Information a yes/no answer gives when success is predicted with probability p
+    (largest at p = 0.5): the classic adaptive-testing criterion."""
+    return p * (1 - p)
+
+
+def _diagnostic_candidates(
+    db: Session, user: User, asked_codes: set[str], skills: list[Skill]
+) -> list[tuple[Skill, Item]]:
+    """One representative unseen question per candidate skill: a rated medium question if
+    possible (closest to 60% historical success), else any rated one."""
+    seen = engine.attempted_item_ids(db, user.id)
+    out = []
+    for s in skills:
+        if s.code in asked_codes:
+            continue  # one question per standard
+        pool = [
+            i
+            for i in db.scalars(engine.usable_items(db, s.id))
+            if i.id not in seen and i.difficulty != "unrated"
+        ]
+        if not pool:
+            continue
+        medium = [i for i in pool if i.difficulty == "medium"] or pool
+        out.append((s, _pick(medium)))
+    return out
+
+
+def choose_diagnostic_item(db: Session, user: User, a: Assessment) -> tuple[Item, dict]:
+    """Adaptive diagnostic: pick the next question from what has been answered so far.
+
+    1. If the last answer was wrong and that skill has a curated prerequisite that hasn't been
+       checked, check the building block next (at most MAX_PREREQ_PROBES times).
+    2. Otherwise cover the curriculum: only domains asked least so far are eligible, and among
+       them the model picks the question it is LEAST sure about (predicted success closest to
+       50%), which is the most informative one. Before any answer exists, the first question
+       is a typical-difficulty question from the lowest grade.
+    The reason for every choice is stored and shown on the diagnosis page.
+    """
+    trace = list((a.result or {}).get("trace", []))
+    asked = [db.get(Item, i) for i in a.planned_item_ids]
+    asked_skills = [db.get(Skill, i.skill_id) for i in asked if i]
+    asked_codes = {s.code for s in asked_skills}
+    probes = sum(1 for t in trace if t.get("kind") == "prerequisite")
+
+    last = db.scalar(
+        select(Interaction)
+        .where(Interaction.assessment_id == a.id)
+        .order_by(Interaction.created_at.desc(), Interaction.id.desc())
+        .limit(1)
+    )
+    if last is not None and not last.is_correct and probes < MAX_PREREQ_PROBES:
+        missed = db.get(Skill, last.skill_id)
+        pre_skills = list(
+            db.scalars(
+                select(Skill)
+                .join(SkillPrerequisite, SkillPrerequisite.prerequisite_id == Skill.id)
+                .where(SkillPrerequisite.skill_id == missed.id, Skill.is_available)
+                .order_by(Skill.grade, Skill.code)
+            )
+        )
+        cands = _diagnostic_candidates(db, user, asked_codes, pre_skills)
+        if cands:
+            skill, item = cands[0]
+            return item, {
+                "kind": "prerequisite",
+                "skill_id": skill.id,
+                "skill": skill.name,
+                "reason": f"You missed the {missed.name} question, so MENTORX checks one of its "
+                f"building blocks ({skill.code}) before moving on.",
+            }
+
+    core = list(
+        db.scalars(
+            select(Skill)
+            .where(Skill.is_available, Skill.n_items >= CORE_MIN_ITEMS)
+            .order_by(Skill.grade, Skill.code)
+        )
+    )
+    cands = _diagnostic_candidates(db, user, asked_codes, core)
+    if not cands:
+        raise AppError(409, "no_content", "There are no more questions for this diagnostic.")
+    per_domain: dict[str, int] = {}
+    for s in asked_skills:
+        per_domain[s.domain_code] = per_domain.get(s.domain_code, 0) + 1
+    least = min(per_domain.get(s.domain_code, 0) for s, _ in cands)
+    cands = [(s, i) for s, i in cands if per_domain.get(s.domain_code, 0) == least]
+
+    h = kt.state_for(db, user.id)
+    preds = kt.predict_items(h, [i for _, i in cands])
+    if preds and preds[0] is not None:
+        ranked = sorted(zip(cands, preds, strict=True), key=lambda cp: -_info(cp[1]))
+        (skill, item), p = _rng.choice(ranked[:2])
+        return item, {
+            "kind": "model",
+            "skill_id": skill.id,
+            "skill": skill.name,
+            "predicted_p": p,
+            "reason": f"The model was least sure how you'd do on {skill.domain_name} "
+            f"(predicted success {round(100 * p)}%), so this question tells us the most.",
+        }
+    lowest = min(s.grade or 99 for s, _ in cands)
+    first = [(s, i) for s, i in cands if (s.grade or 99) == lowest]
+    skill, item = _rng.choice(first)
+    return item, {
+        "kind": "start",
+        "skill_id": skill.id,
+        "skill": skill.name,
+        "reason": f"A typical grade-{lowest} question to start with "
+        f"({round(100 * (item.success_rate or 0.6))}% of students got it right first time).",
+    }
+
+
 def plan_diagnostic(db: Session, n: int) -> list[int]:
+    """Fixed (non-adaptive) diagnostic plan. Kept for reference and tests; the app now uses
+    choose_diagnostic_item, which picks each question after seeing the previous answers."""
     core = list(
         db.scalars(select(Skill).where(Skill.is_available, Skill.n_items >= CORE_MIN_ITEMS))
     )
@@ -124,8 +254,17 @@ def start(db: Session, user: User, kind: str, skill_id: int | None) -> Assessmen
         skill = db.get(Skill, skill_id) if skill_id else None
         if skill is None or not skill.is_available:
             raise AppError(404, "skill_not_found", "That skill isn't available.")
+    target_n = None
     if kind == "diagnostic":
-        planned = plan_diagnostic(db, cfg.diagnostic_length)
+        planned, target_n = [], cfg.diagnostic_length  # chosen one at a time (adaptive)
+        n_core = db.scalar(
+            select(func.count())
+            .select_from(Skill)
+            .where(Skill.is_available, Skill.n_items >= CORE_MIN_ITEMS)
+        )
+        if not n_core:
+            raise AppError(409, "no_content", "There are no questions available yet.")
+        target_n = min(target_n, int(n_core))
     elif kind == "skill_check":
         planned = plan_skill(db, user.id, skill.id, cfg.skill_check_length, fresh_only=True)
     else:
@@ -137,7 +276,7 @@ def start(db: Session, user: User, kind: str, skill_id: int | None) -> Assessmen
                 "You've already seen almost every question in this skill, so a fair reassessment "
                 "isn't possible. Keep practising instead.",
             )
-    if not planned:
+    if not planned and not target_n:
         raise AppError(409, "no_content", "There are no questions available for this assessment.")
     snapshot = {}
     if skill is not None:
@@ -152,6 +291,7 @@ def start(db: Session, user: User, kind: str, skill_id: int | None) -> Assessmen
         kind=kind,
         skill_id=skill.id if skill else None,
         planned_item_ids=planned,
+        target_n=target_n,
         result=snapshot,
     )
     db.add(a)
@@ -181,18 +321,34 @@ def next_item(db: Session, user: User, assessment_id: uuid.UUID) -> dict:
     if a.status != "active":
         raise AppError(409, "assessment_closed", "This assessment has finished.")
     if a.current_item_id is None:
-        done = set(db.scalars(select(Interaction.item_id).where(Interaction.assessment_id == a.id)))
-        remaining = [i for i in a.planned_item_ids if i not in done]
-        if not remaining:
+        if a.answered_count >= a.target_count:
             raise AppError(409, "assessment_complete", "No questions left.")
-        item = db.get(Item, remaining[0])
+        if a.kind == "diagnostic":
+            item, why = choose_diagnostic_item(db, user, a)
+            a.planned_item_ids = [*a.planned_item_ids, item.id]  # new list: JSON change tracked
+            result = dict(a.result or {})
+            result["trace"] = [*result.get("trace", []), {"item_id": item.id, **why}]
+            a.result = result
+        else:
+            done = set(
+                db.scalars(select(Interaction.item_id).where(Interaction.assessment_id == a.id))
+            )
+            remaining = [i for i in a.planned_item_ids if i not in done]
+            if not remaining:
+                raise AppError(409, "assessment_complete", "No questions left.")
+            item = db.get(Item, remaining[0])
         h = kt.state_for(db, user.id)
         a.current_item_id = item.id
         a.current_served_at = engine.now()
         a.current_predicted_p = kt.predict_items(h, [item])[0]
         db.commit()
     item = db.get(Item, a.current_item_id)
-    return engine.public_item(db, item, a.answered_count + 1, a.target_count)
+    out = engine.public_item(db, item, a.answered_count + 1, a.target_count)
+    if a.kind == "diagnostic":
+        trace = (a.result or {}).get("trace", [])
+        why = next((t for t in reversed(trace) if t.get("item_id") == item.id), None)
+        out["selection"] = {"how": why["reason"]} if why else None
+    return out
 
 
 def answer(db: Session, user: User, assessment_id: uuid.UUID, item_id: int, response: dict) -> dict:
@@ -223,6 +379,7 @@ def answer(db: Session, user: User, assessment_id: uuid.UUID, item_id: int, resp
         state.refresh(db, user.id)
     db.commit()
     return {
+        "interaction_id": inter.id,
         "correct": inter.is_correct,
         "correct_answer": engine.reveal(item),
         "message": "Correct. Nice work!"
@@ -297,9 +454,15 @@ def _reassessment_outcome(
         outcome = "not_improved"
     if st is not None:
         st.reassessed_accuracy = recent
+        now = engine.now()
+        was_revision = bool(st.completed_at and st.revision_due_at and st.revision_due_at <= now)
         if recent >= cfg.reassessment_pass:
-            st.completed_at = engine.now()
-            st.revision_due_at = engine.now() + timedelta(days=cfg.revision_after_days)
+            # spaced revision: each successful review doubles the gap (7, 14, 28, 56 days)
+            st.revision_stage = (st.revision_stage + 1) if was_revision else 0
+            st.completed_at = st.completed_at or now
+            st.revision_due_at = now + timedelta(days=revision_interval(st.revision_stage, cfg))
+        elif was_revision:
+            st.revision_stage = 0  # the review showed it needs work: keep it due
         if outcome == "not_improved":
             st.mode_override = None  # let the evidence-based mode step down to more support
     before = (a.result or {}).get("before", {})

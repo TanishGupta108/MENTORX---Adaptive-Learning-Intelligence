@@ -7,7 +7,8 @@ export type Mode = "foundation" | "guided" | "independent" | "advanced";
 export type Difficulty = "easy" | "medium" | "hard" | "unrated";
 export type GoalType = "assess_overall" | "improve_weak" | "learn_topic";
 export type GoalKind = "strengthen_skills" | "weekly_practice" | "master_skill";
-export type AnswerType = "numeric" | "multiple_choice" | "check_all";
+export type AnswerType = "numeric" | "multiple_choice" | "check_all" | "algebraic" | "numeric_expression" | "exact_fraction" | "exact_match";
+export const CHOICE_TYPES: AnswerType[] = ["multiple_choice", "check_all"];
 
 export type ModelInfo = {
   available: boolean;
@@ -65,6 +66,7 @@ export type Profile = {
   focus_skill: { id: number; name: string; code: string } | null;
   pace_preference: "more_support" | "balanced" | "challenge";
   hints_enabled: boolean;
+  daily_goal: number;
   goal: Goal | null;
   is_admin: boolean;
 };
@@ -117,7 +119,22 @@ export type Dashboard = {
   progress: DayPoint[];
   activity: Activity[];
   goal: Goal | null;
+  streak: Streak;
+  mixed: MixedInfo;
   model: ModelInfo;
+};
+
+export type Streak = { current: number; longest: number; today: number; daily_goal: number; goal_met: boolean; active_today: boolean };
+export type MixedInfo = { available: boolean; skills_practised: number; needs_skills: number; questions: number; answered: number; accuracy: number | null };
+
+export type TraceStep = {
+  position: number;
+  skill_id: number | null;
+  skill: string | null;
+  kind: "start" | "model" | "prerequisite";
+  reason: string;
+  predicted_p: number | null;
+  correct: boolean | null;
 };
 
 export type Diagnosis = {
@@ -127,6 +144,7 @@ export type Diagnosis = {
   assessed: SkillSummary[];
   model_estimates_for_unassessed: SkillSummary[];
   recommendations: Recommendation[];
+  selection_trace: TraceStep[];
   model: ModelInfo;
 };
 
@@ -148,9 +166,11 @@ export type Resource = {
 
 export type CorrectAnswer =
   | { type: "numeric"; values: string[] }
+  | { type: "text"; values: string[] }
   | { type: "multiple_choice" | "check_all"; option_ids: string[]; options_html: string[] };
 
 export type Mistake = {
+  interaction_id: number;
   item_id: number;
   body_html: string;
   answer_type: AnswerType;
@@ -201,14 +221,17 @@ export type SkillDetail = SkillSummary & {
 export type Question = {
   item_id: number;
   skill: { id: number; code: string; name: string };
+  skills?: { id: number; code: string; name: string }[];
+  mixed?: boolean;
   body_html: string;
   answer_type: AnswerType;
+  input_hint?: string | null;
   options: { id: string; html: string }[];
   difficulty: Difficulty;
   position: number | null;
   total: number | null;
-  // practice only
-  selection?: { requested: string; served: string; how: string; fallback_note: string | null };
+  // why this question was chosen (practice, and the adaptive diagnostic)
+  selection?: { requested?: string; served?: string; how: string; fallback_note?: string | null } | null;
   mode?: Mode;
   hint_used?: boolean;
 };
@@ -229,6 +252,7 @@ export type Assessment = {
 };
 
 export type AssessmentAnswer = {
+  interaction_id: number;
   correct: boolean;
   correct_answer: CorrectAnswer;
   message: string;
@@ -238,7 +262,7 @@ export type AssessmentAnswer = {
   result: ReassessmentResult | null;
 };
 
-export type PracticeStart = { id: string; skill_id: number; mode: Mode; guided: boolean; difficulty: Difficulty; total: number; answered: number };
+export type PracticeStart = { id: string; kind: "skill" | "mixed"; skill_id: number | null; mode: Mode; guided: boolean; difficulty: Difficulty; total: number; answered: number };
 
 export type PracticeSummary = {
   accuracy: number;
@@ -248,10 +272,12 @@ export type PracticeSummary = {
   skill_attempts: number;
   predicted_p: number | null;
   mode: Mode | null;
-  next: { action: "reassess" | "foundation" | "practice"; label: string; why: string };
+  mixed?: boolean;
+  next: { action: "reassess" | "foundation" | "practice" | "mixed"; label: string; why: string };
 };
 
 export type PracticeAnswer = {
+  interaction_id: number;
   correct: boolean;
   hint_used: boolean;
   revealed: boolean;
@@ -283,6 +309,7 @@ export type Analytics = {
     assessment_accuracy: number | null;
     practice_accuracy: number | null;
     hint_rate: number | null;
+    mixed_accuracy: number | null;
     assessments: number;
     practice_sessions: number;
     resources_completed: number;
@@ -291,10 +318,14 @@ export type Analytics = {
   daily: DayPoint[];
   skills: SkillSummary[];
   assessments: { id: string; kind: string; skill: string | null; accuracy: number; correct: number; answered: number; completed_at: string; outcome: string | null }[];
-  practice: { id: string; skill: string; mode: Mode; accuracy: number; answered: number; started_at: string }[];
+  practice: { id: string; skill: string; kind: "skill" | "mixed"; mode: Mode; accuracy: number; answered: number; started_at: string }[];
   activity: Activity[];
   model: ModelInfo;
 };
+
+export type Hint = { kind: string; text: string; source: string; label?: string; note?: string };
+export type AiStatus = { enabled: boolean; model: string | null; daily_limit: number; used_today: number; label: string };
+export type AiText = { kind: "explanation" | "hint"; content: string; model: string; cached: boolean; label: string };
 
 const V2 = "/api/v2";
 
@@ -302,7 +333,7 @@ export const tutor = {
   profile: () => api.get<Profile>(`${V2}/profile`),
   onboard: (body: { goal_type: GoalType; focus_skill_id?: number | null; goal_kind: GoalKind; goal_target?: number | null }) =>
     api.post<Profile>(`${V2}/onboarding`, body),
-  updateProfile: (body: Partial<{ pace_preference: Profile["pace_preference"]; hints_enabled: boolean; goal_type: GoalType; focus_skill_id: number | null }>) =>
+  updateProfile: (body: Partial<{ pace_preference: Profile["pace_preference"]; hints_enabled: boolean; goal_type: GoalType; focus_skill_id: number | null; daily_goal: number }>) =>
     api.patch<Profile>(`${V2}/profile`, body),
   setGoal: (body: { kind: GoalKind; target?: number | null; skill_id?: number | null }) => api.put<Goal>(`${V2}/goal`, body),
   catalog: () => api.get<Catalog>(`${V2}/subject`),
@@ -317,8 +348,11 @@ export const tutor = {
   assessmentNext: (id: string) => api.get<Question>(`${V2}/assessments/${id}/next`),
   assessmentAnswer: (id: string, body: AnswerBody) => api.post<AssessmentAnswer>(`${V2}/assessments/${id}/answer`, body),
   startPractice: (skill_id: number, guided: boolean) => api.post<PracticeStart>(`${V2}/practice`, { skill_id, guided }),
+  startMixed: () => api.post<PracticeStart>(`${V2}/practice`, { kind: "mixed" }),
   practiceNext: (id: string) => api.get<Question>(`${V2}/practice/${id}/next`),
-  practiceHint: (id: string) => api.post<{ kind: string; text: string; source: string }>(`${V2}/practice/${id}/hint`),
+  practiceHint: (id: string, ai = false) => api.post<Hint>(`${V2}/practice/${id}/hint${ai ? "?ai=true" : ""}`),
+  aiStatus: () => api.get<AiStatus>(`${V2}/ai/status`),
+  aiExplain: (interaction_id: number) => api.post<AiText>(`${V2}/ai/explain`, { interaction_id }),
   practiceAnswer: (id: string, body: AnswerBody & { reveal?: boolean }) => api.post<PracticeAnswer>(`${V2}/practice/${id}/answer`, body),
   practiceEnd: (id: string) => api.post<{ status: string; summary: PracticeSummary | null }>(`${V2}/practice/${id}/end`),
   resources: (params: { kind?: string; q?: string } = {}) => {
@@ -330,10 +364,22 @@ export const tutor = {
 
 export type AdminSkill = { id: number; code: string; name: string; description: string; domain_name: string; n_items: number; is_available: boolean };
 export type AdminItem = { id: number; preview: string; answer_type: string; difficulty: Difficulty; success_rate: number | null; train_attempts: number; exclusion_reason: string | null; is_active: boolean };
+export type Metrics = { n: number; observed_rate: number | null; mean_predicted: number | null; auc: number | null; log_loss: number | null; brier: number | null; accuracy: number | null };
+export type ModelMonitor = {
+  model: ModelInfo;
+  overall: Metrics;
+  by_context: Record<string, Metrics>;
+  calibration: { bin: string; mean_predicted: number; observed_rate: number; n: number }[];
+  min_for_metrics: number;
+};
+export type AdminAiText = { id: number; item_id: number; question: string; kind: "explanation" | "hint"; answer_sig: string; content: string; model: string; status: "ok" | "hidden"; latency_ms: number | null; created_at: string };
 export type AdminPrereq = { skill_id: number; skill: string; prerequisite_id: number; prerequisite: string; source: string };
 
 export const adminApi = {
-  overview: () => api.get<{ skills: number; available_skills: number; items: number; usable_items: number; disabled_by_admin: number; exclusions: { reason: string; count: number }[]; resources: number; prerequisites: number }>(`${V2}/admin/overview`),
+  model: () => api.get<ModelMonitor>(`${V2}/admin/model`),
+  aiTexts: () => api.get<AdminAiText[]>(`${V2}/admin/ai`),
+  setAiText: (id: number, status: "ok" | "hidden") => api.patch<{ id: number; status: string }>(`${V2}/admin/ai/${id}`, { status }),
+  overview: () => api.get<{ skills: number; available_skills: number; items: number; usable_items: number; usable_mixed_items: number; disabled_by_admin: number; exclusions: { reason: string; count: number }[]; resources: number; prerequisites: number }>(`${V2}/admin/overview`),
   skills: (q?: string) => api.get<AdminSkill[]>(`${V2}/admin/skills${q ? `?q=${encodeURIComponent(q)}` : ""}`),
   updateSkill: (id: number, description: string) => api.patch<{ id: number }>(`${V2}/admin/skills/${id}`, { description }),
   items: (skillId: number) => api.get<AdminItem[]>(`${V2}/admin/skills/${skillId}/items`),

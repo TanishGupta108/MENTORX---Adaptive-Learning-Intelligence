@@ -7,6 +7,9 @@ Principles (from the product brief):
   weakness or a strength when the student's own answers support it.
 - Learning modes are per skill and change as evidence changes. Speed is never used to judge
   understanding.
+- Only single-skill questions are evidence for a skill. A multi-skill question has one shared
+  score, so it is never counted for each of its skills (the model still sees it, with all of
+  its skills, because that is how it was trained).
 """
 
 from __future__ import annotations
@@ -116,7 +119,11 @@ def _evidence_from_rows(rows: list[tuple[bool, bool]]) -> Evidence:
 def evidence_for(db: Session, user_id: uuid.UUID, skill_id: int) -> Evidence:
     rows = db.execute(
         select(Interaction.is_correct, Interaction.hint_used)
-        .where(Interaction.user_id == user_id, Interaction.skill_id == skill_id)
+        .where(
+            Interaction.user_id == user_id,
+            Interaction.skill_id == skill_id,
+            Interaction.n_skills == 1,
+        )
         .order_by(Interaction.created_at, Interaction.id)
     ).all()
     return _evidence_from_rows([(c, h) for c, h in rows])
@@ -139,7 +146,7 @@ def refresh(db: Session, user_id: uuid.UUID, now: datetime | None = None) -> dic
             Interaction.hint_used,
             Interaction.created_at,
         )
-        .where(Interaction.user_id == user_id)
+        .where(Interaction.user_id == user_id, Interaction.n_skills == 1)  # see module doc
         .order_by(Interaction.created_at, Interaction.id)
     ).all()
     by_skill: dict[int, list[tuple[bool, bool]]] = {}

@@ -15,6 +15,10 @@ os.environ.setdefault(
 os.environ["DATABASE_URL"] = os.environ["TEST_DATABASE_URL"]
 os.environ["ENVIRONMENT"] = "test"
 os.environ["PILOT_ACTIVE"] = "false"
+# The AI tutor must never reach a real model from tests (a developer's .env may hold a key):
+# a dummy key and an address nothing listens on. AI tests replace llm.complete.
+os.environ["OPENROUTER_API_KEY"] = "test-key-not-real"
+os.environ["AI_BASE_URL"] = "http://127.0.0.1:9/never"
 
 import pytest  # noqa: E402
 from alembic import command  # noqa: E402

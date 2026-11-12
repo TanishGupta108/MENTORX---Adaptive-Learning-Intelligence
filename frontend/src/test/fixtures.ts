@@ -39,6 +39,7 @@ export const profile: Profile = {
   focus_skill: null,
   pace_preference: "balanced",
   hints_enabled: true,
+  daily_goal: 10,
   goal: { id: 1, kind: "strengthen_skills", label: "Build 3 likely strengths", target: 3, value: 1, achieved: false, skill_id: null },
   is_admin: false,
 };
@@ -65,6 +66,8 @@ export const dashboard: Dashboard = {
   progress: [{ date: "2026-11-10", attempts: 12, correct: 8, accuracy: 0.66 }],
   activity: [{ kind: "diagnostic", title: "Diagnostic assessment", detail: "6/10 correct", at: "2026-11-10T10:00:00Z", id: "a1", skill_id: null }],
   goal: profile.goal,
+  streak: { current: 3, longest: 5, today: 4, daily_goal: 10, goal_met: false, active_today: true },
+  mixed: { available: true, skills_practised: 10, needs_skills: 2, questions: 354, answered: 0, accuracy: null },
   model,
 };
 
@@ -75,6 +78,10 @@ export const diagnosis: Diagnosis = {
   assessed: [skill(), skill({ id: 130, name: "Solve Unit Rate Problems", status: "likely_strength", correct: 2, attempts: 2, observed_accuracy: 1, predicted_p: 0.81 })],
   model_estimates_for_unassessed: [skill({ id: 217, name: "Solve 2-Step Equations", status: "needs_assessment", evidence: "none", attempts: 0, correct: 0, observed_accuracy: null, predicted_p: 0.41 })],
   recommendations: [rec],
+  selection_trace: [
+    { position: 1, skill_id: 129, skill: "Create Tables to Compare Equivalent Ratios", kind: "start", reason: "A typical grade-6 question to start with (61% of students got it right first time).", predicted_p: null, correct: true },
+    { position: 2, skill_id: 166, skill: "Write & Solve 1-Step Equations", kind: "prerequisite", reason: "You missed the Solve 2-Step Equations question, so MENTORX checks one of its building blocks (6.EE.B.7) before moving on.", predicted_p: null, correct: false },
+  ],
   model,
 };
 

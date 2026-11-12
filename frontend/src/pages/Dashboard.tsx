@@ -1,10 +1,12 @@
-import { Activity as ActivityIcon, ArrowRight, BookOpen, CalendarClock, ClipboardCheck, Flame, Goal, Layers3, LineChart, Map, Play, Sparkles, Target, TrendingUp } from "lucide-react";
-import { Link } from "react-router";
+import { useState } from "react";
+import { Activity as ActivityIcon, ArrowRight, BookOpen, CalendarClock, ClipboardCheck, Flame, Goal, Layers3, LineChart, Lock, Map, Play, Shuffle, Sparkles, Target, TrendingUp } from "lucide-react";
+import { Link, useNavigate } from "react-router";
+import { ApiError } from "../api/client";
 import { tutor } from "../api/tutor";
-import type { Activity, Recommendation, Status } from "../api/tutor";
+import type { Activity, MixedInfo, Recommendation, Status, Streak } from "../api/tutor";
 import { useApi } from "../hooks/useApi";
 import { ActivityChart } from "../components/charts";
-import { Button, Card, CardTitle, EmptyState, ErrorState, ModeBadge, ModelEstimate, PageLoader, ProgressBar, Stat, STATUS_META, StatusBadge, timeAgo } from "../components/ui";
+import { Button, Card, CardTitle, EmptyState, ErrorState, ModeBadge, ModelEstimate, PageLoader, pct, ProgressBar, Stat, STATUS_META, StatusBadge, timeAgo } from "../components/ui";
 
 function greeting() {
   const h = new Date().getHours();
@@ -69,6 +71,70 @@ export function ActivityList({ items }: { items: Activity[] }) {
         );
       })}
     </ul>
+  );
+}
+
+export function StreakCard({ s }: { s: Streak }) {
+  return (
+    <Card>
+      <CardTitle icon={<Flame className="size-4 text-weakness" />} title="Today" action={<Link to="/profile" className="text-sm text-brand hover:underline">Daily goal</Link>} />
+      <div className="flex items-center gap-4">
+        <div className="grid size-14 shrink-0 place-items-center rounded-2xl bg-weakness/10">
+          <span className="text-xl font-semibold text-weakness">{s.current}</span>
+        </div>
+        <div className="min-w-0 flex-1">
+          <p className="font-medium">{s.current === 1 ? "1-day streak" : `${s.current}-day streak`}</p>
+          <p className="text-xs text-ink-faint">Longest: {s.longest} {s.longest === 1 ? "day" : "days"}</p>
+        </div>
+      </div>
+      <div className="mt-4 flex items-center gap-3">
+        <ProgressBar value={Math.min(s.today, s.daily_goal)} max={s.daily_goal} tone={s.goal_met ? "strength" : "brand"} />
+        <span className="shrink-0 text-sm font-semibold">
+          {s.today}/{s.daily_goal}
+        </span>
+      </div>
+      <p className="mt-2 text-xs text-ink-muted">
+        {s.goal_met ? "Daily goal reached. Well done!" : s.active_today ? "Questions answered today. Keep going!" : "Answer a question today to keep your streak."}
+      </p>
+    </Card>
+  );
+}
+
+export function MixedCard({ m }: { m: MixedInfo }) {
+  const navigate = useNavigate();
+  const [busy, setBusy] = useState(false);
+  const [err, setErr] = useState<string>();
+  async function start() {
+    setBusy(true);
+    setErr(undefined);
+    try {
+      const p = await tutor.startMixed();
+      navigate(`/practice/${p.id}`);
+    } catch (e) {
+      setErr(e instanceof ApiError ? e.message : "Couldn't start mixed practice.");
+      setBusy(false);
+    }
+  }
+  return (
+    <Card>
+      <CardTitle icon={<Shuffle className="size-4" />} title="Mixed practice" subtitle="Real problems combine skills" />
+      {m.available ? (
+        <>
+          <p className="text-sm text-ink-muted">
+            {m.questions} problems that use two or more skills at once, chosen by the model for your level.
+            {m.answered > 0 && ` So far: ${pct(m.accuracy)} correct over ${m.answered}.`}
+          </p>
+          <Button size="sm" className="mt-3" onClick={start} loading={busy} icon={<Shuffle className="size-4" />}>
+            Start a mixed round
+          </Button>
+          {err && <p className="mt-2 text-xs text-developing">{err}</p>}
+        </>
+      ) : (
+        <p className="flex items-start gap-2 text-sm text-ink-muted">
+          <Lock className="mt-0.5 size-4 shrink-0" /> Opens after you&apos;ve answered questions in {m.needs_skills} skills ({m.skills_practised} so far).
+        </p>
+      )}
+    </Card>
   );
 }
 
@@ -151,6 +217,7 @@ export function DashboardPage() {
         </Card>
 
         <div className="space-y-6">
+          <StreakCard s={data.streak} />
           <Card>
             <CardTitle icon={<Goal className="size-4" />} title="Learning goal" action={<Link to="/profile" className="text-sm text-brand hover:underline">Change</Link>} />
             {data.goal ? (
@@ -184,6 +251,8 @@ export function DashboardPage() {
               </ul>
             </Card>
           )}
+
+          {data.diagnostic_completed && <MixedCard m={data.mixed} />}
 
           <Card>
             <CardTitle icon={<ActivityIcon className="size-4" />} title="Recent activity" />

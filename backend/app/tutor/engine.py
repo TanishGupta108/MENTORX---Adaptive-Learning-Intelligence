@@ -19,11 +19,23 @@ from sqlalchemy.orm import Session
 
 from app.core.errors import AppError
 from app.tutor import answers
-from app.tutor.models import Interaction, Item, Skill
+from app.tutor.models import Interaction, Item, ItemSkill, Skill
 
 
 def now() -> datetime:
     return datetime.now(UTC)
+
+
+def item_skills(db: Session, item_ids) -> dict[int, list[int]]:
+    """All skills of each given question (the dataset's full mapping)."""
+    out: dict[int, list[int]] = {}
+    if not item_ids:
+        return out
+    for iid, sid in db.execute(
+        select(ItemSkill.item_id, ItemSkill.skill_id).where(ItemSkill.item_id.in_(list(item_ids)))
+    ):
+        out.setdefault(iid, []).append(sid)
+    return {k: sorted(v) for k, v in out.items()}
 
 
 def public_item(
@@ -31,11 +43,18 @@ def public_item(
 ) -> dict:
     """Everything the client needs to render a question, and nothing that reveals the answer."""
     skill = db.get(Skill, item.skill_id)
+    skills = [skill]
+    if item.n_skills > 1:
+        ids = item_skills(db, [item.id]).get(item.id, [item.skill_id])
+        skills = [db.get(Skill, i) for i in ids]
     return {
         "item_id": item.id,
         "skill": {"id": skill.id, "code": skill.code, "name": skill.name},
+        "skills": [{"id": s.id, "code": s.code, "name": s.name} for s in skills if s],
+        "mixed": item.n_skills > 1,
         "body_html": item.body_html,
         "answer_type": item.answer_type,
+        "input_hint": answers.INPUT_HINTS.get(item.answer_type),
         "options": [{"id": o["id"], "html": o["html"]} for o in item.options],
         "difficulty": item.difficulty,
         "position": position,
@@ -43,8 +62,13 @@ def public_item(
     }
 
 
-def usable_items(db: Session, skill_id: int | None = None):
+def usable_items(db: Session, skill_id: int | None = None, mixed: bool = False):
+    """Servable questions. With a skill: that skill's SINGLE-skill questions (multi-skill
+    questions are only used in Mixed practice). mixed=True: multi-skill questions only."""
     stmt = select(Item).where(Item.is_active, Item.exclusion_reason.is_(None))
+    if mixed:
+        return stmt.where(Item.n_skills > 1)
+    stmt = stmt.where(Item.n_skills == 1)
     if skill_id is not None:
         stmt = stmt.where(Item.skill_id == skill_id)
     return stmt
@@ -80,6 +104,7 @@ def record(
         user_id=user_id,
         item_id=item.id,
         skill_id=item.skill_id,
+        n_skills=item.n_skills,
         context=context,
         assessment_id=assessment_id,
         practice_id=practice_id,
@@ -107,9 +132,12 @@ def reveal(item: Item) -> dict:
 
 
 def skill_accuracy(db: Session, user_id: uuid.UUID, skill_id: int) -> tuple[int, int]:
+    """(correct, answered) on the skill's own single-skill questions."""
     n, c = db.execute(
         select(func.count(), func.count().filter(Interaction.is_correct)).where(
-            Interaction.user_id == user_id, Interaction.skill_id == skill_id
+            Interaction.user_id == user_id,
+            Interaction.skill_id == skill_id,
+            Interaction.n_skills == 1,
         )
     ).one()
     return int(c), int(n)

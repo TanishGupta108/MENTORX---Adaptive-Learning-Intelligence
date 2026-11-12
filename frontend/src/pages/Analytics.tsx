@@ -31,11 +31,12 @@ export function AnalyticsPage() {
     <div className="space-y-6">
       <PageHeader eyebrow="Performance analytics" title="Am I actually improving?" subtitle="Everything here is your observed performance. The model's predictions are labelled and drawn separately." />
 
-      <section className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+      <section className="grid grid-cols-2 gap-3 lg:grid-cols-5">
         <Stat label="Observed accuracy" value={pct(t.observed_accuracy)} hint={`${t.correct} of ${t.questions} questions`} icon={<Target className="size-4" />} />
         <Stat label="Assessment accuracy" value={pct(t.assessment_accuracy)} hint={`${t.assessments} assessments`} icon={<ClipboardCheck className="size-4" />} />
         <Stat label="Practice accuracy" value={pct(t.practice_accuracy)} hint={`${t.practice_sessions} sessions`} icon={<TrendingUp className="size-4" />} />
         <Stat label="Hints used" value={pct(t.hint_rate)} hint="of all answers" icon={<Lightbulb className="size-4" />} />
+        <Stat label="Mixed problems" value={pct(t.mixed_accuracy)} hint="multi-skill questions, observed" icon={<Target className="size-4" />} />
       </section>
 
       <Card>

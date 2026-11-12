@@ -13,7 +13,7 @@ from sqlalchemy.orm import Session
 
 from app.core.config import get_settings
 from app.db.models import User
-from app.tutor import engine, kt, recommend, resources, state
+from app.tutor import engine, kt, practice, recommend, resources, state
 from app.tutor import profile as profile_service
 from app.tutor.models import (
     Assessment,
@@ -181,8 +181,32 @@ def diagnosis(db: Session, user: User) -> dict:
         "assessed": assessed,
         "model_estimates_for_unassessed": sorted(with_pred, key=lambda s: s["predicted_p"])[:8],
         "recommendations": _recs_out(db, user, states, 3),
+        "selection_trace": _diagnostic_trace(db, a) if a and a.kind == "diagnostic" else [],
         "model": kt.info().__dict__,
     }
+
+
+def _diagnostic_trace(db: Session, a: Assessment) -> list[dict]:
+    """Why each diagnostic question was chosen, with the observed result next to it."""
+    results = dict(
+        db.execute(
+            select(Interaction.item_id, Interaction.is_correct).where(
+                Interaction.assessment_id == a.id
+            )
+        ).all()
+    )
+    return [
+        {
+            "position": i + 1,
+            "skill_id": t.get("skill_id"),
+            "skill": t.get("skill"),
+            "kind": t.get("kind"),
+            "reason": t.get("reason"),
+            "predicted_p": t.get("predicted_p"),
+            "correct": results.get(t.get("item_id")),
+        }
+        for i, t in enumerate((a.result or {}).get("trace", []))
+    ]
 
 
 def _recent_mistakes(db: Session, user: User, skill_id: int, limit: int = 4) -> list[dict]:
@@ -192,6 +216,7 @@ def _recent_mistakes(db: Session, user: User, skill_id: int, limit: int = 4) -> 
         .where(
             Interaction.user_id == user.id,
             Interaction.skill_id == skill_id,
+            Interaction.n_skills == 1,
             ~Interaction.is_correct,
         )
         .order_by(Interaction.created_at.desc())
@@ -199,6 +224,7 @@ def _recent_mistakes(db: Session, user: User, skill_id: int, limit: int = 4) -> 
     ).all()
     return [
         {
+            "interaction_id": inter.id,
             "item_id": it.id,
             "body_html": it.body_html,
             "answer_type": it.answer_type,
@@ -306,7 +332,12 @@ def skill_detail(db: Session, user: User, skill_id: int) -> dict:
         "difficulty_counts": dict(
             db.execute(
                 select(Item.difficulty, func.count())
-                .where(Item.skill_id == skill_id, Item.is_active, Item.exclusion_reason.is_(None))
+                .where(
+                    Item.skill_id == skill_id,
+                    Item.n_skills == 1,
+                    Item.is_active,
+                    Item.exclusion_reason.is_(None),
+                )
                 .group_by(Item.difficulty)
             ).all()
         ),
@@ -386,11 +417,16 @@ def _activity(db: Session, user: User, limit: int = 8) -> list[dict]:
         .order_by(PracticeSession.started_at.desc())
         .limit(limit)
     ):
-        skill = db.get(Skill, p.skill_id)
+        skill = db.get(Skill, p.skill_id) if p.skill_id else None
+        title = (
+            "Mixed practice"
+            if p.kind == "mixed"
+            else f"{'Guided practice' if p.guided else 'Practice'}: {skill.name}"
+        )
         items.append(
             {
                 "kind": "practice",
-                "title": f"{'Guided practice' if p.guided else 'Practice'}: {skill.name}",
+                "title": title,
                 "detail": f"{p.correct_count}/{p.answered_count} correct · {MODE_LABEL[p.mode]} mode",
                 "at": p.ended_at or p.started_at,
                 "id": str(p.id),
@@ -446,6 +482,11 @@ def dashboard(db: Session, user: User) -> dict:
     ]
     goal = profile_service.goal_progress(db, user)
     db.commit()  # goal achievement timestamp
+    practised = practice.practised_skills(db, user.id)
+    mixed_left = db.scalar(
+        select(func.count()).select_from(engine.usable_items(db, mixed=True).subquery())
+    )
+    mc, mn = practice.mixed_accuracy(db, user.id)
     return {
         "name": user.full_name.split(" ")[0],
         "diagnostic_completed": prof.diagnostic_completed_at is not None,
@@ -471,7 +512,46 @@ def dashboard(db: Session, user: User) -> dict:
         "progress": _daily(db, user, 14),
         "activity": _activity(db, user, 6),
         "goal": goal,
+        "streak": streak(db, user, prof.daily_goal),
+        "mixed": {
+            "available": len(practised) >= practice.MIXED_MIN_SKILLS and bool(mixed_left),
+            "skills_practised": len(practised),
+            "needs_skills": practice.MIXED_MIN_SKILLS,
+            "questions": int(mixed_left or 0),
+            "answered": mn,
+            "accuracy": mc / mn if mn else None,
+        },
         "model": kt.info().__dict__,
+    }
+
+
+def streak(db: Session, user: User, daily_goal: int) -> dict:
+    """Days in a row with at least one answer (UTC days), and today's count vs the goal.
+    A streak stays alive until the end of the next day."""
+    since = datetime.now(UTC) - timedelta(days=400)
+    stamps = db.scalars(
+        select(Interaction.created_at).where(
+            Interaction.user_id == user.id, Interaction.created_at >= since
+        )
+    ).all()
+    days = {t.astimezone(UTC).date() for t in stamps}
+    today = datetime.now(UTC).date()
+    today_count = sum(1 for t in stamps if t.astimezone(UTC).date() == today)
+    cur, d = 0, today if today in days else today - timedelta(days=1)
+    while d in days:
+        cur += 1
+        d -= timedelta(days=1)
+    longest, run, prev = 0, 0, None
+    for day in sorted(days):
+        run = run + 1 if prev is not None and (day - prev).days == 1 else 1
+        longest, prev = max(longest, run), day
+    return {
+        "current": cur,
+        "longest": longest,
+        "today": today_count,
+        "daily_goal": daily_goal,
+        "goal_met": today_count >= daily_goal,
+        "active_today": today in days,
     }
 
 
@@ -576,6 +656,9 @@ def analytics(db: Session, user: User) -> dict:
             if by_ctx["practice"][0]
             else None,
             "hint_rate": hints / n if n else None,
+            "mixed_accuracy": (lambda c, m: c / m if m else None)(
+                *practice.mixed_accuracy(db, user.id)
+            ),
             "assessments": len(assessments),
             "practice_sessions": len(sessions),
             "resources_completed": int(res_done or 0),
@@ -599,7 +682,8 @@ def analytics(db: Session, user: User) -> dict:
         "practice": [
             {
                 "id": p.id,
-                "skill": skills[p.skill_id].name,
+                "skill": skills[p.skill_id].name if p.skill_id else "Mixed practice",
+                "kind": p.kind,
                 "mode": p.mode,
                 "accuracy": p.correct_count / max(p.answered_count, 1),
                 "answered": p.answered_count,

@@ -1,9 +1,10 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router";
-import { ArrowDown, ArrowRight, ArrowUp, Eye, Flag, HelpCircle, Lightbulb, Sparkles } from "lucide-react";
+import { ArrowDown, ArrowRight, ArrowUp, Bot, Eye, Flag, HelpCircle, Lightbulb, Shuffle, Sparkles } from "lucide-react";
 import { ApiError } from "../api/client";
 import { tutor } from "../api/tutor";
-import type { AnswerBody, Difficulty, PracticeAnswer, PracticeSummary, Question } from "../api/tutor";
+import type { AnswerBody, Difficulty, Hint, PracticeAnswer, PracticeSummary, Question } from "../api/tutor";
+import { AiExplain, useAiEnabled } from "../components/AiTutor";
 import { useProfile } from "../components/AppShell";
 import { DifficultyTag, HintBox, QuestionView } from "../components/QuestionView";
 import { Button, Card, cx, ErrorState, ModeBadge, ModelEstimate, PageLoader, pct, ProgressBar, Ring, Spinner } from "../components/ui";
@@ -21,7 +22,8 @@ function DifficultyTrack({ level }: { level: Difficulty }) {
   );
 }
 
-function Summary({ s, skillId, onAgain }: { s: PracticeSummary; skillId: number; onAgain: () => void }) {
+function Summary({ s, skillId, onAgain }: { s: PracticeSummary; skillId: number | null; onAgain: () => void }) {
+  if (s.mixed || skillId === null) return <MixedSummary s={s} onAgain={onAgain} />;
   return (
     <Card className="mx-auto max-w-2xl p-8 text-center">
       <div className="flex justify-center">
@@ -58,13 +60,44 @@ function Summary({ s, skillId, onAgain }: { s: PracticeSummary; skillId: number;
   );
 }
 
+function MixedSummary({ s, onAgain }: { s: PracticeSummary; onAgain: () => void }) {
+  return (
+    <Card className="mx-auto max-w-2xl p-8 text-center">
+      <div className="flex justify-center">
+        <Ring value={s.accuracy} size={110} stroke={9} label={<span className="text-xl">{pct(s.accuracy)}</span>} color={s.accuracy >= 0.7 ? "#34d399" : s.accuracy >= 0.4 ? "#fbbf24" : "#fb7185"} />
+      </div>
+      <h1 className="mt-5 text-2xl font-semibold">Mixed practice complete</h1>
+      <p className="mt-1 text-ink-muted">
+        You answered {s.correct} of {s.answered} mixed problems correctly.
+      </p>
+      <div className="mt-6 rounded-2xl border border-line bg-surface-2 p-4 text-left">
+        <p className="text-xs font-semibold uppercase tracking-wider text-ink-faint">All your mixed problems</p>
+        <p className="mt-1 text-xl font-semibold">{pct(s.skill_accuracy)}</p>
+        <p className="text-xs text-ink-faint">{s.skill_attempts} answers (observed). Mixed problems combine skills, so they never change a single skill&apos;s diagnosis.</p>
+      </div>
+      <div className="mt-6 rounded-2xl border border-brand/30 bg-brand-soft p-4 text-left">
+        <p className="font-medium">{s.next.label}</p>
+        <p className="mt-1 text-sm text-ink-muted">{s.next.why}</p>
+      </div>
+      <div className="mt-6 flex flex-wrap justify-center gap-3">
+        {s.next.action === "mixed" && <Button onClick={onAgain}>Another mixed round</Button>}
+        <Button variant="secondary" to="/dashboard">
+          Back to the dashboard
+        </Button>
+      </div>
+    </Card>
+  );
+}
+
 export function PracticePage() {
   const { id = "" } = useParams();
   const navigate = useNavigate();
   const { profile } = useProfile();
   const [q, setQ] = useState<Question | null>(null);
   const [fb, setFb] = useState<PracticeAnswer | null>(null);
-  const [hint, setHint] = useState<{ text: string; source: string } | null>(null);
+  const [hint, setHint] = useState<Hint | null>(null);
+  const [hintLoading, setHintLoading] = useState(false);
+  const aiEnabled = useAiEnabled();
   const [summary, setSummary] = useState<PracticeSummary | null>(null);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
@@ -109,29 +142,32 @@ export function PracticePage() {
     }
   }
 
-  async function getHint() {
+  async function getHint(ai = false) {
+    setHintLoading(true);
     try {
-      setHint(await tutor.practiceHint(id));
+      setHint(await tutor.practiceHint(id, ai));
     } catch (e) {
       setErr(e instanceof ApiError ? e.message : "Couldn't load a hint.");
+    } finally {
+      setHintLoading(false);
     }
   }
 
   async function finishEarly() {
     const r = await tutor.practiceEnd(id);
     if (r.summary) setSummary(r.summary);
-    else navigate(q ? `/skills/${q.skill.id}` : "/dashboard");
+    else navigate(q && !q.mixed ? `/skills/${q.skill.id}` : "/dashboard");
   }
 
   async function again() {
     if (!q) return;
-    const p = await tutor.startPractice(q.skill.id, true);
+    const p = q.mixed ? await tutor.startMixed() : await tutor.startPractice(q.skill.id, true);
     setSummary(null);
     navigate(`/practice/${p.id}`, { replace: true });
   }
 
   if (fatal) return <ErrorState error={fatal} onRetry={() => { setFatal(null); void load(); }} />;
-  if (summary && q) return <Summary s={summary} skillId={q.skill.id} onAgain={again} />;
+  if (summary && q) return <Summary s={summary} skillId={q.mixed ? null : q.skill.id} onAgain={again} />;
   if (!q) return <PageLoader label="Choosing a question for you…" />;
 
   const level = (fb ? fb.difficulty_next : (q.selection?.requested as Difficulty)) ?? "easy";
@@ -142,9 +178,15 @@ export function PracticePage() {
     <div className="mx-auto max-w-3xl">
       <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
         <div>
-          <Link to={`/skills/${q.skill.id}`} className="text-sm text-ink-muted hover:text-ink">
-            ← {q.skill.name}
-          </Link>
+          {q.mixed ? (
+            <Link to="/dashboard" className="flex items-center gap-1.5 text-sm text-ink-muted hover:text-ink">
+              <Shuffle className="size-3.5" /> Mixed practice
+            </Link>
+          ) : (
+            <Link to={`/skills/${q.skill.id}`} className="text-sm text-ink-muted hover:text-ink">
+              ← {q.skill.name}
+            </Link>
+          )}
           <div className="mt-1.5 flex flex-wrap items-center gap-3">
             {q.mode && <ModeBadge mode={q.mode} />}
             <DifficultyTrack level={level} />
@@ -164,6 +206,12 @@ export function PracticePage() {
       <Card className="p-6 sm:p-8">
         <div className="mb-5 flex flex-wrap items-center gap-2 text-xs">
           <DifficultyTag level={q.selection?.served === "review" ? "review" : q.difficulty} />
+          {q.mixed &&
+            (q.skills ?? []).map((sk) => (
+              <span key={sk.id} className="rounded-md bg-surface-3 px-2 py-0.5 text-ink-muted" title={sk.name}>
+                {sk.code}
+              </span>
+            ))}
           <button type="button" onClick={() => setWhyOpen((o) => !o)} className="flex items-center gap-1 text-ink-muted hover:text-ink">
             <HelpCircle className="size-3.5" /> Why this question?
           </button>
@@ -189,13 +237,22 @@ export function PracticePage() {
           />
         )}
 
-        {hint && !fb && <div className="mt-5"><HintBox text={hint.text} source={hint.source} /></div>}
+        {hint && !fb && (
+          <div className="mt-5">
+            <HintBox text={hint.text} source={hint.source} label={hint.label} note={hint.note} />
+          </div>
+        )}
 
         {!fb && (
           <div className="mt-5 flex flex-wrap gap-2 border-t border-line pt-4">
             {showHintButton && (
-              <Button variant="soft" size="sm" onClick={getHint} icon={<Lightbulb className="size-4" />}>
+              <Button variant="soft" size="sm" onClick={() => getHint(false)} disabled={hintLoading} icon={<Lightbulb className="size-4" />}>
                 {q.mode === "foundation" || q.mode === "guided" ? "Need a hint?" : "Hint"}
+              </Button>
+            )}
+            {showHintButton && aiEnabled && (
+              <Button variant="soft" size="sm" onClick={() => getHint(true)} loading={hintLoading} icon={<Bot className="size-4" />}>
+                {hintLoading ? "Asking the AI tutor…" : "AI hint for this question"}
               </Button>
             )}
             <Button variant="ghost" size="sm" onClick={() => submit({ item_id: q.item_id }, true)} icon={<Eye className="size-4" />} disabled={submitting}>
@@ -213,6 +270,7 @@ export function PracticePage() {
               </p>
             )}
             {fb.hint_used && fb.correct && <p className="flex items-center gap-2 text-xs text-ink-faint"><Sparkles className="size-3.5" /> Correct with a hint. Great; next time try it without one.</p>}
+            <AiExplain interactionId={fb.interaction_id} label={fb.correct ? "Why is this right? Explain it" : "Explain this step by step"} />
             <div className="flex justify-end">
               {fb.complete ? (
                 <Button size="lg" onClick={() => setSummary(fb.summary)} icon={<Flag className="size-4" />}>

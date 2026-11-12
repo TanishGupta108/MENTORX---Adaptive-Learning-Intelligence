@@ -29,6 +29,7 @@ export function ProfilePage() {
   const navigate = useNavigate();
   const [pace, setPace] = useState(profile.pace_preference);
   const [hints, setHints] = useState(profile.hints_enabled);
+  const [daily, setDaily] = useState(profile.daily_goal ?? 10);
   const [goalType, setGoalType] = useState<GoalType>(profile.goal_type ?? "assess_overall");
   const [goalKind, setGoalKind] = useState<GoalKind>(profile.goal?.kind ?? "strengthen_skills");
   const [target, setTarget] = useState(profile.goal?.target ?? 3);
@@ -39,7 +40,7 @@ export function ProfilePage() {
     setBusy(true);
     setSaved(undefined);
     try {
-      await tutor.updateProfile({ pace_preference: pace, hints_enabled: hints, goal_type: goalType === "learn_topic" && !profile.focus_skill ? profile.goal_type ?? "assess_overall" : goalType });
+      await tutor.updateProfile({ pace_preference: pace, hints_enabled: hints, daily_goal: daily, goal_type: goalType === "learn_topic" && !profile.focus_skill ? profile.goal_type ?? "assess_overall" : goalType });
       if (goalKind !== profile.goal?.kind || target !== profile.goal?.target) {
         await tutor.setGoal({ kind: goalKind, target, skill_id: goalKind === "master_skill" ? profile.focus_skill?.id : null });
       }
@@ -95,6 +96,11 @@ export function ProfilePage() {
             </Field>
           </div>
           {profile.goal && <p className="mt-3 text-sm text-ink-muted">Current: {profile.goal.label}. Progress {profile.goal.value}/{profile.goal.target}.</p>}
+          <div className="mt-5 max-w-xs">
+            <Field label="Daily goal (questions per day)" hint="Shown on your dashboard with your streak.">
+              <input className={inputClass} type="number" min={1} max={200} value={daily} onChange={(e) => setDaily(Math.max(1, Math.min(200, Number(e.target.value) || 1)))} />
+            </Field>
+          </div>
         </Card>
 
         <Card>
