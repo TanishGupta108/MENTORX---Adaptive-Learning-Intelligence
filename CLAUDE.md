@@ -5,10 +5,11 @@ dataset with a trained DKT-Q knowledge-tracing model. The product brief is `buil
 The detailed design and the honest list of what is limited are in `docs/modules/tutor.md`.
 
 ## Where we are (2026-11-12)
-- Branch `feat/mentorx-v2-maths-tutor`: commits `abfbee3` (v2), `0235b87` (v2.1 features) and
-  `42849d5` (notes + docs). **Not pushed or deployed.** The user wants to push and deploy only
-  after the whole project is complete, so don't push without asking.
-- Live site (Vercel + Render) still runs the old v1 (Machine Learning subject).
+- v2.1 is DEPLOYED (2026-11-12): `main` = `feat/mentorx-v2-maths-tutor`, pushed. Render (API) and
+  Vercel (frontend) run it; the production DB is seeded with Mathematics; `OPENROUTER_API_KEY` and
+  `ADMIN_EMAILS` are set on Render. Live check: `python backend/scripts/smoke.py
+  https://mentorx-adaptive-learning-intellige.vercel.app` (prints PASSED (v2)).
+- Pushing to `main` auto-deploys both. Run all the checks before pushing.
 - Tests: backend 212 passed, frontend 16 passed; typecheck and build clean.
 - Local DB is seeded with the real data: 132 skills, 2,942 single-skill questions, 354 multi-skill
   questions, notes and a worked example for every available skill.
@@ -21,8 +22,7 @@ The detailed design and the honest list of what is limited are in `docs/modules/
 4. Pilot with real students, then tune the thresholds in `backend/app/core/config.py`.
 5. Optional: add the original Kaggle `dkt_best.pth` (194 skills) for comparison; the current
    DKT-Q (AUC 0.812) is better.
-6. Deploy when the user says so: follow `docs/deployment.md` ("Mathematics content" and
-   "AI tutor": reseed from the laptop, set `OPENROUTER_API_KEY` on Render).
+6. After content changes, reseed production from the laptop (`docs/deployment.md`, "Mathematics content").
 
 ## Layout
 - `backend/app/tutor/`: v2 tutor.
