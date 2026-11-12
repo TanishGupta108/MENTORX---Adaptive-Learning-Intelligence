@@ -284,6 +284,9 @@ resources:
     title: "Circumference and area of circles"
     minutes: 6
     content: |
+      ### Key idea
+      A circle is fixed by its **radius** r. Circumference grows with r (C = 2πr); area grows with r squared (A = πr²), so doubling the radius makes the area four times bigger.
+
       ### Formulas
       - **Circumference** (distance around): C = 2πr = πd.
       - **Area** (space inside): A = πr².
@@ -355,6 +358,9 @@ resources:
     title: "Operations with multi-digit decimals"
     minutes: 6
     content: |
+      ### Key idea
+      Decimals are whole-number arithmetic plus **place value**: line up the points to add or subtract, count decimal places to multiply, and make the divisor whole before dividing.
+
       ### Adding and subtracting
       Line up the **decimal points**. Fill empty places with zeros: 4.5 − 1.27 = 4.50 − 1.27 = 3.23.
 
@@ -422,6 +428,9 @@ resources:
     title: "Multiplying and dividing rational numbers"
     minutes: 5
     content: |
+      ### Key idea
+      Multiply or divide the sizes as usual, then fix the sign: **same signs give a positive** result, **different signs give a negative** result.
+
       ### Sign rules
       - Same signs → positive: (−4) × (−3) = 12.
       - Different signs → negative: (−20) ÷ 5 = −4.
@@ -591,6 +600,9 @@ resources:
     title: "Multi-step linear equations"
     minutes: 7
     content: |
+      ### Key idea
+      Keep the equation balanced: **expand, collect like terms, move the variable terms to one side**, then undo the remaining operations step by step.
+
       ### Strategy
       1. **Expand** brackets (distribute).
       2. **Collect like terms** on each side.

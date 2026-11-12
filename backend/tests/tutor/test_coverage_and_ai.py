@@ -391,3 +391,28 @@ def test_admin_model_monitor_and_ai_moderation(client, math_keys, learner, fake_
         "/api/v2/ai/explain", json={"interaction_id": a["interaction_id"]}, headers=learner
     )
     assert hidden.status_code == 410
+
+
+def test_learning_content_files_are_well_formed():
+    """Every notes entry has the "Key idea" used for hints; keys are unique across files."""
+    import re
+
+    import yaml
+
+    from app.tutor.seed import SEED_DIR
+
+    keys, notes_codes, example_codes = set(), set(), set()
+    for f in sorted(SEED_DIR.glob("resources*.yaml")):
+        spec = yaml.safe_load(f.read_text(encoding="utf-8"))
+        for r in spec["resources"]:
+            assert r["key"] not in keys, r["key"]
+            keys.add(r["key"])
+            assert re.fullmatch(r"\d\.[A-Z]{1,3}\.[A-C]\.\d+[a-e]?", r["skill"]), r["skill"]
+            assert r["kind"] in ("notes", "worked_example") and len(r["content"]) > 100
+            if r["kind"] == "notes":
+                assert "### Key idea" in r["content"], r["key"]
+                notes_codes.add(r["skill"])
+            else:
+                assert "**Answer:**" in r["content"], r["key"]
+                example_codes.add(r["skill"])
+    assert notes_codes == example_codes and len(notes_codes) >= 100

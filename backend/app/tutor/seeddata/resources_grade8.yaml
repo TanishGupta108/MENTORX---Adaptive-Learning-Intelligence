@@ -1,0 +1,925 @@
+# Concept notes and worked examples for grade 8 standards that had none.
+# Original content written for MENTORX with AI assistance (Claude), checked for mathematical
+# correctness when written, and labelled in the app as AI-assisted pending teacher review.
+source_label: "MENTORX original (AI-assisted, pending teacher review)"
+resources:
+  # ------------------------------------------------------------ 8.EE.A.1
+  - key: notes-exponent-rules
+    skill: 8.EE.A.1
+    kind: notes
+    title: "Properties of integer exponents"
+    minutes: 6
+    content: |
+      ### Key idea
+      Exponent rules all come from "an exponent counts how many times a base is multiplied".
+
+      ### The rules (same base a, a ≠ 0)
+      - Multiply: a^m × a^n = a^(m+n). 2³ × 2⁴ = 2⁷.
+      - Divide: a^m ÷ a^n = a^(m−n). 5⁶ ÷ 5² = 5⁴.
+      - Power of a power: (a^m)^n = a^(mn). (3²)³ = 3⁶.
+      - Zero exponent: a⁰ = 1.
+      - Negative exponent: a^(−n) = 1/a^n. 4⁻² = 1/16.
+
+      ### Watch out
+      - Add exponents only when the **bases are the same** and you are multiplying.
+      - 2³ × 2⁴ is 2⁷, not 4⁷.
+  - key: example-exponent-rules
+    skill: 8.EE.A.1
+    kind: worked_example
+    title: "Worked example: simplify and evaluate"
+    minutes: 3
+    content: |
+      **Problem.** Evaluate 3⁵ × 3⁻² ÷ 3².
+
+      1. Multiply: 3⁵ × 3⁻² = 3^(5 − 2) = 3³.
+      2. Divide: 3³ ÷ 3² = 3^(3 − 2) = 3¹.
+      3. 3¹ = 3.
+
+      **Answer:** 3.
+
+  # ------------------------------------------------------------ 8.EE.A.2
+  - key: notes-square-cube-roots
+    skill: 8.EE.A.2
+    kind: notes
+    title: "Square roots and cube roots"
+    minutes: 5
+    content: |
+      ### Key idea
+      The **square root** of n is the number that multiplied by itself gives n: sqrt(49) = 7 because 7² = 49. The **cube root** of n is the number used three times: cbrt(27) = 3 because 3³ = 27.
+
+      ### Solving equations
+      - x² = 64 has two solutions: x = 8 or x = −8.
+      - x³ = 125 has one: x = 5.
+
+      ### Know these
+      Perfect squares 1, 4, 9, 16, 25, 36, 49, 64, 81, 100, 121, 144. Perfect cubes 1, 8, 27, 64, 125, 1000.
+
+      ### Watch out
+      - sqrt(2) is irrational: it doesn't come out exactly as a fraction or terminating decimal.
+  - key: example-square-cube-roots
+    skill: 8.EE.A.2
+    kind: worked_example
+    title: "Worked example: side of a cube"
+    minutes: 3
+    content: |
+      **Problem.** A cube has volume 216 cm³. How long is each edge?
+
+      1. Volume of a cube: V = s³, so s³ = 216.
+      2. s = cbrt(216).
+      3. 6 × 6 × 6 = 216.
+
+      **Answer:** 6 cm.
+
+  # ------------------------------------------------------------ 8.EE.A.3
+  - key: notes-scientific-notation
+    skill: 8.EE.A.3
+    kind: notes
+    title: "Scientific notation"
+    minutes: 5
+    content: |
+      ### Key idea
+      Scientific notation writes a number as **a × 10ⁿ** with 1 ≤ a < 10. It makes very large and very small numbers easy to read and compare.
+
+      ### Converting
+      - 3,200,000 = 3.2 × 10⁶ (the point moved 6 places left).
+      - 0.00045 = 4.5 × 10⁻⁴ (the point moved 4 places right).
+
+      ### Comparing
+      Compare the powers of 10 first: 2 × 10⁸ is bigger than 9 × 10⁷.
+
+      ### Watch out
+      - 32 × 10⁵ is not in scientific notation; it should be 3.2 × 10⁶.
+  - key: example-scientific-notation
+    skill: 8.EE.A.3
+    kind: worked_example
+    title: "Worked example: how many times bigger?"
+    minutes: 3
+    content: |
+      **Problem.** About how many times larger is 6 × 10⁸ than 2 × 10⁵?
+
+      1. Divide: (6 × 10⁸) ÷ (2 × 10⁵).
+      2. 6 ÷ 2 = 3 and 10⁸ ÷ 10⁵ = 10³.
+      3. 3 × 10³ = 3,000.
+
+      **Answer:** 3,000 times larger.
+
+  # ------------------------------------------------------------ 8.EE.A.4
+  - key: notes-scientific-operations
+    skill: 8.EE.A.4
+    kind: notes
+    title: "Calculating with scientific notation"
+    minutes: 5
+    content: |
+      ### Key idea
+      Multiply or divide the **number parts** and the **powers of 10** separately, then adjust so the number part is between 1 and 10.
+
+      ### Rules
+      - (a × 10ᵐ) × (b × 10ⁿ) = (a × b) × 10^(m+n).
+      - (a × 10ᵐ) ÷ (b × 10ⁿ) = (a ÷ b) × 10^(m−n).
+      - Add or subtract: first rewrite with the **same power of 10**.
+
+      ### Adjusting
+      12 × 10⁴ = 1.2 × 10⁵.
+
+      ### Watch out
+      - Calculators may show 3.1E7, which means 3.1 × 10⁷.
+  - key: example-scientific-operations
+    skill: 8.EE.A.4
+    kind: worked_example
+    title: "Worked example: multiply"
+    minutes: 3
+    content: |
+      **Problem.** Find (4 × 10³) × (5 × 10⁶) in scientific notation.
+
+      1. 4 × 5 = 20 and 10³ × 10⁶ = 10⁹.
+      2. 20 × 10⁹ is not standard form: 20 = 2 × 10¹.
+      3. So 2 × 10¹ × 10⁹ = 2 × 10¹⁰.
+
+      **Answer:** 2 × 10¹⁰.
+
+  # ------------------------------------------------------------ 8.EE.B.5
+  - key: notes-compare-slopes
+    skill: 8.EE.B.5
+    kind: notes
+    title: "Unit rate as slope"
+    minutes: 5
+    content: |
+      ### Key idea
+      In a proportional relationship y = kx, the **unit rate k is the slope** of the graph. A steeper line means a faster rate.
+
+      ### Comparing different representations
+      - Graph: slope = rise ÷ run.
+      - Table: y ÷ x.
+      - Equation: the number in front of x.
+      Turn each into a unit rate, then compare.
+
+      ### Watch out
+      - Check which quantity is on which axis before comparing steepness.
+  - key: example-compare-slopes
+    skill: 8.EE.B.5
+    kind: worked_example
+    title: "Worked example: two runners"
+    minutes: 3
+    content: |
+      **Problem.** Runner A: d = 6t (km, hours). Runner B's graph passes through (2, 13). Who is faster?
+
+      1. A's unit rate: 6 km per hour.
+      2. B's unit rate: 13 ÷ 2 = 6.5 km per hour.
+      3. 6.5 > 6.
+
+      **Answer:** Runner B is faster.
+
+  # ------------------------------------------------------------ 8.EE.B.6
+  - key: notes-slope-similar-triangles
+    skill: 8.EE.B.6
+    kind: notes
+    title: "Slope and y = mx + b"
+    minutes: 6
+    content: |
+      ### Key idea
+      The **slope** of a line is rise ÷ run, and it's the same between any two points, because the slope triangles along a line are **similar**. A line through the origin is y = mx; shifted up or down by b, it's y = mx + b.
+
+      ### Finding slope from two points
+      m = (y₂ − y₁) ÷ (x₂ − x₁). Through (1, 3) and (4, 9): m = 6 ÷ 3 = 2.
+
+      ### Reading y = mx + b
+      - m: slope.
+      - b: y-intercept (where the line crosses the y-axis).
+
+      ### Watch out
+      - Subtract in the same order on top and bottom.
+  - key: example-slope-similar-triangles
+    skill: 8.EE.B.6
+    kind: worked_example
+    title: "Worked example: equation from two points"
+    minutes: 3
+    content: |
+      **Problem.** A line passes through (0, −1) and (2, 5). Write its equation.
+
+      1. Slope: (5 − (−1)) ÷ (2 − 0) = 6 ÷ 2 = 3.
+      2. It crosses the y-axis at (0, −1), so b = −1.
+
+      **Answer:** y = 3x − 1.
+
+  # ------------------------------------------------------------ 8.EE.C.7a
+  - key: notes-number-of-solutions
+    skill: 8.EE.C.7a
+    kind: notes
+    title: "One, none or infinitely many solutions"
+    minutes: 5
+    content: |
+      ### Key idea
+      Simplify a linear equation until you reach one of three endings:
+      - **x = a**: one solution.
+      - **a = a** (like 5 = 5): true for every x, so **infinitely many** solutions.
+      - **a = b** with a ≠ b (like 3 = 7): never true, so **no solution**.
+
+      ### Shortcut
+      With x on both sides (ax + b = cx + d): different coefficients (a ≠ c) give one solution; same coefficient and same constant give infinitely many; same coefficient but different constants give none.
+
+      ### Watch out
+      - Expand brackets fully before comparing.
+  - key: example-number-of-solutions
+    skill: 8.EE.C.7a
+    kind: worked_example
+    title: "Worked example: how many solutions?"
+    minutes: 3
+    content: |
+      **Problem.** How many solutions does 3(x + 2) = 3x + 5 have?
+
+      1. Expand: 3x + 6 = 3x + 5.
+      2. Subtract 3x: 6 = 5.
+      3. That is never true.
+
+      **Answer:** no solution.
+
+  # ------------------------------------------------------------ 8.EE.C.8a
+  - key: notes-systems-graphs
+    skill: 8.EE.C.8a
+    kind: notes
+    title: "Solving systems with graphs"
+    minutes: 5
+    content: |
+      ### Key idea
+      The solution of a system of two linear equations is the point that lies on **both** lines: their **intersection**.
+
+      ### Three possibilities
+      - Lines cross once: one solution.
+      - Parallel lines (same slope, different intercept): no solution.
+      - Same line: infinitely many solutions.
+
+      ### Check
+      Substitute the point into both equations. It must make both true.
+
+      ### Watch out
+      - Reading a graph can be imprecise; check by substitution.
+  - key: example-systems-graphs
+    skill: 8.EE.C.8a
+    kind: worked_example
+    title: "Worked example: check an intersection"
+    minutes: 3
+    content: |
+      **Problem.** The lines y = 2x + 1 and y = −x + 7 seem to cross at (2, 5). Is this the solution?
+
+      1. First equation: 2(2) + 1 = 5. ✓
+      2. Second equation: −2 + 7 = 5. ✓
+
+      **Answer:** yes, (2, 5) is the solution.
+
+  # ------------------------------------------------------------ 8.EE.C.8b
+  - key: notes-systems-algebra
+    skill: 8.EE.C.8b
+    kind: notes
+    title: "Solving systems algebraically"
+    minutes: 6
+    content: |
+      ### Key idea
+      Turn two equations into one equation with one variable, solve it, then substitute back.
+
+      ### Substitution
+      If y = 2x and x + y = 12: replace y, so x + 2x = 12, 3x = 12, x = 4, y = 8.
+
+      ### Elimination
+      Add or subtract equations to cancel a variable: (x + y = 10) + (x − y = 4) gives 2x = 14, so x = 7 and y = 3.
+
+      ### Watch out
+      - Find **both** values and check them in both original equations.
+  - key: example-systems-algebra
+    skill: 8.EE.C.8b
+    kind: worked_example
+    title: "Worked example: substitution"
+    minutes: 3
+    content: |
+      **Problem.** Solve y = 3x − 2 and 2x + y = 13.
+
+      1. Substitute: 2x + (3x − 2) = 13.
+      2. 5x − 2 = 13, so 5x = 15 and x = 3.
+      3. y = 3(3) − 2 = 7.
+      4. Check: 2(3) + 7 = 13. ✓
+
+      **Answer:** x = 3, y = 7.
+
+  # ------------------------------------------------------------ 8.EE.C.8c
+  - key: notes-systems-word-problems
+    skill: 8.EE.C.8c
+    kind: notes
+    title: "Systems of equations in word problems"
+    minutes: 6
+    content: |
+      ### Key idea
+      Two unknowns need **two facts**. Choose a letter for each unknown, write one equation per fact, then solve the system.
+
+      ### Steps
+      1. Define the variables in words ("a = adult tickets").
+      2. Fact 1, often a total count: a + c = 50.
+      3. Fact 2, often a total value: 12a + 7c = 450.
+      4. Solve and answer in words.
+
+      ### Watch out
+      - Check that the answer makes sense (whole numbers of tickets, positive amounts).
+  - key: example-systems-word-problems
+    skill: 8.EE.C.8c
+    kind: worked_example
+    title: "Worked example: tickets"
+    minutes: 4
+    content: |
+      **Problem.** 50 tickets were sold: adults $12 and children $7. Takings were $450. How many of each?
+
+      1. a + c = 50 and 12a + 7c = 450.
+      2. From the first, c = 50 − a. Substitute: 12a + 7(50 − a) = 450.
+      3. 12a + 350 − 7a = 450, so 5a = 100 and a = 20.
+      4. c = 50 − 20 = 30. Check: 12(20) + 7(30) = 240 + 210 = 450. ✓
+
+      **Answer:** 20 adult and 30 child tickets.
+
+  # ------------------------------------------------------------ 8.F.A.1
+  - key: notes-function-definition
+    skill: 8.F.A.1
+    kind: notes
+    title: "What is a function?"
+    minutes: 4
+    content: |
+      ### Key idea
+      A **function** gives **exactly one output for each input**. Its graph is the set of points (input, output).
+
+      ### Checking
+      - Table: no input appears twice with different outputs.
+      - Graph: a vertical line never crosses it more than once (vertical line test).
+
+      ### Examples
+      - y = 2x + 1 is a function.
+      - The pairs (3, 4) and (3, 7) together are not: input 3 has two outputs.
+
+      ### Watch out
+      - Different inputs **can** share an output: (1, 5) and (2, 5) is fine.
+  - key: example-function-definition
+    skill: 8.F.A.1
+    kind: worked_example
+    title: "Worked example: function or not?"
+    minutes: 2
+    content: |
+      **Problem.** Is {(1, 2), (2, 4), (3, 4), (1, 6)} a function?
+
+      1. Look for repeated inputs: 1 appears twice.
+      2. It goes to 2 and to 6, two different outputs.
+
+      **Answer:** not a function.
+
+  # ------------------------------------------------------------ 8.F.A.3
+  - key: notes-linear-nonlinear
+    skill: 8.F.A.3
+    kind: notes
+    title: "Linear and non-linear functions"
+    minutes: 5
+    content: |
+      ### Key idea
+      A **linear** function has a **constant rate of change**: its graph is a straight line and its equation can be written y = mx + b. Anything else is **non-linear**.
+
+      ### Checking a table
+      When x goes up by equal steps, does y change by the same amount each time? Yes: linear.
+
+      ### Examples
+      - y = 3x − 2: linear.
+      - y = x² or y = 2ˣ: non-linear (the changes grow).
+      - A = s² for the area of a square is non-linear.
+
+      ### Watch out
+      - Check equal x-steps before comparing the y-changes.
+  - key: example-linear-nonlinear
+    skill: 8.F.A.3
+    kind: worked_example
+    title: "Worked example: reading a table"
+    minutes: 3
+    content: |
+      **Problem.** x: 0, 1, 2, 3 and y: 1, 3, 7, 13. Linear or not?
+
+      1. Changes in y: 3 − 1 = 2, 7 − 3 = 4, 13 − 7 = 6.
+      2. The changes are not constant.
+
+      **Answer:** non-linear.
+
+  # ------------------------------------------------------------ 8.F.B.4
+  - key: notes-model-linear-function
+    skill: 8.F.B.4
+    kind: notes
+    title: "Modelling with linear functions"
+    minutes: 6
+    content: |
+      ### Key idea
+      A linear model y = mx + b has a **rate of change m** (how much y changes per 1 unit of x) and an **initial value b** (y when x = 0). Find them from words, a table or two points.
+
+      ### From two points
+      m = change in y ÷ change in x; then b = y − mx using either point.
+
+      ### Interpreting
+      Plan cost C = 20 + 5h: a $20 start fee and $5 per hour.
+
+      ### Watch out
+      - Units matter: the slope is "y-units per x-unit".
+  - key: example-model-linear-function
+    skill: 8.F.B.4
+    kind: worked_example
+    title: "Worked example: a phone plan"
+    minutes: 3
+    content: |
+      **Problem.** A plan costs $35 for 100 minutes and $50 for 200 minutes. Write C = mx + b.
+
+      1. m = (50 − 35) ÷ (200 − 100) = 15 ÷ 100 = 0.15 dollars per minute.
+      2. b = 35 − 0.15 × 100 = 35 − 15 = 20.
+      3. C = 0.15x + 20.
+
+      **Answer:** C = 0.15x + 20 (a $20 base fee plus 15 cents a minute).
+
+  # ------------------------------------------------------------ 8.F.B.5
+  - key: notes-qualitative-graphs
+    skill: 8.F.B.5
+    kind: notes
+    title: "Describing graphs in words"
+    minutes: 4
+    content: |
+      ### Key idea
+      You can tell a story from a graph without numbers: where it is **increasing**, **decreasing** or **constant**, and whether it is **linear** or curved.
+
+      ### Reading the shape
+      - Line going up left to right: increasing.
+      - Flat segment: nothing changing (e.g. standing still).
+      - Steeper: changing faster.
+
+      ### Sketching
+      Go through the story in order and draw each part with the right direction and steepness.
+
+      ### Watch out
+      - On a distance-time graph, a flat line means stopped, not "moving slowly".
+  - key: example-qualitative-graphs
+    skill: 8.F.B.5
+    kind: worked_example
+    title: "Worked example: a walk"
+    minutes: 3
+    content: |
+      **Problem.** Describe a distance-from-home graph: it rises steeply, then is flat, then falls gently to 0.
+
+      1. Rises steeply: walking away from home quickly.
+      2. Flat: stopped (perhaps at a shop).
+      3. Falls gently to 0: walking home slowly.
+
+      **Answer:** a quick walk out, a stop, then a slower walk home.
+
+  # ------------------------------------------------------------ 8.G.A.1a
+  - key: notes-transform-lines
+    skill: 8.G.A.1a
+    kind: notes
+    title: "Rigid transformations and line segments"
+    minutes: 4
+    content: |
+      ### Key idea
+      **Translations, reflections and rotations** are rigid motions: they move a figure without changing its size or shape. Lines go to lines, and **segments keep their length**.
+
+      ### The three moves
+      - Translation: slide every point the same distance and direction.
+      - Reflection: flip over a line.
+      - Rotation: turn around a point by an angle.
+
+      ### Watch out
+      - A dilation (enlargement) is NOT rigid: it changes lengths.
+  - key: example-transform-lines
+    skill: 8.G.A.1a
+    kind: worked_example
+    title: "Worked example: length after a rotation"
+    minutes: 2
+    content: |
+      **Problem.** Segment AB is 7 cm. It is rotated 90° about A to A'B'. How long is A'B'?
+
+      1. A rotation is a rigid motion.
+      2. Rigid motions keep lengths.
+
+      **Answer:** 7 cm.
+
+  # ------------------------------------------------------------ 8.G.A.1b
+  - key: notes-transform-angles
+    skill: 8.G.A.1b
+    kind: notes
+    title: "Rigid transformations and angles"
+    minutes: 4
+    content: |
+      ### Key idea
+      Rigid motions (translations, reflections, rotations) **keep angle measures**, and they keep **parallel lines parallel**.
+
+      ### Using it
+      If triangle ABC is reflected to A'B'C', then angle A' = angle A, angle B' = angle B and angle C' = angle C.
+
+      ### Watch out
+      - A reflection reverses the order of the vertices (clockwise becomes anticlockwise), but each angle keeps its size.
+  - key: example-transform-angles
+    skill: 8.G.A.1b
+    kind: worked_example
+    title: "Worked example: an image angle"
+    minutes: 2
+    content: |
+      **Problem.** In triangle PQR, angle Q = 48°. The triangle is translated 5 units right. What is angle Q' in the image?
+
+      1. A translation is a rigid motion.
+      2. Rigid motions keep angle measures.
+
+      **Answer:** 48°.
+
+  # ------------------------------------------------------------ 8.G.A.2
+  - key: notes-congruence-sequences
+    skill: 8.G.A.2
+    kind: notes
+    title: "Congruence through sequences of transformations"
+    minutes: 5
+    content: |
+      ### Key idea
+      Two figures are **congruent** if a sequence of rigid motions (translations, reflections, rotations) maps one exactly onto the other.
+
+      ### Describing a sequence
+      Be precise: "translate 3 right and 2 up", "reflect over the y-axis", "rotate 90° clockwise about the origin".
+
+      ### Steps
+      1. Match corresponding vertices.
+      2. Fix orientation first if a flip is needed (reflection), then rotate, then translate.
+
+      ### Watch out
+      - Same shape but different size means similar, not congruent.
+  - key: example-congruence-sequences
+    skill: 8.G.A.2
+    kind: worked_example
+    title: "Worked example: mapping a point"
+    minutes: 3
+    content: |
+      **Problem.** Point (2, 3) is reflected over the x-axis and then translated 4 units left. Where does it end up?
+
+      1. Reflect over the x-axis: (x, y) → (x, −y), giving (2, −3).
+      2. Translate 4 left: subtract 4 from x, giving (−2, −3).
+
+      **Answer:** (−2, −3).
+
+  # ------------------------------------------------------------ 8.G.A.3
+  - key: notes-coordinate-transformations
+    skill: 8.G.A.3
+    kind: notes
+    title: "Transformations with coordinates"
+    minutes: 6
+    content: |
+      ### Key idea
+      Each transformation has a coordinate rule.
+
+      ### Rules
+      - Translation by (a, b): (x, y) → (x + a, y + b).
+      - Reflection over the x-axis: (x, y) → (x, −y).
+      - Reflection over the y-axis: (x, y) → (−x, y).
+      - Rotation 90° anticlockwise about the origin: (x, y) → (−y, x).
+      - Rotation 180° about the origin: (x, y) → (−x, −y).
+      - Dilation by scale factor k from the origin: (x, y) → (kx, ky).
+
+      ### Watch out
+      - Apply the rule to every vertex, then join the image points.
+  - key: example-coordinate-transformations
+    skill: 8.G.A.3
+    kind: worked_example
+    title: "Worked example: a dilation"
+    minutes: 3
+    content: |
+      **Problem.** Triangle with vertices (1, 2), (3, 2) and (1, 5) is dilated by scale factor 2 from the origin. Find the image.
+
+      1. Multiply each coordinate by 2.
+      2. (1, 2) → (2, 4); (3, 2) → (6, 4); (1, 5) → (2, 10).
+
+      **Answer:** (2, 4), (6, 4), (2, 10). Every side is twice as long.
+
+  # ------------------------------------------------------------ 8.G.A.4
+  - key: notes-similarity-transformations
+    skill: 8.G.A.4
+    kind: notes
+    title: "Similar figures and dilations"
+    minutes: 5
+    content: |
+      ### Key idea
+      Two figures are **similar** if rigid motions **and a dilation** map one onto the other. Similar figures have equal angles and **proportional** side lengths.
+
+      ### Scale factor
+      k = image length ÷ original length. All sides use the same k.
+
+      ### Watch out
+      - Check every pair of corresponding sides: if one ratio differs, the figures are not similar.
+  - key: example-similarity-transformations
+    skill: 8.G.A.4
+    kind: worked_example
+    title: "Worked example: a missing side"
+    minutes: 3
+    content: |
+      **Problem.** Rectangles 4 by 6 and 10 by x are similar (4 matches 10). Find x.
+
+      1. Scale factor: 10 ÷ 4 = 2.5.
+      2. x = 6 × 2.5 = 15.
+
+      **Answer:** x = 15.
+
+  # ------------------------------------------------------------ 8.G.A.5
+  - key: notes-angle-facts-triangles
+    skill: 8.G.A.5
+    kind: notes
+    title: "Angle facts: triangles, parallel lines, similarity"
+    minutes: 6
+    content: |
+      ### Key idea
+      - The angles of a triangle add to **180°**.
+      - An **exterior angle** equals the sum of the two opposite interior angles.
+      - A line crossing two **parallel** lines makes equal **alternate** angles and equal **corresponding** angles.
+      - Two triangles with **two equal angles** are similar (angle-angle).
+
+      ### Watch out
+      - Alternate and corresponding angles are equal only when the lines are parallel.
+  - key: example-angle-facts-triangles
+    skill: 8.G.A.5
+    kind: worked_example
+    title: "Worked example: exterior angle"
+    minutes: 3
+    content: |
+      **Problem.** A triangle has interior angles 50° and 65°. Find the exterior angle at the third vertex.
+
+      1. Exterior angle = sum of the two opposite interior angles.
+      2. 50° + 65° = 115°.
+      3. Check: the third interior angle is 180 − 115 = 65°, and 65 + 115 = 180. ✓
+
+      **Answer:** 115°.
+
+  # ------------------------------------------------------------ 8.G.B.7
+  - key: notes-pythagorean
+    skill: 8.G.B.7
+    kind: notes
+    title: "The Pythagorean theorem"
+    minutes: 6
+    content: |
+      ### Key idea
+      In a **right triangle** with legs a and b and hypotenuse c (the side opposite the right angle): **a² + b² = c²**.
+
+      ### Finding a side
+      - Hypotenuse: c = sqrt(a² + b²).
+      - Leg: a = sqrt(c² − b²).
+
+      ### In 3D
+      The diagonal of a box l × w × h is sqrt(l² + w² + h²).
+
+      ### Watch out
+      - c is always the longest side. If you get a leg longer than c, you added instead of subtracting.
+      - It only works for right triangles.
+  - key: example-pythagorean
+    skill: 8.G.B.7
+    kind: worked_example
+    title: "Worked example: a ladder"
+    minutes: 3
+    content: |
+      **Problem.** A 13 m ladder leans on a wall with its foot 5 m from the wall. How high up the wall does it reach?
+
+      1. The ladder is the hypotenuse: c = 13, one leg b = 5.
+      2. a² = 13² − 5² = 169 − 25 = 144.
+      3. a = sqrt(144) = 12.
+
+      **Answer:** 12 m.
+
+  # ------------------------------------------------------------ 8.G.B.8
+  - key: notes-distance-points
+    skill: 8.G.B.8
+    kind: notes
+    title: "Distance between two points"
+    minutes: 5
+    content: |
+      ### Key idea
+      Join two points with a right triangle: the horizontal leg is the difference in x, the vertical leg is the difference in y, and the **distance is the hypotenuse**.
+
+      ### Formula
+      d = sqrt((x₂ − x₁)² + (y₂ − y₁)²).
+
+      ### Watch out
+      - Square the differences before adding; negative differences become positive when squared.
+  - key: example-distance-points
+    skill: 8.G.B.8
+    kind: worked_example
+    title: "Worked example: (1, 2) to (7, 10)"
+    minutes: 3
+    content: |
+      **Problem.** Find the distance between (1, 2) and (7, 10).
+
+      1. Horizontal leg: 7 − 1 = 6. Vertical leg: 10 − 2 = 8.
+      2. d² = 6² + 8² = 36 + 64 = 100.
+      3. d = sqrt(100) = 10.
+
+      **Answer:** 10 units.
+
+  # ------------------------------------------------------------ 8.G.C.9
+  - key: notes-volume-cylinder-cone-sphere
+    skill: 8.G.C.9
+    kind: notes
+    title: "Volume of cylinders, cones and spheres"
+    minutes: 6
+    content: |
+      ### Key idea
+      - Cylinder: V = πr²h (base area × height).
+      - Cone: V = ⅓πr²h (one third of the matching cylinder).
+      - Sphere: V = (4/3)πr³.
+
+      ### Steps
+      1. Find the radius (half the diameter).
+      2. Substitute into the formula.
+      3. Leave the answer in terms of π, or use π ≈ 3.14 if asked.
+
+      ### Watch out
+      - Use the radius, not the diameter.
+      - Volume is in cubic units.
+  - key: example-volume-cylinder-cone-sphere
+    skill: 8.G.C.9
+    kind: worked_example
+    title: "Worked example: a cone"
+    minutes: 3
+    content: |
+      **Problem.** A cone has diameter 6 cm and height 10 cm. Find its volume in terms of π.
+
+      1. Radius: 6 ÷ 2 = 3 cm.
+      2. V = ⅓ × π × 3² × 10 = ⅓ × π × 9 × 10.
+      3. ⅓ × 90 = 30, so V = 30π.
+
+      **Answer:** 30π cm³ (about 94.2 cm³).
+
+  # ------------------------------------------------------------ 8.NS.A.1
+  - key: notes-rational-irrational
+    skill: 8.NS.A.1
+    kind: notes
+    title: "Rational and irrational numbers"
+    minutes: 5
+    content: |
+      ### Key idea
+      A **rational** number can be written as a fraction a/b of integers. Its decimal **ends or repeats**. An **irrational** number can't: its decimal goes on forever **without repeating** (π, sqrt(2)).
+
+      ### Repeating decimals are rational
+      0.333... = 1/3. For 0.4545...: let x = 0.4545..., then 100x = 45.4545..., so 99x = 45 and x = 45/99 = 5/11.
+
+      ### Watch out
+      - sqrt(16) = 4 is rational. Only square roots of non-perfect squares are irrational.
+  - key: example-rational-irrational
+    skill: 8.NS.A.1
+    kind: worked_example
+    title: "Worked example: sort the numbers"
+    minutes: 3
+    content: |
+      **Problem.** Which are irrational: 0.75, sqrt(10), 2/9, π, sqrt(49)?
+
+      1. 0.75 = 3/4: rational.
+      2. sqrt(10): 10 isn't a perfect square, so irrational.
+      3. 2/9 = 0.222...: rational.
+      4. π: irrational.
+      5. sqrt(49) = 7: rational.
+
+      **Answer:** sqrt(10) and π.
+
+  # ------------------------------------------------------------ 8.NS.A.2
+  - key: notes-approximate-irrationals
+    skill: 8.NS.A.2
+    kind: notes
+    title: "Approximating irrational numbers"
+    minutes: 5
+    content: |
+      ### Key idea
+      Trap an irrational number between two perfect squares to estimate it, then refine with decimals.
+
+      ### Steps for sqrt(20)
+      1. 16 < 20 < 25, so 4 < sqrt(20) < 5.
+      2. Try 4.5: 4.5² = 20.25, a bit too big. Try 4.4: 4.4² = 19.36, too small.
+      3. So sqrt(20) is between 4.4 and 4.5, closer to 4.5 (about 4.47).
+
+      ### Watch out
+      - π ≈ 3.14 is an approximation; π is not exactly 3.14.
+  - key: example-approximate-irrationals
+    skill: 8.NS.A.2
+    kind: worked_example
+    title: "Worked example: sqrt(50) on a number line"
+    minutes: 3
+    content: |
+      **Problem.** Between which two whole numbers is sqrt(50)? Which is it closer to?
+
+      1. 49 < 50 < 64, so 7 < sqrt(50) < 8.
+      2. 50 is very close to 49, so sqrt(50) is close to 7.
+      3. 7.1² = 50.41, so sqrt(50) ≈ 7.07.
+
+      **Answer:** between 7 and 8, just above 7.
+
+  # ------------------------------------------------------------ 8.SP.A.1
+  - key: notes-scatter-plots
+    skill: 8.SP.A.1
+    kind: notes
+    title: "Scatter plots and association"
+    minutes: 5
+    content: |
+      ### Key idea
+      A **scatter plot** shows pairs of measurements as points, so you can see whether two variables are related (**associated**).
+
+      ### Patterns to describe
+      - **Positive** association: as x goes up, y tends to go up.
+      - **Negative** association: as x goes up, y tends to go down.
+      - **No** association: no clear trend.
+      - Linear or non-linear; clusters; **outliers** (points far from the rest).
+
+      ### Watch out
+      - Association is not proof that one thing causes the other.
+  - key: example-scatter-plots
+    skill: 8.SP.A.1
+    kind: worked_example
+    title: "Worked example: study time"
+    minutes: 2
+    content: |
+      **Problem.** A plot of hours studied (x) against test score (y) shows points rising from left to right in a roughly straight band, with one student at 1 hour scoring 95. Describe it.
+
+      1. Points rise: positive association.
+      2. Roughly straight band: linear.
+      3. The (1, 95) point is far from the others: an outlier.
+
+      **Answer:** a positive, linear association with one outlier.
+
+  # ------------------------------------------------------------ 8.SP.A.2
+  - key: notes-line-of-best-fit
+    skill: 8.SP.A.2
+    kind: notes
+    title: "Lines of best fit"
+    minutes: 4
+    content: |
+      ### Key idea
+      When a scatter plot looks linear, draw a **line of best fit**: a straight line that follows the trend, with points roughly balanced above and below it.
+
+      ### Judging a fit
+      - The line should follow the direction of the points.
+      - Points should be close to the line, about as many above as below.
+
+      ### Watch out
+      - The line doesn't have to pass through any data point exactly.
+      - Don't let a single outlier pull the line away from the main trend.
+  - key: example-line-of-best-fit
+    skill: 8.SP.A.2
+    kind: worked_example
+    title: "Worked example: choosing a line"
+    minutes: 2
+    content: |
+      **Problem.** Line A passes above every point; line B has 6 points above and 5 below, close to it. Which fits better?
+
+      1. A line of best fit should have points on both sides.
+      2. Line A misses the whole cloud on one side.
+
+      **Answer:** line B.
+
+  # ------------------------------------------------------------ 8.SP.A.3
+  - key: notes-linear-model-data
+    skill: 8.SP.A.3
+    kind: notes
+    title: "Using a linear model for data"
+    minutes: 5
+    content: |
+      ### Key idea
+      The equation of a line of best fit, y = mx + b, lets you **interpret** data and **predict** values. The slope tells you how much y changes for each extra unit of x; the intercept is the predicted y when x = 0.
+
+      ### Example
+      Plant height h = 1.5w + 4 (cm, weeks): grows about 1.5 cm a week, starting near 4 cm.
+
+      ### Watch out
+      - Predictions far outside the data range can be unreliable.
+  - key: example-linear-model-data
+    skill: 8.SP.A.3
+    kind: worked_example
+    title: "Worked example: predicting"
+    minutes: 3
+    content: |
+      **Problem.** A line of best fit for ice-cream sales is s = 12t − 150 (sales, temperature in °C). Predict sales at 25°C and interpret the slope.
+
+      1. s = 12(25) − 150 = 300 − 150 = 150.
+      2. Slope 12: each extra degree goes with about 12 more sales.
+
+      **Answer:** about 150 sales; 12 more sales per degree.
+
+  # ------------------------------------------------------------ 8.SP.A.4
+  - key: notes-two-way-tables
+    skill: 8.SP.A.4
+    kind: notes
+    title: "Two-way tables"
+    minutes: 5
+    content: |
+      ### Key idea
+      A **two-way table** counts data by two categories at once. **Relative frequencies** (row or column percentages) show whether the categories are associated.
+
+      ### Steps
+      1. Fill in the table and the row/column totals.
+      2. Divide each cell by its row total (or column total).
+      3. Compare the percentages: big differences suggest an association.
+
+      ### Watch out
+      - Compare percentages, not raw counts, when the groups have different sizes.
+  - key: example-two-way-tables
+    skill: 8.SP.A.4
+    kind: worked_example
+    title: "Worked example: curfews and chores"
+    minutes: 4
+    content: |
+      **Problem.** Of 40 students with a curfew, 30 do chores. Of 60 without a curfew, 24 do chores. Is there an association?
+
+      1. With a curfew: 30 ÷ 40 = 75% do chores.
+      2. Without: 24 ÷ 60 = 40% do chores.
+      3. 75% and 40% are very different.
+
+      **Answer:** yes; students with a curfew are more likely to do chores in this data.

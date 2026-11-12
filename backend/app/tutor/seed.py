@@ -334,7 +334,9 @@ def seed_prerequisites(db: Session) -> int:
 def seed_resources(db: Session) -> int:
     """Original notes/worked examples (seeddata/resources.yaml) and one genuine Common Core
     standard link per skill. Upserted by seed_key, so admin-created resources are untouched."""
-    spec = yaml.safe_load((SEED_DIR / "resources.yaml").read_text(encoding="utf-8"))
+    # resources.yaml plus any resources_*.yaml (each file may set its own source_label)
+    files = sorted(SEED_DIR.glob("resources*.yaml"))
+    specs = [yaml.safe_load(f.read_text(encoding="utf-8")) for f in files]
     by_code = _skills_by_code(db)
     existing = {
         r.seed_key: r for r in db.scalars(select(Resource).where(Resource.seed_key.is_not(None)))
@@ -360,7 +362,11 @@ def seed_resources(db: Session) -> int:
             is_original=False,
             position=90,
         )
-    for res in spec["resources"]:
+    for res, label in (
+        (r, spec.get("source_label", "MENTORX original demo content"))
+        for spec in specs
+        for r in spec["resources"]
+    ):
         for s in by_code.get(res["skill"], []):
             upsert(
                 f"{res['key']}:{s.id}",
@@ -371,7 +377,7 @@ def seed_resources(db: Session) -> int:
                 url=None,
                 content_md=res["content"].strip(),
                 minutes=res.get("minutes", 5),
-                source_label="MENTORX original demo content",
+                source_label=label,
                 is_original=True,
                 position=res.get("position", 10),
             )

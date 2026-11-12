@@ -4,6 +4,8 @@
 
 **v2 (November 2026):** the adaptive Mathematics tutor on the [FoundationalASSIST](https://huggingface.co/datasets/ASSISTments/FoundationalASSIST) dataset ([module doc](docs/modules/tutor.md)). It answers five questions for every student: what do I understand, what am I struggling with, what next, how should I practise, am I improving? Observed performance and model predictions are always shown separately.
 
+**v2.1:** 132 skills and 2,942 questions (plus 354 multi-skill questions for Mixed practice) after adding algebraic and other typed answers, verified dataset images and formula conversion; an adaptive diagnostic in which the model chooses the most informative next question; live model monitoring on real answers; an optional AI tutor (explanations and answer-safe hints via free OpenRouter models); streaks, a daily goal and spaced revision; notes and worked examples for every available skill.
+
 **Earlier milestones (v1, Machine Learning subject):** M0 scaffold ✓ · M1 requirements & design ✓ · M2 question bank ✓ (285 questions, AI-checked, [review log](docs/question-review-log.md)) · M3 data pipeline + EDA ✓ · M4 models ✓ ([ML report](docs/ml-report.md)) · M5 database, auth & core API ✓ · M6 adaptive quiz engine ✓ · M7 learning paths & revision ✓ · M8 frontend MVP ✓ · M9 deployment & hardening ✓ (live at https://mentorx-adaptive-learning-intellige.vercel.app, [deployment guide](docs/deployment.md)) · M10 engagement ✓ (daily goal, streaks, weekly report, feedback; [module doc](docs/modules/engagement.md)) · M11 pilot features ✓, study not yet run ([pilot guide](docs/modules/pilot.md)) · M12 deliverables drafted ([report](docs/report/final-report.md), [testing](docs/report/testing-report.md), [viva Q&A](docs/report/viva-qa.md), [demo script](docs/report/demo-script.md)). See [docs/PROJECT_PLAN.md](docs/PROJECT_PLAN.md) for the feasibility analysis, scope, architecture, database schema, ML methodology and roadmap.
 
 | Part | Stack | Folder |
@@ -56,7 +58,9 @@ pip install -e ../ml -e ".[dev]"  # the backend shares the feature code in ml/
 copy .env.example .env            # macOS/Linux: cp .env.example .env
 alembic upgrade head
 python scripts/seed.py           # loads the v1 question bank
+python scripts/check_images.py --data-dir "C:/path/to/FoundationalASSIST"  # once: which question images load
 python scripts/seed_math.py --data-dir "C:/path/to/FoundationalASSIST"  # Mathematics (needs Problems.csv + Skills.csv)
+# optional AI tutor: put OPENROUTER_API_KEY=<your key> in backend/.env (see .env.example)
 uvicorn app.main:app --reload
 
 # 3. Frontend  (http://localhost:5173)

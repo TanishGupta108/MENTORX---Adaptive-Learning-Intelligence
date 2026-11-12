@@ -69,14 +69,22 @@ so a fresh database has no maths content until it is seeded once. The app then a
 `503 content_missing` on onboarding.
 
 **Seed the production database from your own computer (recommended):**
-1. Render dashboard -> `mentorx-db` -> **Connect** -> copy the **External Database URL**.
-2. In a terminal on your computer, in `backend/` with the virtual environment active:
+1. Once, check which question images still load (writes `image_check.json` next to the CSVs;
+   questions whose images haven't been verified are not served):
+   ```
+   python scripts/check_images.py --data-dir "C:/path/to/folder/with/Problems.csv"
+   ```
+2. Render dashboard -> `mentorx-db` -> **Connect** -> copy the **External Database URL**.
+3. In a terminal on your computer, in `backend/` with the virtual environment active:
    ```
    set DATABASE_URL=<paste the external URL>        (PowerShell: $env:DATABASE_URL="<url>")
    python scripts/seed_math.py --data-dir "C:/path/to/folder/with/Problems.csv"
    ```
-3. It prints the number of skills, usable questions, prerequisite links and resources.
-   It's safe to run again: admin edits are kept.
+4. It prints the number of skills, usable questions (single-skill and mixed), whether images
+   were checked, prerequisite links and resources. It's safe to run again: admin edits are kept.
+
+Images are not copied: verified images load from the dataset's own HTTPS hosts, which the
+frontend's Content-Security-Policy (`frontend/vercel.json`, `img-src`) allows explicitly.
 
 Alternatively, if the CSVs are available on the server, set `MATH_DATA_DIR`; `scripts/start.sh`
 then refreshes the content on every start.
@@ -86,7 +94,17 @@ served with NumPy, so the API needs no PyTorch. `GET /api/v1/health/model` repor
 model loaded. If it didn't, the app shows observed performance only and never labels anything
 as a model prediction.
 
-Admins: set `ADMIN_EMAILS` to give accounts the Content admin page.
+Admins: set `ADMIN_EMAILS` to give accounts the Content admin page (it also has the live
+Model monitor and the AI tutor texts).
+
+## AI tutor (optional)
+
+Set `OPENROUTER_API_KEY` on the API service to switch on AI explanations and AI hints (free
+OpenRouter models; leave it empty to switch the feature off and hide its buttons). `AI_MODEL`
+and `AI_FALLBACK_MODELS` choose the models; free models are often rate-limited upstream, so
+the fallbacks are tried in order. `AI_DAILY_LIMIT` caps new AI texts per student per day.
+Free models may log prompts: only the question, its answer and the student's response are
+sent, never a name, email or id.
 
 ## Environment variables
 

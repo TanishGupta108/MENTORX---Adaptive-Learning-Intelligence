@@ -1,0 +1,793 @@
+# Concept notes and worked examples for grade 7 standards that had none.
+# Original content written for MENTORX with AI assistance (Claude), checked for mathematical
+# correctness when written, and labelled in the app as AI-assisted pending teacher review.
+source_label: "MENTORX original (AI-assisted, pending teacher review)"
+resources:
+  # ------------------------------------------------------------ 7.EE.A.1
+  - key: notes-linear-expressions
+    skill: 7.EE.A.1
+    kind: notes
+    title: "Adding, subtracting, factoring and expanding linear expressions"
+    minutes: 6
+    content: |
+      ### Key idea
+      Linear expressions follow the same properties as numbers. You can **combine like terms**, **expand** brackets with the distributive property and **factor** out a common factor, including with negative and fractional coefficients.
+
+      ### Moves you can make
+      - Combine like terms: 3x − 5 + 2x + 1 = 5x − 4.
+      - Expand: −2(3x − 4) = −6x + 8 (the −2 multiplies both terms).
+      - Factor: 6x − 9 = 3(2x − 3).
+      - Subtract a whole expression: (4x + 1) − (x − 3) = 4x + 1 − x + 3 = 3x + 4.
+
+      ### Watch out
+      - A minus sign in front of brackets changes the sign of **every** term inside.
+  - key: example-linear-expressions
+    skill: 7.EE.A.1
+    kind: worked_example
+    title: "Worked example: simplify"
+    minutes: 3
+    content: |
+      **Problem.** Simplify 5(x + 2) − 3(x − 1).
+
+      1. Expand: 5x + 10 − 3x + 3. (−3 × −1 = +3.)
+      2. Combine the x terms: 5x − 3x = 2x.
+      3. Combine the numbers: 10 + 3 = 13.
+
+      **Answer:** 2x + 13.
+
+  # ------------------------------------------------------------ 7.EE.A.2
+  - key: notes-rewrite-in-context
+    skill: 7.EE.A.2
+    kind: notes
+    title: "Rewriting expressions to see the situation differently"
+    minutes: 5
+    content: |
+      ### Key idea
+      Equivalent forms of an expression can tell different stories. **a + 0.05a = 1.05a** both mean "a price plus 5% tax", but 1.05a shows you can multiply by 1.05 in one step.
+
+      ### Common rewrites
+      - Increase by p%: x + (p/100)x = (1 + p/100)x. A 20% raise: 1.2x.
+      - Decrease by p%: x − (p/100)x = (1 − p/100)x. A 25% discount: 0.75x.
+      - Perimeter of a rectangle: 2l + 2w = 2(l + w).
+
+      ### Watch out
+      - A 20% discount then 20% increase is 0.8 × 1.2 = 0.96 of the price, not the same price.
+  - key: example-rewrite-in-context
+    skill: 7.EE.A.2
+    kind: worked_example
+    title: "Worked example: a discount"
+    minutes: 3
+    content: |
+      **Problem.** A jacket costs p dollars and is 30% off. Write the sale price in two ways.
+
+      1. Price minus the discount: p − 0.3p.
+      2. Combine: 1p − 0.3p = 0.7p.
+      3. Meaning: you pay 70% of the original price.
+
+      **Answer:** p − 0.3p = 0.7p.
+
+  # ------------------------------------------------------------ 7.EE.B.3
+  - key: notes-multistep-problems
+    skill: 7.EE.B.3
+    kind: notes
+    title: "Solving multi-step real-world problems"
+    minutes: 6
+    content: |
+      ### Key idea
+      Real problems mix whole numbers, fractions, decimals and percents. Convert them to **one convenient form**, work step by step, and **estimate** to check that the answer is reasonable.
+
+      ### Steps
+      1. Underline what you know and what you're asked to find.
+      2. Choose a form: 25% = 0.25 = 1/4.
+      3. Do one operation at a time and label each result.
+      4. Estimate before and check after.
+
+      ### Watch out
+      - Percent problems: "10% of 50" is 0.10 × 50 = 5.
+  - key: example-multistep-problems
+    skill: 7.EE.B.3
+    kind: worked_example
+    title: "Worked example: a raise"
+    minutes: 3
+    content: |
+      **Problem.** Sam earns $25 an hour and gets a 10% raise. What is the new hourly wage, and how much more is earned over a 40-hour week?
+
+      1. Raise per hour: 10% of 25 = 0.10 × 25 = $2.50.
+      2. New wage: 25 + 2.50 = $27.50.
+      3. Extra per week: 2.50 × 40 = $100.
+
+      **Answer:** $27.50 an hour, $100 more per week.
+
+  # ------------------------------------------------------------ 7.EE.B.4b
+  - key: notes-two-step-inequalities
+    skill: 7.EE.B.4b
+    kind: notes
+    title: "Solving two-step inequalities"
+    minutes: 6
+    content: |
+      ### Key idea
+      Solve an inequality like an equation, with one extra rule: **multiplying or dividing both sides by a negative number reverses the inequality sign**.
+
+      ### Steps for 3x + 4 > 19
+      1. Subtract 4: 3x > 15.
+      2. Divide by 3: x > 5.
+      3. Graph: open circle at 5, arrow to the right.
+
+      ### With a negative
+      −2x + 1 ≤ 9 → −2x ≤ 8 → x ≥ −4 (sign flips because we divided by −2).
+
+      ### Watch out
+      - Check with a number from your solution, e.g. x = 6 in 3x + 4 > 19 gives 22 > 19. True.
+  - key: example-two-step-inequalities
+    skill: 7.EE.B.4b
+    kind: worked_example
+    title: "Worked example: a budget"
+    minutes: 3
+    content: |
+      **Problem.** You have $50. A phone case costs $14 and songs cost $1.50 each. How many songs s can you buy?
+
+      1. Total cost at most 50: 14 + 1.5s ≤ 50.
+      2. Subtract 14: 1.5s ≤ 36.
+      3. Divide by 1.5: s ≤ 24.
+
+      **Answer:** at most 24 songs.
+
+  # ------------------------------------------------------------ 7.G.A.2
+  - key: notes-triangle-conditions
+    skill: 7.G.A.2
+    kind: notes
+    title: "When do measurements make a triangle?"
+    minutes: 5
+    content: |
+      ### Key idea
+      Three side lengths make a triangle only if **the two shorter sides add up to more than the longest side** (triangle inequality). Given angles must add to **180°**.
+
+      ### One triangle, many, or none?
+      - Three sides that work: exactly one triangle shape.
+      - Three angles that add to 180°: many triangles (same shape, different sizes).
+      - Sides 2, 3 and 6: no triangle, because 2 + 3 < 6.
+
+      ### Watch out
+      - 3, 4, 7 also fails: 3 + 4 = 7 makes a flat line, not a triangle.
+  - key: example-triangle-conditions
+    skill: 7.G.A.2
+    kind: worked_example
+    title: "Worked example: can these be sides?"
+    minutes: 3
+    content: |
+      **Problem.** Can 5 cm, 8 cm and 12 cm be the sides of a triangle? What about 4 cm, 5 cm and 10 cm?
+
+      1. 5 + 8 = 13 > 12. Yes, a triangle.
+      2. 4 + 5 = 9 < 10. No triangle: the short sides can't meet.
+
+      **Answer:** the first set works, the second doesn't.
+
+  # ------------------------------------------------------------ 7.G.A.3
+  - key: notes-cross-sections
+    skill: 7.G.A.3
+    kind: notes
+    title: "Cross sections of 3D figures"
+    minutes: 4
+    content: |
+      ### Key idea
+      A **cross section** is the 2D shape you see when you slice through a 3D figure with a flat plane.
+
+      ### Common slices
+      - Rectangular prism, slice parallel to the base: a rectangle the same size as the base.
+      - Cylinder, slice parallel to the base: a circle. Slice straight down through the middle: a rectangle.
+      - Square pyramid, slice parallel to the base: a smaller square.
+      - Cone, slice parallel to the base: a smaller circle.
+
+      ### Watch out
+      - Slicing at an angle can give other shapes (a tilted slice of a cylinder is an oval).
+  - key: example-cross-sections
+    skill: 7.G.A.3
+    kind: worked_example
+    title: "Worked example: slicing a pyramid"
+    minutes: 2
+    content: |
+      **Problem.** A square pyramid is cut by a vertical plane through its top point and parallel to one edge of the base. What shape is the cross section?
+
+      1. The slice passes through the apex and crosses the square base along a line.
+      2. The cut has a base on the bottom and meets at one point at the top.
+
+      **Answer:** a triangle.
+
+  # ------------------------------------------------------------ 7.G.B.5
+  - key: notes-angle-equations
+    skill: 7.G.B.5
+    kind: notes
+    title: "Using angle facts to write equations"
+    minutes: 5
+    content: |
+      ### Key idea
+      Angle relationships give you equations you can solve for an unknown angle.
+
+      ### Facts
+      - **Supplementary** angles add to **180°** (angles on a straight line).
+      - **Complementary** angles add to **90°**.
+      - **Vertical** angles (opposite each other where two lines cross) are **equal**.
+      - Angles around a point add to 360°.
+
+      ### Steps
+      1. Name the relationship.
+      2. Write the equation, e.g. (2x + 10) + 70 = 180.
+      3. Solve: 2x = 100, x = 50.
+
+      ### Watch out
+      - After finding x, substitute back if the question asks for the angle, not x.
+  - key: example-angle-equations
+    skill: 7.G.B.5
+    kind: worked_example
+    title: "Worked example: vertical angles"
+    minutes: 3
+    content: |
+      **Problem.** Two vertical angles measure (3x − 15)° and 60°. Find x.
+
+      1. Vertical angles are equal: 3x − 15 = 60.
+      2. Add 15: 3x = 75.
+      3. Divide by 3: x = 25.
+
+      **Answer:** x = 25.
+
+  # ------------------------------------------------------------ 7.G.B.6
+  - key: notes-area-volume-surface
+    skill: 7.G.B.6
+    kind: notes
+    title: "Area, volume and surface area of composite shapes"
+    minutes: 6
+    content: |
+      ### Key idea
+      Break complicated shapes into **simple pieces** (rectangles, triangles, prisms), work on each piece, then add (or subtract a hole).
+
+      ### Formulas
+      - Prism volume: V = (area of base) × height.
+      - Surface area: the sum of the areas of all faces.
+
+      ### Steps
+      1. Sketch and split the shape.
+      2. Label each piece's measurements.
+      3. Compute each part, then combine.
+
+      ### Watch out
+      - Don't count a hidden shared face in surface area.
+      - Keep units consistent: area in square units, volume in cubic units.
+  - key: example-area-volume-surface
+    skill: 7.G.B.6
+    kind: worked_example
+    title: "Worked example: a triangular prism"
+    minutes: 4
+    content: |
+      **Problem.** A triangular prism has a triangle base with base 6 cm and height 4 cm. The prism is 10 cm long. Find its volume.
+
+      1. Area of the triangle base: ½ × 6 × 4 = 12 cm².
+      2. Volume = base area × length = 12 × 10 = 120.
+
+      **Answer:** 120 cm³.
+
+  # ------------------------------------------------------------ 7.NS.A.1b
+  - key: notes-sums-rational
+    skill: 7.NS.A.1b
+    kind: notes
+    title: "Adding positive and negative numbers"
+    minutes: 5
+    content: |
+      ### Key idea
+      p + q is the number found by starting at p and moving **|q| units**: right if q is positive, left if q is negative. A number plus its **opposite** is 0 (5 + (−5) = 0).
+
+      ### Rules
+      - Same signs: add the absolute values, keep the sign. −3 + (−4) = −7.
+      - Different signs: subtract the absolute values, keep the sign of the larger one. −8 + 5 = −3.
+
+      ### Watch out
+      - Picture the number line: −8 + 5 moves 5 to the right from −8 and lands on −3.
+  - key: example-sums-rational
+    skill: 7.NS.A.1b
+    kind: worked_example
+    title: "Worked example: temperature change"
+    minutes: 3
+    content: |
+      **Problem.** The temperature is −6°C and rises 9 degrees. What is the new temperature?
+
+      1. Start at −6 and move 9 to the right: −6 + 9.
+      2. Different signs: 9 − 6 = 3, and 9 has the larger absolute value, so positive.
+
+      **Answer:** 3°C.
+
+  # ------------------------------------------------------------ 7.NS.A.1c
+  - key: notes-subtract-rational
+    skill: 7.NS.A.1c
+    kind: notes
+    title: "Subtracting positive and negative numbers"
+    minutes: 5
+    content: |
+      ### Key idea
+      Subtracting a number is the same as **adding its opposite**: p − q = p + (−q). The distance between two numbers on a number line is the absolute value of their difference.
+
+      ### Examples
+      - 4 − 9 = 4 + (−9) = −5.
+      - 4 − (−9) = 4 + 9 = 13.
+      - Distance between −3 and 5: |5 − (−3)| = 8.
+
+      ### Watch out
+      - "Minus a negative" becomes plus: 2 − (−6) = 8.
+  - key: example-subtract-rational
+    skill: 7.NS.A.1c
+    kind: worked_example
+    title: "Worked example: elevation difference"
+    minutes: 3
+    content: |
+      **Problem.** A mountain top is at 2,500 m and a valley floor at −120 m. How much higher is the top?
+
+      1. Difference: 2,500 − (−120).
+      2. Add the opposite: 2,500 + 120 = 2,620.
+
+      **Answer:** 2,620 m higher.
+
+  # ------------------------------------------------------------ 7.NS.A.1d
+  - key: notes-add-subtract-rational-properties
+    skill: 7.NS.A.1d
+    kind: notes
+    title: "Adding and subtracting rational numbers efficiently"
+    minutes: 5
+    content: |
+      ### Key idea
+      Rewrite subtraction as adding the opposite, then use the **commutative and associative properties** to group numbers that are easy to combine.
+
+      ### Example
+      −3.4 + 7 − 6.6 = −3.4 + (−6.6) + 7 = −10 + 7 = −3.
+
+      ### Fractions
+      Use a common denominator: −½ + ¾ = −2/4 + 3/4 = 1/4.
+
+      ### Watch out
+      - Keep each sign attached to the number after it when you rearrange.
+  - key: example-add-subtract-rational-properties
+    skill: 7.NS.A.1d
+    kind: worked_example
+    title: "Worked example: grouping smartly"
+    minutes: 3
+    content: |
+      **Problem.** Find 2¾ − 5 + 1¼ − 3.
+
+      1. As additions: 2¾ + (−5) + 1¼ + (−3).
+      2. Group: (2¾ + 1¼) + (−5 + −3) = 4 + (−8).
+      3. 4 + (−8) = −4.
+
+      **Answer:** −4.
+
+  # ------------------------------------------------------------ 7.NS.A.2d
+  - key: notes-fraction-to-decimal
+    skill: 7.NS.A.2d
+    kind: notes
+    title: "Converting fractions to decimals"
+    minutes: 5
+    content: |
+      ### Key idea
+      A fraction is a division: a/b = a ÷ b. Long division turns it into a decimal that either **terminates** (ends) or **repeats**.
+
+      ### Examples
+      - 3/8 = 3 ÷ 8 = 0.375 (terminates).
+      - 2/3 = 0.666... = 0.6̅ (repeats).
+      - 5/11 = 0.4545... (the block 45 repeats).
+
+      ### Shortcut
+      If the denominator (in simplest form) has only factors 2 and 5, the decimal terminates.
+
+      ### Watch out
+      - Divide numerator by denominator, not the other way round.
+  - key: example-fraction-to-decimal
+    skill: 7.NS.A.2d
+    kind: worked_example
+    title: "Worked example: 7/12"
+    minutes: 3
+    content: |
+      **Problem.** Write 7/12 as a decimal.
+
+      1. 7 ÷ 12: 70 ÷ 12 = 5 r 10, so 0.5.
+      2. 100 ÷ 12 = 8 r 4, so 0.58.
+      3. 40 ÷ 12 = 3 r 4, so 0.583. The remainder 4 keeps repeating, so the 3 repeats.
+
+      **Answer:** 0.58333... = 0.583̅.
+
+  # ------------------------------------------------------------ 7.RP.A.1
+  - key: notes-unit-rates-fractions
+    skill: 7.RP.A.1
+    kind: notes
+    title: "Unit rates with fractions"
+    minutes: 5
+    content: |
+      ### Key idea
+      A unit rate is "how much for 1". With fractions, you still **divide the first quantity by the second**, even if that means dividing fractions.
+
+      ### Dividing fractions
+      Multiply by the reciprocal: (1/2) ÷ (1/4) = (1/2) × 4 = 2.
+
+      ### Example
+      Walking ½ mile in ¼ hour: ½ ÷ ¼ = 2 miles per hour.
+
+      ### Watch out
+      - Ask "per what?": miles per hour means miles ÷ hours.
+  - key: example-unit-rates-fractions
+    skill: 7.RP.A.1
+    kind: worked_example
+    title: "Worked example: painting"
+    minutes: 3
+    content: |
+      **Problem.** Lena paints ⅔ of a wall in ½ hour. How much of the wall per hour?
+
+      1. Unit rate = wall ÷ hours = ⅔ ÷ ½.
+      2. Multiply by the reciprocal: ⅔ × 2 = 4/3.
+      3. 4/3 = 1⅓.
+
+      **Answer:** 1⅓ walls per hour.
+
+  # ------------------------------------------------------------ 7.RP.A.2b
+  - key: notes-constant-proportionality
+    skill: 7.RP.A.2b
+    kind: notes
+    title: "The constant of proportionality"
+    minutes: 5
+    content: |
+      ### Key idea
+      In a proportional relationship y = kx, the **constant of proportionality k** is the unit rate: k = y ÷ x, the same for every pair.
+
+      ### Where to find k
+      - **Table**: divide y by x in any row.
+      - **Graph**: the y-value when x = 1 (the line passes through (0, 0) and (1, k)).
+      - **Equation**: the number multiplying x in y = kx.
+      - **Words**: "$3 per pound" means k = 3.
+
+      ### Watch out
+      - If y ÷ x is not the same in every row, the relationship is not proportional.
+  - key: example-constant-proportionality
+    skill: 7.RP.A.2b
+    kind: worked_example
+    title: "Worked example: from a table"
+    minutes: 3
+    content: |
+      **Problem.** A table shows x = 2, 5, 8 and y = 7, 17.5, 28. Find k and write the equation.
+
+      1. 7 ÷ 2 = 3.5; 17.5 ÷ 5 = 3.5; 28 ÷ 8 = 3.5. The same each time.
+      2. So k = 3.5.
+
+      **Answer:** k = 3.5, and y = 3.5x.
+
+  # ------------------------------------------------------------ 7.RP.A.2d
+  - key: notes-proportional-graph-points
+    skill: 7.RP.A.2d
+    kind: notes
+    title: "Reading points on a proportional graph"
+    minutes: 4
+    content: |
+      ### Key idea
+      The graph of a proportional relationship is a straight line through the **origin (0, 0)**. The point **(1, r)** shows the unit rate r. Any point (x, y) on the line means "x units cost/take y".
+
+      ### Reading points
+      - (0, 0): zero of one quantity means zero of the other.
+      - (1, r): the unit rate.
+      - (4, 20): 4 units go with 20, so the rate is 20 ÷ 4 = 5.
+
+      ### Watch out
+      - A straight line that does not go through (0, 0) is not proportional.
+  - key: example-proportional-graph-points
+    skill: 7.RP.A.2d
+    kind: worked_example
+    title: "Worked example: a petrol graph"
+    minutes: 3
+    content: |
+      **Problem.** A line through the origin passes through (5, 8.5), where x is litres and y is dollars. What does (1, r) tell you? Find r.
+
+      1. (1, r) is the cost of 1 litre: the unit rate.
+      2. r = 8.5 ÷ 5 = 1.7.
+
+      **Answer:** fuel costs $1.70 per litre, so the point is (1, 1.7).
+
+  # ------------------------------------------------------------ 7.SP.A.1
+  - key: notes-sampling
+    skill: 7.SP.A.1
+    kind: notes
+    title: "Samples and populations"
+    minutes: 5
+    content: |
+      ### Key idea
+      A **population** is the whole group you want to know about; a **sample** is the part you actually measure. Conclusions about a population are only valid if the sample is **representative**, and **random sampling** is the best way to get one.
+
+      ### Good and bad samples
+      - Random: every member has an equal chance of being chosen (names from a hat).
+      - Biased: asking only students in the library about reading habits.
+
+      ### Watch out
+      - A bigger sample helps, but a big biased sample is still biased.
+  - key: example-sampling
+    skill: 7.SP.A.1
+    kind: worked_example
+    title: "Worked example: is it fair?"
+    minutes: 3
+    content: |
+      **Problem.** To find students' favourite sport, Raj asks everyone at football practice. Is this a good sample?
+
+      1. Population: all students at the school.
+      2. People at football practice are more likely to choose football.
+      3. The sample is biased.
+
+      **Answer:** No. A random sample of all students would be better.
+
+  # ------------------------------------------------------------ 7.SP.A.2
+  - key: notes-sample-inferences
+    skill: 7.SP.A.2
+    kind: notes
+    title: "Using random samples to make estimates"
+    minutes: 5
+    content: |
+      ### Key idea
+      A random sample's **proportion** can estimate the population's proportion. If 12 of 40 sampled students walk to school (30%), estimate 30% of all students walk.
+
+      ### Steps
+      1. Find the fraction or percent in the sample.
+      2. Apply it to the population size.
+
+      ### Variation
+      Different random samples give slightly different estimates. Several samples show how much the estimate can vary.
+
+      ### Watch out
+      - An estimate is not an exact answer. Say "about".
+  - key: example-sample-inferences
+    skill: 7.SP.A.2
+    kind: worked_example
+    title: "Worked example: estimating a total"
+    minutes: 3
+    content: |
+      **Problem.** In a random sample of 50 of a school's 600 students, 18 have a pet. Estimate how many students in the school have a pet.
+
+      1. Sample proportion: 18 ÷ 50 = 0.36.
+      2. Apply to the population: 0.36 × 600 = 216.
+
+      **Answer:** about 216 students.
+
+  # ------------------------------------------------------------ 7.SP.B.3
+  - key: notes-compare-populations
+    skill: 7.SP.B.3
+    kind: notes
+    title: "Comparing two data sets"
+    minutes: 5
+    content: |
+      ### Key idea
+      To compare two groups, look at how far apart their **centres** are compared with their **spread**. Divide the difference in means by a measure of variability (such as the MAD).
+
+      ### Steps
+      1. Find each group's mean (or median).
+      2. Find each group's MAD (or IQR).
+      3. Difference of centres ÷ MAD. Larger than about 2 means a clear difference.
+
+      ### Watch out
+      - Overlapping data doesn't mean "no difference"; compare the gap with the spread.
+  - key: example-compare-populations
+    skill: 7.SP.B.3
+    kind: worked_example
+    title: "Worked example: two classes"
+    minutes: 3
+    content: |
+      **Problem.** Class A's mean test score is 78 and class B's is 72. Both have a MAD of 3. How big is the difference?
+
+      1. Difference of means: 78 − 72 = 6.
+      2. Compared with the spread: 6 ÷ 3 = 2.
+
+      **Answer:** the means differ by 2 MADs, a noticeable difference.
+
+  # ------------------------------------------------------------ 7.SP.B.4
+  - key: notes-informal-inferences
+    skill: 7.SP.B.4
+    kind: notes
+    title: "Drawing conclusions from centre and spread"
+    minutes: 5
+    content: |
+      ### Key idea
+      Use measures of **centre** (mean, median) and **variability** (MAD, IQR) from random samples to compare two populations and make careful conclusions.
+
+      ### Which measures?
+      - Data roughly symmetric: mean and MAD.
+      - Data skewed or with outliers: median and IQR.
+
+      ### Writing a conclusion
+      "Based on these samples, students in group A **tend to** sleep longer than students in group B."
+
+      ### Watch out
+      - Samples give evidence, not certainty. Avoid "always".
+  - key: example-informal-inferences
+    skill: 7.SP.B.4
+    kind: worked_example
+    title: "Worked example: reading times"
+    minutes: 3
+    content: |
+      **Problem.** Sample of 7th graders: median 30 min reading a day, IQR 10. Sample of 8th graders: median 20 min, IQR 12. What can you say?
+
+      1. The medians differ by 10 minutes, about one IQR.
+      2. The spreads are similar.
+
+      **Answer:** 7th graders in these samples tend to read about 10 minutes more per day.
+
+  # ------------------------------------------------------------ 7.SP.C.5
+  - key: notes-probability-scale
+    skill: 7.SP.C.5
+    kind: notes
+    title: "Probability between 0 and 1"
+    minutes: 4
+    content: |
+      ### Key idea
+      A **probability** is a number from **0** (impossible) to **1** (certain) that describes how likely an event is. ½ means equally likely to happen or not.
+
+      ### The scale
+      - 0: impossible (rolling a 7 on a normal die).
+      - Near 0: unlikely.
+      - ½: as likely as not (a coin landing heads).
+      - Near 1: likely.
+      - 1: certain.
+
+      ### Watch out
+      - Probabilities can't be negative or greater than 1. 120% is never a probability.
+  - key: example-probability-scale
+    skill: 7.SP.C.5
+    kind: worked_example
+    title: "Worked example: describe the chance"
+    minutes: 2
+    content: |
+      **Problem.** A bag has 9 red marbles and 1 blue marble. Describe the probability of picking blue.
+
+      1. P(blue) = 1/10 = 0.1.
+      2. 0.1 is close to 0.
+
+      **Answer:** unlikely (probability 0.1).
+
+  # ------------------------------------------------------------ 7.SP.C.6
+  - key: notes-experimental-probability
+    skill: 7.SP.C.6
+    kind: notes
+    title: "Estimating probability from experiments"
+    minutes: 4
+    content: |
+      ### Key idea
+      The **experimental probability** of an event is (number of times it happened) ÷ (number of trials). With many trials it gets close to the theoretical probability, and it can be used to predict.
+
+      ### Example
+      A spinner lands on blue 31 times in 100 spins: P(blue) ≈ 0.31. In 300 spins, expect about 0.31 × 300 ≈ 93 blues.
+
+      ### Watch out
+      - Small numbers of trials can be far from the true probability.
+  - key: example-experimental-probability
+    skill: 7.SP.C.6
+    kind: worked_example
+    title: "Worked example: free throws"
+    minutes: 3
+    content: |
+      **Problem.** A player makes 18 of 24 free throws. About how many would they make in 60 attempts?
+
+      1. Experimental probability: 18 ÷ 24 = 0.75.
+      2. Predict: 0.75 × 60 = 45.
+
+      **Answer:** about 45 free throws.
+
+  # ------------------------------------------------------------ 7.SP.C.7a
+  - key: notes-uniform-model
+    skill: 7.SP.C.7a
+    kind: notes
+    title: "Uniform probability models"
+    minutes: 4
+    content: |
+      ### Key idea
+      In a **uniform** model every outcome is **equally likely**, so P(event) = (number of favourable outcomes) ÷ (number of possible outcomes).
+
+      ### Examples
+      - Fair die: P(even) = 3/6 = ½.
+      - Picking a letter at random from MATH: P(vowel) = 1/4.
+
+      ### Watch out
+      - Use it only when outcomes really are equally likely (a fair coin, a well-shuffled deck).
+  - key: example-uniform-model
+    skill: 7.SP.C.7a
+    kind: worked_example
+    title: "Worked example: a class draw"
+    minutes: 3
+    content: |
+      **Problem.** A name is drawn at random from 12 girls and 13 boys. What is P(girl)?
+
+      1. Total outcomes: 12 + 13 = 25, all equally likely.
+      2. Favourable: 12.
+      3. P(girl) = 12/25 = 0.48.
+
+      **Answer:** 12/25.
+
+  # ------------------------------------------------------------ 7.SP.C.8a
+  - key: notes-compound-events
+    skill: 7.SP.C.8a
+    kind: notes
+    title: "Probability of compound events"
+    minutes: 5
+    content: |
+      ### Key idea
+      A **compound event** combines two or more simple events. Its probability is the fraction of all outcomes in the **sample space** where the compound event happens.
+
+      ### Example
+      Flip a coin and roll a die: 2 × 6 = 12 equally likely outcomes. P(heads and a 6) = 1/12.
+
+      ### Shortcut for independent events
+      P(A and B) = P(A) × P(B): ½ × 1/6 = 1/12.
+
+      ### Watch out
+      - Count every outcome in the sample space before dividing.
+  - key: example-compound-events
+    skill: 7.SP.C.8a
+    kind: worked_example
+    title: "Worked example: two coins"
+    minutes: 3
+    content: |
+      **Problem.** Flip two fair coins. What is the probability of getting exactly one head?
+
+      1. Outcomes: HH, HT, TH, TT. That's 4.
+      2. Exactly one head: HT and TH. That's 2.
+      3. P = 2/4 = ½.
+
+      **Answer:** ½.
+
+  # ------------------------------------------------------------ 7.SP.C.8b
+  - key: notes-sample-spaces
+    skill: 7.SP.C.8b
+    kind: notes
+    title: "Listing sample spaces"
+    minutes: 5
+    content: |
+      ### Key idea
+      To find a compound probability, first list the **sample space**: every possible outcome. Organised lists, **tables** and **tree diagrams** make sure nothing is missed or counted twice.
+
+      ### Tools
+      - **Table**: rows for the first event, columns for the second (great for two dice: 6 × 6 = 36 cells).
+      - **Tree diagram**: one branch per choice at each stage.
+
+      ### Watch out
+      - With two dice, (2, 5) and (5, 2) are different outcomes.
+  - key: example-sample-spaces
+    skill: 7.SP.C.8b
+    kind: worked_example
+    title: "Worked example: sum of two dice"
+    minutes: 3
+    content: |
+      **Problem.** Roll two dice. What is the probability that the sum is 7?
+
+      1. The table has 6 × 6 = 36 outcomes.
+      2. Sum 7: (1,6), (2,5), (3,4), (4,3), (5,2), (6,1). That's 6 outcomes.
+      3. P = 6/36 = 1/6.
+
+      **Answer:** 1/6.
+
+  # ------------------------------------------------------------ 7.SP.C.8c
+  - key: notes-simulation
+    skill: 7.SP.C.8c
+    kind: notes
+    title: "Designing a simulation"
+    minutes: 4
+    content: |
+      ### Key idea
+      A **simulation** uses a simple random tool (coin, die, spinner, random numbers) to imitate a real situation, so you can estimate probabilities that are hard to calculate.
+
+      ### Steps
+      1. Match each real outcome to tool outcomes with the same probability (a 1/6 chance: one face of a die).
+      2. Decide what one trial is (e.g. 3 rolls for 3 days).
+      3. Run many trials and count how often the event happens.
+      4. Estimated probability = successes ÷ trials.
+
+      ### Watch out
+      - The tool's probabilities must match the real situation.
+  - key: example-simulation
+    skill: 7.SP.C.8c
+    kind: worked_example
+    title: "Worked example: rainy days"
+    minutes: 3
+    content: |
+      **Problem.** It rains on 50% of days. Design a simulation for "rain on at least 2 of the next 3 days".
+
+      1. Tool: a coin. Heads = rain (probability ½).
+      2. One trial: flip 3 times.
+      3. Success: 2 or 3 heads.
+      4. Run 40 trials. If 21 are successes, P ≈ 21/40 ≈ 0.53. (The exact answer is 4/8 = 0.5.)
+
+      **Answer:** flip a coin 3 times per trial and count trials with at least 2 heads.

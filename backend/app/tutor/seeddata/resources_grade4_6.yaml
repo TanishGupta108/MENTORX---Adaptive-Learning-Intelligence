@@ -1,0 +1,975 @@
+# Concept notes and worked examples for grade 4-6 standards that had none.
+# Original content written for MENTORX with AI assistance (Claude), checked for mathematical
+# correctness when written, and labelled in the app as AI-assisted pending teacher review.
+# Same Markdown subset as resources.yaml. "### Key idea" is used as the skill-level hint.
+source_label: "MENTORX original (AI-assisted, pending teacher review)"
+resources:
+  # ------------------------------------------------------------ 4.G.A.1
+  - key: notes-lines-angles
+    skill: 4.G.A.1
+    kind: notes
+    title: "Lines, rays and angles"
+    minutes: 5
+    content: |
+      ### Key idea
+      A **line** goes on forever in both directions, a **ray** starts at a point and goes on in one direction, and a **line segment** has two endpoints. Two rays from the same point make an **angle**.
+
+      ### Kinds of angles
+      - **Right angle**: exactly 90°, like the corner of a page.
+      - **Acute angle**: less than 90°.
+      - **Obtuse angle**: more than 90° but less than 180°.
+      - **Straight angle**: exactly 180°.
+
+      ### Lines that meet (or don't)
+      - **Parallel** lines never meet and stay the same distance apart.
+      - **Perpendicular** lines meet at a right angle.
+
+      ### Watch out
+      - An angle's size depends on how far it opens, not on how long its sides are drawn.
+  - key: example-lines-angles
+    skill: 4.G.A.1
+    kind: worked_example
+    title: "Worked example: naming angles"
+    minutes: 3
+    content: |
+      **Problem.** A clock shows 3:00. What kind of angle do the hands make? What about at 4:00?
+
+      1. At 3:00 the hands point to 12 and 3: a quarter turn, which is **90°**. That is a right angle.
+      2. At 4:00 the hands are one more "hour step" apart. Each hour step is 360° ÷ 12 = 30°, so the angle is 90° + 30° = 120°.
+      3. 120° is more than 90° and less than 180°.
+
+      **Answer:** 3:00 makes a right angle; 4:00 makes an obtuse angle.
+
+  # ------------------------------------------------------------ 4.MD.A.1
+  - key: notes-convert-units
+    skill: 4.MD.A.1
+    kind: notes
+    title: "Converting measurements within one system"
+    minutes: 5
+    content: |
+      ### Key idea
+      To change from a **bigger unit to a smaller unit, multiply**; to change from a **smaller unit to a bigger unit, divide**. You need more of the small units to measure the same thing.
+
+      ### Facts to know
+      - 1 foot = 12 inches, 1 yard = 3 feet
+      - 1 hour = 60 minutes, 1 minute = 60 seconds
+      - 1 kilometre = 1,000 metres, 1 metre = 100 centimetres
+      - 1 kilogram = 1,000 grams, 1 litre = 1,000 millilitres
+
+      ### Two-column tables
+      Write the bigger unit in one column and the matching number of smaller units in the other. Each row grows by the same amount.
+
+      ### Watch out
+      - Check that your answer makes sense: 3 feet must be **more** than 3 inches.
+  - key: example-convert-units
+    skill: 4.MD.A.1
+    kind: worked_example
+    title: "Worked example: feet to inches"
+    minutes: 3
+    content: |
+      **Problem.** A rope is 7 feet long. How many inches is that?
+
+      1. Feet are bigger than inches, so multiply.
+      2. 1 foot = 12 inches, so 7 feet = 7 × 12 inches.
+      3. 7 × 12 = 84.
+
+      **Answer:** 84 inches.
+
+  # ------------------------------------------------------------ 4.MD.A.3
+  - key: notes-rectangle-area-perimeter
+    skill: 4.MD.A.3
+    kind: notes
+    title: "Area and perimeter of rectangles"
+    minutes: 5
+    content: |
+      ### Key idea
+      **Perimeter** is the distance all the way around a shape. **Area** is the amount of surface inside it, measured in square units.
+
+      ### Formulas for a rectangle
+      - Perimeter = 2 × length + 2 × width
+      - Area = length × width
+
+      ### Working backwards
+      If you know the area and one side, divide: missing side = area ÷ known side.
+
+      ### Watch out
+      - Area uses square units (cm², ft²); perimeter uses plain units (cm, ft).
+      - Don't mix them up: a 3 by 4 rectangle has perimeter 14 but area 12.
+  - key: example-rectangle-area-perimeter
+    skill: 4.MD.A.3
+    kind: worked_example
+    title: "Worked example: a missing side"
+    minutes: 3
+    content: |
+      **Problem.** A rectangular garden has an area of 48 square metres and a width of 6 metres. What is its length, and what is its perimeter?
+
+      1. Area = length × width, so 48 = length × 6.
+      2. Length = 48 ÷ 6 = 8 metres.
+      3. Perimeter = 2 × 8 + 2 × 6 = 16 + 12 = 28 metres.
+
+      **Answer:** length 8 m, perimeter 28 m.
+
+  # ------------------------------------------------------------ 4.NF.C.6
+  - key: notes-tenths-hundredths
+    skill: 4.NF.C.6
+    kind: notes
+    title: "Fractions with denominators 10 and 100 as decimals"
+    minutes: 5
+    content: |
+      ### Key idea
+      The first place after the decimal point is **tenths** and the second is **hundredths**. So 3/10 = 0.3 and 27/100 = 0.27.
+
+      ### Steps
+      1. Make the denominator 10 or 100 if it isn't already (for example 4/10 = 40/100).
+      2. Tenths: write the numerator in the first decimal place.
+      3. Hundredths: the numerator fills the first two decimal places.
+
+      ### Watch out
+      - 5/100 is 0.05, not 0.5. Hundredths always use two decimal places.
+      - 0.5 and 0.50 are equal: 5 tenths = 50 hundredths.
+  - key: example-tenths-hundredths
+    skill: 4.NF.C.6
+    kind: worked_example
+    title: "Worked example: writing hundredths"
+    minutes: 3
+    content: |
+      **Problem.** Write 8/100 and 62/100 as decimals. Which is larger?
+
+      1. 8/100 is 8 hundredths: 0.08.
+      2. 62/100 is 62 hundredths: 0.62.
+      3. 62 hundredths is more than 8 hundredths.
+
+      **Answer:** 0.08 and 0.62; 0.62 is larger.
+
+  # ------------------------------------------------------------ 5.G.A.1
+  - key: notes-coordinate-plane-basics
+    skill: 5.G.A.1
+    kind: notes
+    title: "The coordinate plane"
+    minutes: 5
+    content: |
+      ### Key idea
+      A point is located by an **ordered pair (x, y)**: start at the origin (0, 0), move **x** units across, then **y** units up.
+
+      ### Parts of the plane
+      - The horizontal number line is the **x-axis**; the vertical one is the **y-axis**.
+      - They cross at the **origin**, (0, 0).
+
+      ### Steps to plot (x, y)
+      1. Start at the origin.
+      2. Move right x units along the x-axis.
+      3. Move up y units.
+
+      ### Watch out
+      - Order matters: (2, 5) and (5, 2) are different points. "Across, then up".
+  - key: example-coordinate-plane-basics
+    skill: 5.G.A.1
+    kind: worked_example
+    title: "Worked example: reading points"
+    minutes: 3
+    content: |
+      **Problem.** Point A is 4 units right of the origin and 1 unit up. Point B is 1 unit right and 4 units up. Write their coordinates.
+
+      1. A: across 4, up 1, so A = (4, 1).
+      2. B: across 1, up 4, so B = (1, 4).
+
+      **Answer:** A(4, 1) and B(1, 4). Same numbers, different points.
+
+  # ------------------------------------------------------------ 5.NBT.A.1
+  - key: notes-place-value-ten-times
+    skill: 5.NBT.A.1
+    kind: notes
+    title: "Place value: each place is ten times the next"
+    minutes: 5
+    content: |
+      ### Key idea
+      A digit in one place is worth **10 times** what it would be worth in the place to its right, and **1/10** of what it would be worth in the place to its left.
+
+      ### Examples
+      - In 550, the first 5 is worth 500 and the second is worth 50: 500 is 10 times 50.
+      - 0.3 is 10 times 0.03.
+
+      ### Multiplying and dividing by 10
+      - × 10 moves every digit one place to the **left** (3.4 × 10 = 34).
+      - ÷ 10 moves every digit one place to the **right** (3.4 ÷ 10 = 0.34).
+
+      ### Watch out
+      - Don't just "add a zero": 3.4 × 10 is 34, not 3.40.
+  - key: example-place-value-ten-times
+    skill: 5.NBT.A.1
+    kind: worked_example
+    title: "Worked example: comparing digit values"
+    minutes: 3
+    content: |
+      **Problem.** In 7.77, how many times larger is the value of the first 7 than the value of the second 7?
+
+      1. The first 7 is in the ones place: it is worth 7.
+      2. The second 7 is in the tenths place: it is worth 0.7.
+      3. 7 ÷ 0.7 = 10.
+
+      **Answer:** 10 times larger.
+
+  # ------------------------------------------------------------ 5.NBT.B.5
+  - key: notes-multiply-multidigit
+    skill: 5.NBT.B.5
+    kind: notes
+    title: "Multiplying multi-digit whole numbers"
+    minutes: 6
+    content: |
+      ### Key idea
+      The standard algorithm multiplies by **one digit at a time** and then adds the partial products. Each digit's place value decides how far its row is shifted.
+
+      ### Steps for 46 × 23
+      1. Multiply 46 by the ones digit 3: 138.
+      2. Multiply 46 by the tens digit 2 (really 20): 920.
+      3. Add: 138 + 920 = 1,058.
+
+      ### Check with an estimate
+      46 × 23 is about 50 × 20 = 1,000, so 1,058 is reasonable.
+
+      ### Watch out
+      - The second row is multiplied by 20, not 2, so it ends in a 0.
+      - Remember to add any carried digits.
+  - key: example-multiply-multidigit
+    skill: 5.NBT.B.5
+    kind: worked_example
+    title: "Worked example: 312 × 14"
+    minutes: 4
+    content: |
+      **Problem.** A school orders 14 boxes with 312 pencils each. How many pencils is that?
+
+      1. 312 × 4 = 1,248.
+      2. 312 × 10 = 3,120.
+      3. 1,248 + 3,120 = 4,368.
+      4. Estimate: 300 × 14 = 4,200, close to 4,368.
+
+      **Answer:** 4,368 pencils.
+
+  # ------------------------------------------------------------ 5.NBT.B.6
+  - key: notes-divide-whole-numbers
+    skill: 5.NBT.B.6
+    kind: notes
+    title: "Dividing whole numbers"
+    minutes: 6
+    content: |
+      ### Key idea
+      Division asks **how many equal groups** (or how many in each group). You can divide in steps, taking away easy multiples of the divisor (partial quotients).
+
+      ### Partial quotients for 864 ÷ 24
+      1. 24 × 30 = 720. Left over: 864 − 720 = 144.
+      2. 24 × 6 = 144. Left over: 0.
+      3. Add the parts: 30 + 6 = 36.
+
+      ### Check
+      Multiply back: 36 × 24 = 864. If it matches, you're right.
+
+      ### Watch out
+      - A remainder must be smaller than the divisor.
+      - In word problems, decide what the remainder means (round up for "how many buses").
+  - key: example-divide-whole-numbers
+    skill: 5.NBT.B.6
+    kind: worked_example
+    title: "Worked example: equal groups"
+    minutes: 3
+    content: |
+      **Problem.** 1,512 stickers are shared equally among 36 students. How many does each get?
+
+      1. 36 × 40 = 1,440. Left: 1,512 − 1,440 = 72.
+      2. 36 × 2 = 72. Left: 0.
+      3. 40 + 2 = 42.
+      4. Check: 42 × 36 = 1,512.
+
+      **Answer:** 42 stickers each.
+
+  # ------------------------------------------------------------ 5.NBT.B.7
+  - key: notes-decimal-operations
+    skill: 5.NBT.B.7
+    kind: notes
+    title: "Adding, subtracting, multiplying and dividing decimals"
+    minutes: 6
+    content: |
+      ### Key idea
+      Decimals follow the same rules as whole numbers. The only extra job is to **keep track of place value**, so the decimal point lands in the right place.
+
+      ### Rules of thumb
+      - **Add/subtract:** line up the decimal points (write 2.5 as 2.50 if it helps).
+      - **Multiply:** multiply as whole numbers, then count the decimal places in both factors. 0.3 × 0.4: 3 × 4 = 12, two decimal places, so 0.12.
+      - **Divide by a decimal:** multiply both numbers by 10 (or 100) until the divisor is whole. 4.8 ÷ 0.6 = 48 ÷ 6 = 8.
+
+      ### Watch out
+      - Estimate first: 0.3 × 0.4 must be smaller than both factors.
+  - key: example-decimal-operations
+    skill: 5.NBT.B.7
+    kind: worked_example
+    title: "Worked example: cost of fruit"
+    minutes: 3
+    content: |
+      **Problem.** Apples cost $1.25 per pound. How much do 2.4 pounds cost?
+
+      1. Multiply as whole numbers: 125 × 24 = 3,000.
+      2. Decimal places: 1.25 has 2, 2.4 has 1, total 3. So 3.000.
+      3. Estimate: about $1 × 2.4 = $2.40 to $1.50 × 2.4 = $3.60. $3.00 fits.
+
+      **Answer:** $3.00.
+
+  # ------------------------------------------------------------ 6.EE.A.2c
+  - key: notes-evaluate-expressions
+    skill: 6.EE.A.2c
+    kind: notes
+    title: "Evaluating expressions"
+    minutes: 5
+    content: |
+      ### Key idea
+      To **evaluate** an expression, replace each variable with its value and calculate, following the **order of operations**: brackets, exponents, multiplication and division (left to right), addition and subtraction (left to right).
+
+      ### Steps
+      1. Substitute the value, in brackets: for 3x² with x = 4, write 3(4)².
+      2. Exponents first: 4² = 16.
+      3. Then multiply: 3 × 16 = 48.
+
+      ### Formulas are expressions too
+      The area of a square A = s² with s = 5 cm gives A = 25 cm².
+
+      ### Watch out
+      - 3x² means 3 × x², not (3x)².
+  - key: example-evaluate-expressions
+    skill: 6.EE.A.2c
+    kind: worked_example
+    title: "Worked example: a formula in context"
+    minutes: 3
+    content: |
+      **Problem.** A taxi charges C = 3 + 2m dollars for m miles. What is the cost of a 7-mile ride?
+
+      1. Substitute m = 7: C = 3 + 2(7).
+      2. Multiply first: 2 × 7 = 14.
+      3. Add: 3 + 14 = 17.
+
+      **Answer:** $17.
+
+  # ------------------------------------------------------------ 6.EE.A.3
+  - key: notes-equivalent-expressions-properties
+    skill: 6.EE.A.3
+    kind: notes
+    title: "Writing equivalent expressions"
+    minutes: 6
+    content: |
+      ### Key idea
+      Two expressions are **equivalent** if they give the same value for every value of the variable. The **distributive property** and **combining like terms** are the main tools.
+
+      ### Distributive property
+      - Expanding: 3(2 + x) = 6 + 3x (multiply 3 by **every** term inside).
+      - Factoring: 24x + 18 = 6(4x + 3) (take out a common factor).
+
+      ### Combining like terms
+      y + y + y = 3y; 5a + 2 + 3a = 8a + 2.
+
+      ### Watch out
+      - 3(2 + x) is not 6 + x. The 3 multiplies the x too.
+      - Test it: put x = 1 into both expressions. Different values mean they are not equivalent.
+  - key: example-equivalent-expressions-properties
+    skill: 6.EE.A.3
+    kind: worked_example
+    title: "Worked example: factoring out the greatest common factor"
+    minutes: 3
+    content: |
+      **Problem.** Write 12x + 30 as a product with a whole number outside brackets.
+
+      1. Common factors of 12 and 30: 1, 2, 3, 6. The greatest is 6.
+      2. 12x ÷ 6 = 2x and 30 ÷ 6 = 5.
+      3. So 12x + 30 = 6(2x + 5).
+      4. Check by expanding: 6 × 2x + 6 × 5 = 12x + 30.
+
+      **Answer:** 6(2x + 5).
+
+  # ------------------------------------------------------------ 6.EE.A.4
+  - key: notes-identify-equivalent
+    skill: 6.EE.A.4
+    kind: notes
+    title: "Identifying equivalent expressions"
+    minutes: 5
+    content: |
+      ### Key idea
+      Expressions are equivalent when they name the **same number whatever value the variable takes**. You can show it with properties, or test it by substituting numbers.
+
+      ### Two ways to check
+      1. **Rewrite**: simplify both expressions and see if they become identical (y + y + y and 3y).
+      2. **Substitute**: try a value such as x = 2 in both. If the results differ, they are NOT equivalent. (Matching once isn't proof, so try a second value.)
+
+      ### Watch out
+      - 2(x + 3) and 2x + 3 look alike but aren't: at x = 1 they give 8 and 5.
+  - key: example-identify-equivalent
+    skill: 6.EE.A.4
+    kind: worked_example
+    title: "Worked example: which are equivalent?"
+    minutes: 3
+    content: |
+      **Problem.** Which expressions are equivalent to 4(n + 2)? (a) 4n + 2, (b) 4n + 8, (c) 2(2n + 4).
+
+      1. Expand: 4(n + 2) = 4n + 8.
+      2. (a) 4n + 2: different constant. Not equivalent.
+      3. (b) 4n + 8: identical. Equivalent.
+      4. (c) 2(2n + 4) = 4n + 8. Equivalent.
+
+      **Answer:** (b) and (c).
+
+  # ------------------------------------------------------------ 6.EE.B.6
+  - key: notes-variables-expressions
+    skill: 6.EE.B.6
+    kind: notes
+    title: "Using variables to write expressions"
+    minutes: 5
+    content: |
+      ### Key idea
+      A **variable** is a letter that stands for a number you don't know yet, or a number that can change. Turning words into an expression means translating each phrase into an operation.
+
+      ### Useful translations
+      - "5 more than n": n + 5
+      - "3 less than n": n − 3 (careful with the order)
+      - "twice n" or "n doubled": 2n
+      - "n split into 4 equal parts": n ÷ 4 or n/4
+
+      ### Steps
+      1. Decide what the variable stands for and say it in words.
+      2. Translate the situation piece by piece.
+
+      ### Watch out
+      - "3 less than n" is n − 3, not 3 − n.
+  - key: example-variables-expressions
+    skill: 6.EE.B.6
+    kind: worked_example
+    title: "Worked example: a cost expression"
+    minutes: 3
+    content: |
+      **Problem.** Tickets cost $8 each and there is a $5 booking fee. Write an expression for the cost of t tickets, then find the cost of 6 tickets.
+
+      1. Tickets cost 8 per ticket: 8t.
+      2. Add the fee once: 8t + 5.
+      3. For t = 6: 8 × 6 + 5 = 48 + 5 = 53.
+
+      **Answer:** 8t + 5; six tickets cost $53.
+
+  # ------------------------------------------------------------ 6.EE.B.8
+  - key: notes-simple-inequalities
+    skill: 6.EE.B.8
+    kind: notes
+    title: "Writing simple inequalities"
+    minutes: 5
+    content: |
+      ### Key idea
+      An **inequality** describes many possible values: x > 3 means "any number greater than 3". Many real conditions are inequalities, not single numbers.
+
+      ### Symbols
+      - > greater than, < less than
+      - ≥ at least (greater than or equal), ≤ at most (less than or equal)
+
+      ### On a number line
+      - Open circle for > and < (the number itself is not included).
+      - Filled circle for ≥ and ≤ (the number is included).
+
+      ### Watch out
+      - "At least 12" means 12 is allowed: x ≥ 12.
+      - An inequality has infinitely many solutions.
+  - key: example-simple-inequalities
+    skill: 6.EE.B.8
+    kind: worked_example
+    title: "Worked example: a height rule"
+    minutes: 3
+    content: |
+      **Problem.** To ride a roller coaster you must be at least 48 inches tall. Write an inequality for allowed heights h.
+
+      1. "At least 48" includes 48 itself.
+      2. So h ≥ 48.
+      3. On a number line: a filled circle at 48 and an arrow to the right.
+
+      **Answer:** h ≥ 48.
+
+  # ------------------------------------------------------------ 6.EE.C.9
+  - key: notes-dependent-independent
+    skill: 6.EE.C.9
+    kind: notes
+    title: "Dependent and independent variables"
+    minutes: 5
+    content: |
+      ### Key idea
+      When one quantity changes because of another, the one you choose freely is the **independent variable** and the one that responds is the **dependent variable**. An equation such as d = 50t links them.
+
+      ### Three views of the same relationship
+      - **Equation**: d = 50t
+      - **Table**: t = 1, 2, 3 gives d = 50, 100, 150
+      - **Graph**: points (1, 50), (2, 100), (3, 150) on a line
+
+      ### Steps
+      1. Ask: which quantity depends on the other?
+      2. Find the rule from the table (what do you multiply by or add?).
+
+      ### Watch out
+      - Put the independent variable on the horizontal axis.
+  - key: example-dependent-independent
+    skill: 6.EE.C.9
+    kind: worked_example
+    title: "Worked example: earning money"
+    minutes: 3
+    content: |
+      **Problem.** Maya earns $12 for every hour she works. Write an equation, and say which variable is dependent.
+
+      1. Money earned depends on hours worked, so money m is dependent and hours h is independent.
+      2. Each hour adds 12, so m = 12h.
+      3. Check: 3 hours gives m = 36.
+
+      **Answer:** m = 12h; m (money) is the dependent variable.
+
+  # ------------------------------------------------------------ 6.G.A.1
+  - key: notes-area-polygons
+    skill: 6.G.A.1
+    kind: notes
+    title: "Area of triangles, parallelograms and other polygons"
+    minutes: 6
+    content: |
+      ### Key idea
+      Area formulas come from rectangles. A **parallelogram** can be rearranged into a rectangle, and a **triangle** is half of a parallelogram.
+
+      ### Formulas
+      - Parallelogram: A = base × height
+      - Triangle: A = ½ × base × height
+      - Trapezoid: A = ½ × (base₁ + base₂) × height
+
+      ### Other polygons
+      Split the shape into rectangles and triangles, find each area, and add.
+
+      ### Watch out
+      - The **height** is perpendicular to the base. It is not the slanted side.
+  - key: example-area-polygons
+    skill: 6.G.A.1
+    kind: worked_example
+    title: "Worked example: a triangle"
+    minutes: 3
+    content: |
+      **Problem.** A triangle has base 10 cm and height 7 cm. Its slanted side is 8 cm. Find its area.
+
+      1. Use base and **height**; the slanted side isn't needed.
+      2. A = ½ × 10 × 7 = ½ × 70 = 35.
+
+      **Answer:** 35 cm².
+
+  # ------------------------------------------------------------ 6.G.A.2
+  - key: notes-volume-prisms-fractions
+    skill: 6.G.A.2
+    kind: notes
+    title: "Volume of rectangular prisms (with fractional edges)"
+    minutes: 5
+    content: |
+      ### Key idea
+      The volume of a rectangular prism is **length × width × height** (V = lwh), or **area of the base × height** (V = Bh). This works for fractional edge lengths too.
+
+      ### Multiplying fractions quickly
+      Multiply the numerators and the denominators: ½ × ¾ = 3/8. Turn mixed numbers into improper fractions first (1½ = 3/2).
+
+      ### Watch out
+      - Volume is in cubic units (cm³, in³).
+      - Multiply all three edges, not just two.
+  - key: example-volume-prisms-fractions
+    skill: 6.G.A.2
+    kind: worked_example
+    title: "Worked example: a box with fractional sides"
+    minutes: 3
+    content: |
+      **Problem.** A box is 2½ in long, 2 in wide and 1½ in tall. Find its volume.
+
+      1. Improper fractions: 2½ = 5/2 and 1½ = 3/2.
+      2. V = 5/2 × 2 × 3/2 = (5 × 2 × 3)/(2 × 2) = 30/4.
+      3. 30/4 = 15/2 = 7½.
+
+      **Answer:** 7½ cubic inches.
+
+  # ------------------------------------------------------------ 6.G.A.4
+  - key: notes-nets-surface-area
+    skill: 6.G.A.4
+    kind: notes
+    title: "Nets and surface area"
+    minutes: 5
+    content: |
+      ### Key idea
+      A **net** is a 3D shape unfolded flat. The **surface area** is the total area of all the faces, so you can find it by adding the areas of the shapes in the net.
+
+      ### Rectangular prism
+      It has 6 faces in 3 matching pairs: SA = 2lw + 2lh + 2wh.
+
+      ### Steps
+      1. List every face (use the net).
+      2. Find each face's area.
+      3. Add them all.
+
+      ### Watch out
+      - Surface area is in square units; volume is in cubic units.
+      - Don't forget the faces you can't see in a drawing.
+  - key: example-nets-surface-area
+    skill: 6.G.A.4
+    kind: worked_example
+    title: "Worked example: wrapping a box"
+    minutes: 3
+    content: |
+      **Problem.** How much paper covers a box 5 cm long, 3 cm wide and 2 cm tall (no overlap)?
+
+      1. Top and bottom: 2 × (5 × 3) = 30.
+      2. Front and back: 2 × (5 × 2) = 20.
+      3. Two sides: 2 × (3 × 2) = 12.
+      4. Total: 30 + 20 + 12 = 62.
+
+      **Answer:** 62 cm².
+
+  # ------------------------------------------------------------ 6.NS.B.2
+  - key: notes-long-division
+    skill: 6.NS.B.2
+    kind: notes
+    title: "Dividing multi-digit numbers"
+    minutes: 5
+    content: |
+      ### Key idea
+      Long division repeats four steps: **divide, multiply, subtract, bring down**, working from the biggest place value to the smallest.
+
+      ### Steps for 2,268 ÷ 12
+      1. 12 into 22: 1 time, remainder 10. Bring down 6: 106.
+      2. 12 into 106: 8 times (96), remainder 10. Bring down 8: 108.
+      3. 12 into 108: 9 times, remainder 0.
+      4. Quotient: 189.
+
+      ### Check
+      189 × 12 = 2,268.
+
+      ### Watch out
+      - If the divisor doesn't go into a step, write 0 in the quotient before bringing down the next digit.
+  - key: example-long-division
+    skill: 6.NS.B.2
+    kind: worked_example
+    title: "Worked example: rows of seats"
+    minutes: 3
+    content: |
+      **Problem.** 3,150 seats are arranged in 25 equal rows. How many seats per row?
+
+      1. 25 into 31: 1, remainder 6. Bring down 5: 65.
+      2. 25 into 65: 2 (50), remainder 15. Bring down 0: 150.
+      3. 25 into 150: 6, remainder 0.
+      4. Check: 126 × 25 = 3,150.
+
+      **Answer:** 126 seats per row.
+
+  # ------------------------------------------------------------ 6.NS.B.4
+  - key: notes-factors-multiples
+    skill: 6.NS.B.4
+    kind: notes
+    title: "Common factors and multiples"
+    minutes: 6
+    content: |
+      ### Key idea
+      The **greatest common factor (GCF)** is the largest number that divides two numbers exactly. The **least common multiple (LCM)** is the smallest number both divide into.
+
+      ### Finding them
+      - GCF of 12 and 18: factors of 12 are 1, 2, 3, 4, 6, 12; of 18 are 1, 2, 3, 6, 9, 18. The greatest shared one is **6**.
+      - LCM of 4 and 6: multiples of 4 are 4, 8, **12**...; of 6 are 6, **12**... So the LCM is 12.
+
+      ### When to use which
+      - GCF: splitting into the largest equal groups, factoring 12 + 18 = 6(2 + 3).
+      - LCM: when two repeating things line up again.
+
+      ### Watch out
+      - The GCF is never bigger than the smaller number; the LCM is never smaller than the larger one.
+  - key: example-factors-multiples
+    skill: 6.NS.B.4
+    kind: worked_example
+    title: "Worked example: snack packs"
+    minutes: 3
+    content: |
+      **Problem.** You have 24 apples and 36 oranges and want identical packs using all the fruit. What is the greatest number of packs?
+
+      1. The number of packs must divide both 24 and 36.
+      2. Factors of 24: 1, 2, 3, 4, 6, 8, 12, 24. Factors of 36: 1, 2, 3, 4, 6, 9, 12, 18, 36.
+      3. Greatest common factor: 12.
+      4. Each pack: 24 ÷ 12 = 2 apples and 36 ÷ 12 = 3 oranges.
+
+      **Answer:** 12 packs.
+
+  # ------------------------------------------------------------ 6.NS.C.6c
+  - key: notes-plot-integers
+    skill: 6.NS.C.6c
+    kind: notes
+    title: "Plotting positive and negative numbers"
+    minutes: 5
+    content: |
+      ### Key idea
+      Negative numbers sit to the **left of 0** on a horizontal number line (or below 0 on a vertical one). On the coordinate plane, the signs of x and y tell you the **quadrant**.
+
+      ### Quadrants
+      - I: (+, +) top right
+      - II: (−, +) top left
+      - III: (−, −) bottom left
+      - IV: (+, −) bottom right
+
+      ### Steps to plot (−3, 2)
+      1. From the origin move 3 **left** (x is negative).
+      2. Then 2 **up** (y is positive). It lands in quadrant II.
+
+      ### Watch out
+      - x first (left/right), then y (up/down).
+  - key: example-plot-integers
+    skill: 6.NS.C.6c
+    kind: worked_example
+    title: "Worked example: which quadrant?"
+    minutes: 3
+    content: |
+      **Problem.** Where are (4, −5) and (−1, −6)?
+
+      1. (4, −5): right 4, down 5. Positive x, negative y: quadrant IV.
+      2. (−1, −6): left 1, down 6. Both negative: quadrant III.
+
+      **Answer:** (4, −5) in quadrant IV; (−1, −6) in quadrant III.
+
+  # ------------------------------------------------------------ 6.NS.C.7a
+  - key: notes-compare-integers
+    skill: 6.NS.C.7a
+    kind: notes
+    title: "Comparing integers on a number line"
+    minutes: 4
+    content: |
+      ### Key idea
+      On a number line, numbers **increase to the right**. The number further right is greater, even when both are negative: −2 > −7.
+
+      ### Steps
+      1. Picture both numbers on a number line.
+      2. The one on the right is greater.
+
+      ### In real life
+      −10°C is colder (smaller) than −3°C, and a −$20 balance is a bigger debt than −$5.
+
+      ### Watch out
+      - −7 has a bigger "size" than −2, but it is the **smaller** number.
+  - key: example-compare-integers
+    skill: 6.NS.C.7a
+    kind: worked_example
+    title: "Worked example: ordering temperatures"
+    minutes: 3
+    content: |
+      **Problem.** Order from coldest to warmest: 3°C, −5°C, 0°C, −1°C.
+
+      1. Place them on a number line: −5, −1, 0, 3 from left to right.
+      2. Further left means colder.
+
+      **Answer:** −5°C, −1°C, 0°C, 3°C.
+
+  # ------------------------------------------------------------ 6.NS.C.7c
+  - key: notes-absolute-value
+    skill: 6.NS.C.7c
+    kind: notes
+    title: "Absolute value"
+    minutes: 4
+    content: |
+      ### Key idea
+      The **absolute value** of a number is its **distance from 0** on the number line. Distance is never negative, so |−6| = 6 and |6| = 6.
+
+      ### In context
+      An account balance of −$30 means a debt of $30: the absolute value tells you how big the debt is.
+
+      ### Watch out
+      - |−6| = 6, but −|6| = −6 (the minus sign is outside).
+      - A bigger absolute value doesn't mean a bigger number: |−9| > |4| but −9 < 4.
+  - key: example-absolute-value
+    skill: 6.NS.C.7c
+    kind: worked_example
+    title: "Worked example: depth and height"
+    minutes: 3
+    content: |
+      **Problem.** A diver is at −12 m and a bird at 9 m. Who is further from sea level?
+
+      1. Distance of the diver from 0: |−12| = 12 m.
+      2. Distance of the bird: |9| = 9 m.
+      3. 12 > 9.
+
+      **Answer:** the diver, 12 m from sea level.
+
+  # ------------------------------------------------------------ 6.NS.C.8
+  - key: notes-coordinate-distance
+    skill: 6.NS.C.8
+    kind: notes
+    title: "Distances on the coordinate plane"
+    minutes: 5
+    content: |
+      ### Key idea
+      When two points share an x-coordinate or a y-coordinate, the distance between them is found by **subtracting the other coordinates**, or by adding absolute values when they are on opposite sides of an axis.
+
+      ### Steps
+      1. Check which coordinate is the same.
+      2. Same sign: subtract the absolute values. (2, 3) to (2, 8): 8 − 3 = 5.
+      3. Opposite signs: add the absolute values. (−4, 1) to (3, 1): 4 + 3 = 7.
+
+      ### Watch out
+      - Distances are positive. Count the units on a grid to check.
+  - key: example-coordinate-distance
+    skill: 6.NS.C.8
+    kind: worked_example
+    title: "Worked example: a map grid"
+    minutes: 3
+    content: |
+      **Problem.** On a map grid the library is at (−3, 5) and the park at (−3, −2). How many units apart are they?
+
+      1. Same x-coordinate, so measure vertically.
+      2. y-values 5 and −2 are on opposite sides of the x-axis: |5| + |−2| = 5 + 2 = 7.
+
+      **Answer:** 7 units.
+
+  # ------------------------------------------------------------ 6.RP.A.1
+  - key: notes-ratio-language
+    skill: 6.RP.A.1
+    kind: notes
+    title: "Understanding ratios"
+    minutes: 4
+    content: |
+      ### Key idea
+      A **ratio** compares two quantities. "For every 3 cats there are 2 dogs" is the ratio 3 : 2 (cats to dogs). It can also be written 3 to 2.
+
+      ### Part-to-part and part-to-whole
+      - Cats to dogs: 3 : 2 (part to part).
+      - Cats to all pets: 3 : 5 (part to whole), because 3 + 2 = 5.
+
+      ### Watch out
+      - Order matters: cats to dogs is 3 : 2, dogs to cats is 2 : 3.
+      - A ratio is a comparison, not a count: 3 : 2 could be 6 cats and 4 dogs.
+  - key: example-ratio-language
+    skill: 6.RP.A.1
+    kind: worked_example
+    title: "Worked example: a class"
+    minutes: 3
+    content: |
+      **Problem.** A class has 12 girls and 15 boys. Write the ratio of girls to boys and girls to all students.
+
+      1. Girls to boys: 12 : 15. Both divide by 3: 4 : 5.
+      2. All students: 12 + 15 = 27. Girls to all: 12 : 27 = 4 : 9.
+
+      **Answer:** 4 : 5 and 4 : 9.
+
+  # ------------------------------------------------------------ 6.SP.A.1
+  - key: notes-statistical-questions
+    skill: 6.SP.A.1
+    kind: notes
+    title: "Statistical questions"
+    minutes: 4
+    content: |
+      ### Key idea
+      A **statistical question** expects **variability** in the answers, so you need to collect data to answer it.
+
+      ### Examples
+      - Statistical: "How many hours do students in my class sleep?" (answers vary).
+      - Not statistical: "How many hours did I sleep last night?" (one answer).
+
+      ### Watch out
+      - Look for a group of people or things and a quantity that can differ between them.
+  - key: example-statistical-questions
+    skill: 6.SP.A.1
+    kind: worked_example
+    title: "Worked example: spot the statistical question"
+    minutes: 2
+    content: |
+      **Problem.** Which is statistical? (a) How old is the school principal? (b) How old are the teachers at our school?
+
+      1. (a) has one answer: no variability.
+      2. (b) has many different answers: the ages vary.
+
+      **Answer:** (b).
+
+  # ------------------------------------------------------------ 6.SP.B.4
+  - key: notes-data-displays
+    skill: 6.SP.B.4
+    kind: notes
+    title: "Dot plots, histograms and box plots"
+    minutes: 6
+    content: |
+      ### Key idea
+      Each display shows the **shape, centre and spread** of numerical data in a different way.
+
+      ### The three displays
+      - **Dot plot**: one dot per value above a number line. Good for small data sets.
+      - **Histogram**: bars for **intervals** (such as 10-19, 20-29). The bar height is how many values fall in each interval.
+      - **Box plot**: shows the five-number summary: minimum, Q1, median, Q3, maximum.
+
+      ### Watch out
+      - In a histogram, bars touch and you can't read individual values.
+      - In a box plot, each of the four sections holds about a quarter of the data, even if a section looks longer.
+  - key: example-data-displays
+    skill: 6.SP.B.4
+    kind: worked_example
+    title: "Worked example: building a box plot"
+    minutes: 4
+    content: |
+      **Problem.** Make the five-number summary for: 2, 4, 5, 7, 8, 9, 12.
+
+      1. Minimum 2, maximum 12.
+      2. Median (middle of 7 values): 7.
+      3. Lower half 2, 4, 5: Q1 = 4. Upper half 8, 9, 12: Q3 = 9.
+
+      **Answer:** 2, 4, 7, 9, 12. The box runs from 4 to 9 with a line at 7.
+
+  # ------------------------------------------------------------ 6.SP.B.5b
+  - key: notes-describe-data
+    skill: 6.SP.B.5b
+    kind: notes
+    title: "Describing a data set"
+    minutes: 4
+    content: |
+      ### Key idea
+      Before analysing data, say **what was measured, how, and in what units**, and how many observations there are.
+
+      ### Checklist
+      - What is the attribute? (height, minutes, score)
+      - What unit? (cm, minutes, points)
+      - How was it measured or collected? (survey, stopwatch)
+      - How many values (n)?
+
+      ### Watch out
+      - Mixing units (minutes and hours) in one data set gives misleading results.
+  - key: example-describe-data
+    skill: 6.SP.B.5b
+    kind: worked_example
+    title: "Worked example: a survey"
+    minutes: 2
+    content: |
+      **Problem.** 20 students timed how long their journey to school took. Describe the data set.
+
+      1. Attribute: journey time to school.
+      2. Unit: minutes.
+      3. Collected by students timing their own journeys.
+      4. n = 20 observations.
+
+      **Answer:** 20 journey times, in minutes, self-timed by students.
+
+  # ------------------------------------------------------------ 6.SP.B.5c
+  - key: notes-centre-variability
+    skill: 6.SP.B.5c
+    kind: notes
+    title: "Measures of centre and variability"
+    minutes: 6
+    content: |
+      ### Key idea
+      A **measure of centre** gives a typical value; a **measure of variability** says how spread out the values are.
+
+      ### Centre
+      - **Mean**: add all values, divide by how many.
+      - **Median**: the middle value when ordered (average of the two middle values if there is an even number).
+
+      ### Variability
+      - **Range**: maximum − minimum.
+      - **IQR**: Q3 − Q1 (spread of the middle half).
+      - **MAD** (mean absolute deviation): the average distance of the values from the mean.
+
+      ### Watch out
+      - An extreme value (outlier) pulls the mean a lot but the median very little.
+  - key: example-centre-variability
+    skill: 6.SP.B.5c
+    kind: worked_example
+    title: "Worked example: mean and MAD"
+    minutes: 4
+    content: |
+      **Problem.** Find the mean and MAD of 4, 6, 7, 11.
+
+      1. Mean: (4 + 6 + 7 + 11) ÷ 4 = 28 ÷ 4 = 7.
+      2. Distances from 7: 3, 1, 0, 4.
+      3. MAD: (3 + 1 + 0 + 4) ÷ 4 = 8 ÷ 4 = 2.
+
+      **Answer:** mean 7, MAD 2.
