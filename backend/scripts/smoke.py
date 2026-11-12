@@ -5,8 +5,11 @@ Usage:
     python scripts/smoke.py https://mentorx-backend-uco2.onrender.com
     python scripts/smoke.py http://localhost:8000
 
-Creates a throwaway account, enrols, answers one diagnostic question, reads the dashboard
-and learning path, then DELETES the account. Exits 1 on the first failure.
+Creates a throwaway account, then tests whichever product is live:
+- v2 (Mathematics seeded): onboarding, one adaptive-diagnostic question (no answer key leaked),
+  the diagnosis, the dashboard, the model and the AI tutor status;
+- v1 (Machine Learning subject): enrol, one diagnostic question, dashboard, learning path.
+Then it DELETES the account. Exits 1 on the first failure.
 Over plain HTTP the refresh-cookie check is skipped (the cookie is Secure in production).
 """
 
@@ -54,6 +57,54 @@ class Smoke:
         return (json.loads(raw) if raw else None), headers
 
 
+def v2_is_live(s: Smoke) -> bool:
+    """True if the v2 Mathematics tutor is deployed and seeded (GET /api/v2/subject = 200)."""
+    v1 = s.base
+    s.base = v1.removesuffix("/v1") + "/v2"
+    try:
+        s.call("GET", "/subject")
+        return True
+    except AssertionError as e:
+        print(f"  --  v2 Mathematics not live ({str(e)[:80]}); testing v1")
+        return False
+    finally:
+        s.base = v1
+
+
+def smoke_v2(s: Smoke) -> None:
+    v1 = s.base
+    s.base = v1.removesuffix("/v1") + "/v2"
+    try:
+        sub, _ = s.call("GET", "/subject")
+        assert sub["n_skills"] >= 10 and sub["n_questions"] >= 100, "maths content too small"
+        assert sub["model"]["available"], "knowledge-tracing model not loaded"
+        print(
+            f"  {sub['n_skills']} skills, {sub['n_questions']} questions",
+            f"model {sub['model']['name']}",
+        )
+        s.call(
+            "POST", "/onboarding", {"goal_type": "assess_overall", "goal_kind": "weekly_practice"}
+        )
+        a, _ = s.call("POST", "/assessments", {"kind": "diagnostic"}, 201)
+        q, _ = s.call("GET", f"/assessments/{a['id']}/next")
+        assert "answer_key" not in q and q["selection"]["how"], "question leaked or unexplained"
+        body = {"item_id": q["item_id"]}
+        if q["answer_type"] == "multiple_choice":
+            body["choice"] = q["options"][0]["id"]
+        elif q["answer_type"] == "check_all":
+            body["choices"] = [q["options"][0]["id"]]
+        else:
+            body["value"] = "1"
+        r, _ = s.call("POST", f"/assessments/{a['id']}/answer", body)
+        assert r["correct_answer"], "no feedback after answering"
+        dash, _ = s.call("GET", "/dashboard")
+        assert dash["streak"]["today"] == 1, dash["streak"]
+        ai, _ = s.call("GET", "/ai/status")
+        print(f"  AI tutor enabled: {ai['enabled']}")
+    finally:
+        s.base = v1
+
+
 def main() -> int:
     if len(sys.argv) != 2:
         print(__doc__)
@@ -88,6 +139,10 @@ def main() -> int:
             print("  --  POST   /auth/refresh: skipped over plain HTTP (Secure cookie)")
 
         s.call("GET", "/me")
+        if v2_is_live(s):
+            smoke_v2(s)
+            print("PASSED (v2)")
+            return 0
         subjects, _ = s.call("GET", "/subjects")
         assert any(x["code"] == "ML" and x["concept_count"] > 0 for x in subjects), subjects
         s.call("POST", "/subjects/ML/enroll")
