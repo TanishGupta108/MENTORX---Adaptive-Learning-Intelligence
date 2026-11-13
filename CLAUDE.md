@@ -4,14 +4,19 @@ AI-powered adaptive Mathematics tutor (grades 4-8, Common Core) on the Foundatio
 dataset with a trained DKT-Q knowledge-tracing model. The product brief is `build.md`.
 The detailed design and the honest list of what is limited are in `docs/modules/tutor.md`.
 
-## v3 (2026-11-13): built and verified locally, NOT committed or deployed yet
-- Multi-subject (Maths + Geography map skills from Slepemapy.cz, `docs/modules/geography.md`),
-  new Home/Progress pages, answer-checking policy + `scripts/regrade.py`, personalization,
-  sturdier LLM chain (`llm.py`). Migration `c5e8a1f4b2d7` (local DB is on it).
-- Checks 2026-11-13: backend 287 passed, ruff clean; frontend 43 passed, typecheck and build clean;
-  `smoke.py http://localhost:8000` PASSED (v3) incl. Geography (16 skills).
-- To ship: commit, push (auto-deploys), then on production run `seed_geography.py` and
-  `regrade.py --dry-run` / `regrade.py` (`docs/deployment.md`), then smoke the Vercel URL.
+## Where we are (2026-11-13): v3 DEPLOYED
+- `main` = `feat/mentorx-v2-maths-tutor` at the v3 commit, pushed; Render + Vercel run it.
+  Multi-subject (Maths + Geography map skills, `docs/modules/geography.md`), Home/Progress pages,
+  answer-checking policy + `scripts/regrade.py`, personalization, sturdier LLM chain (`llm.py`).
+  Migration `c5e8a1f4b2d7` ran on production.
+- Production DB: Geography seeded (16 skills, 930 questions). `regrade.py --dry-run` on production:
+  5 answers checked, 0 changed, so it was not applied.
+- Live smoke PASSED (v3) incl. Geography. One earlier run timed out (>60 s) on one request just
+  after seeding, probably the first Geography model load on the free Render instance; it left one
+  smoke-*@example.com account behind.
+- Checks: backend 287 passed, frontend 43 passed, typecheck and build clean.
+- Production scripts from the laptop: put the Render External Database URL in `backend/.env.prod`
+  (git-ignored) and set it as DATABASE_URL for the script; never print it.
 
 ## Where we were (2026-11-12)
 - v2.1 is DEPLOYED (2026-11-12): `main` = `feat/mentorx-v2-maths-tutor`, pushed. Render (API) and
