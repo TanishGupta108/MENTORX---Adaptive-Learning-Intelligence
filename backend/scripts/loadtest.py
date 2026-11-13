@@ -1,7 +1,8 @@
 """NFR-PERF-01 load test: N concurrent students taking diagnostics and practice sessions.
 
 Usage (against a server whose registration limit allows N sign-ups from one IP):
-    REGISTRATIONS_PER_HOUR=1000 uvicorn app.main:app --port 8000      # in one terminal
+    # in one terminal:
+    REGISTRATIONS_PER_HOUR=1000 REGISTRATIONS_GLOBAL_PER_HOUR=1000 uvicorn app.main:app --port 8000
     python scripts/loadtest.py http://127.0.0.1:8000 --users 50 --questions 20
 
 Each simulated student arrives during the ramp-up period, registers, enrols, then repeatedly

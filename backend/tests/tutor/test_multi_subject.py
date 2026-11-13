@@ -242,3 +242,25 @@ def test_onboarding_into_another_subject(client, geo):
         headers=h,
     )
     assert bad.status_code == 422
+
+
+def test_profile_edit_follows_the_onboarding_rules(client, learner, geo, math_keys):
+    """PATCH /profile: a focus topic must be an available skill of the current subject, and
+    "learn a topic" needs one (it used to answer 500 for an unknown id and accept the rest)."""
+    h = learner
+    geo_skill = GEO_SKILLS[0][0]
+    for body in (
+        {"focus_skill_id": 99_999_999},  # no such skill
+        {"focus_skill_id": geo_skill},  # another subject's skill
+        {"goal_type": "learn_topic"},  # no topic chosen
+        {"goal_type": "learn_topic", "focus_skill_id": None},
+    ):
+        r = client.patch("/api/v2/profile", json=body, headers=h)
+        assert r.status_code == 422, (body, r.status_code, r.text)
+    ok = client.patch(
+        "/api/v2/profile", json={"goal_type": "learn_topic", "focus_skill_id": 129}, headers=h
+    )
+    assert ok.status_code == 200, ok.text
+    assert ok.json()["goal_type"] == "learn_topic"
+    cleared = client.patch("/api/v2/profile", json={"focus_skill_id": None}, headers=h)
+    assert cleared.status_code == 422  # still learning a topic, so it can't be removed alone

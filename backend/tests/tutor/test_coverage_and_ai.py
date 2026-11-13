@@ -317,6 +317,32 @@ def test_ai_explanations_are_cached_private_and_after_answering(
     assert stolen.status_code == 404
 
 
+def test_ai_calls_hold_no_database_connection(client, math_keys, learner, monkeypatch):
+    """A slow model must not keep a pooled connection checked out (a class asking for hints
+    at the same time would otherwise exhaust the pool and block every other request)."""
+    from app.db.session import get_engine
+
+    pool = get_engine().pool
+    busy: list[int] = []
+
+    def complete(messages, max_tokens=1200, **kw):
+        busy.append(pool.checkedout())
+        if "first step" in messages[-1]["content"]:
+            return "Think about place value.", 5, "test-model"
+        return "1. Add.\nTip: check.", 5, "test-model"
+
+    monkeypatch.setattr(llm, "complete", complete)
+    h = learner
+    s, q, a = _first_practice_answer(client, h, math_keys, correct=False)
+    r = client.post("/api/v2/ai/explain", json={"interaction_id": a["interaction_id"]}, headers=h)
+    assert r.status_code == 200
+    s2 = client.post("/api/v2/practice", json={"skill_id": 129}, headers=h).json()
+    client.get(f"/api/v2/practice/{s2['id']}/next", headers=h)
+    hint = client.post(f"/api/v2/practice/{s2['id']}/hint?ai=true", headers=h).json()
+    assert hint["kind"] == "ai"
+    assert busy == [0, 0]
+
+
 def test_ai_hint_never_gives_the_answer_away(client, math_keys, learner, fake_ai):
     h = learner
     s = client.post("/api/v2/practice", json={"skill_id": 129}, headers=h).json()

@@ -73,6 +73,7 @@ def update_profile(req: ProfileUpdate, user: CurrentUser, db: DB) -> dict:
         for k, v in req.model_dump(exclude_unset=True).items()
         if v is not None or k in NULLABLE_PROFILE_FIELDS
     }
+    profile_service.check_update(db, p, data)
     for k, v in data.items():
         setattr(p, k, v)
     if "pace_preference" in data:

@@ -38,6 +38,9 @@ class Settings(BaseSettings):
     cookie_samesite: str = Field(default="strict", pattern="^(strict|lax|none)$")
     login_attempts_per_minute: int = 5
     registrations_per_hour: int = 10  # per client IP
+    # All sign-ups together. A backstop: a client calling the API host directly can fake its
+    # IP (X-Forwarded-For), which defeats the per-IP limit but not this one.
+    registrations_global_per_hour: int = 100
 
     # --- content ---
     # Draft (unreviewed) questions are loaded only outside production (see question-bank guide).

@@ -332,6 +332,11 @@ def _generate(
             "You've used today's AI tutor requests. They reset at midnight.",
         )
     system = SYSTEM_GEO if is_map(item) else SYSTEM
+    # The model may take up to AI_TOTAL_SECONDS. End the transaction first so this request
+    # doesn't hold one of the pool's connections meanwhile (a class asking for hints at once
+    # would otherwise block every other request). Loaded objects stay usable
+    # (expire_on_commit=False); the commit below opens a new transaction.
+    db.commit()
     text, latency, model = llm.complete(
         [{"role": "system", "content": system}, {"role": "user", "content": prompt}], max_tokens
     )

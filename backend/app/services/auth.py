@@ -22,6 +22,9 @@ logger = logging.getLogger(__name__)
 
 login_limiter = RateLimiter(limit=get_settings().login_attempts_per_minute, window_seconds=60)
 register_limiter = RateLimiter(limit=get_settings().registrations_per_hour, window_seconds=3600)
+register_global_limiter = RateLimiter(
+    limit=get_settings().registrations_global_per_hour, window_seconds=3600
+)
 
 
 def check_registration_rate(client_ip: str) -> None:
@@ -32,6 +35,14 @@ def check_registration_rate(client_ip: str) -> None:
             "rate_limited",
             "Too many accounts created from this network. Please try again later.",
             headers={"Retry-After": str(register_limiter.retry_after(f"ip:{client_ip}"))},
+        )
+    if not register_global_limiter.hit("all"):
+        logger.warning("global registration limit reached")
+        raise AppError(
+            429,
+            "rate_limited",
+            "Too many new accounts right now. Please try again later.",
+            headers={"Retry-After": str(register_global_limiter.retry_after("all"))},
         )
 
 

@@ -54,6 +54,20 @@ def test_registration_is_rate_limited_per_ip(client, seeded):
     assert int(r.headers["Retry-After"]) > 0
 
 
+def test_registration_has_a_site_wide_cap_that_fake_ips_cannot_dodge(monkeypatch):
+    """A client calling the API host directly can fake X-Forwarded-For, so every request looks
+    like a new IP; the site-wide hourly cap still stops it."""
+    from app.core.errors import AppError
+    from app.services import auth as auth_service
+
+    monkeypatch.setattr(auth_service.register_global_limiter, "limit", 3)
+    for i in range(3):
+        auth_service.check_registration_rate(f"203.0.113.{i}")
+    with pytest.raises(AppError) as exc:
+        auth_service.check_registration_rate("203.0.113.99")
+    assert exc.value.status_code == 429
+
+
 @pytest.mark.parametrize(
     ("given", "expected"),
     [

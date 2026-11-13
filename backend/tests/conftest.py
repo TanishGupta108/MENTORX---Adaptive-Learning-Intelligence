@@ -73,10 +73,11 @@ def clean_tables(migrated_database):
         conn.execute(text(f"TRUNCATE {', '.join(tables)} RESTART IDENTITY CASCADE"))
     from app.ml.knowledge import reset_stats_cache
     from app.ml.registry import reset_cache
-    from app.services.auth import login_limiter, register_limiter
+    from app.services.auth import login_limiter, register_global_limiter, register_limiter
 
     login_limiter.reset()
     register_limiter.reset()
+    register_global_limiter.reset()
     from app.services.engagement import feedback_limiter
 
     feedback_limiter.reset()

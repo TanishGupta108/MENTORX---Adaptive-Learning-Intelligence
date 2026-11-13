@@ -1,7 +1,8 @@
 # CLAUDE.md: MENTORX (read this first)
 
-AI-powered adaptive Mathematics tutor (grades 4-8, Common Core) on the FoundationalASSIST
-dataset with a trained DKT-Q knowledge-tracing model. The product brief is `build.md`.
+AI-powered adaptive tutor with two subjects: Mathematics (grades 4-8, Common Core,
+FoundationalASSIST dataset) and Geography map skills (Slepemapy.cz, `docs/modules/geography.md`),
+each with its own trained DKT-Q knowledge-tracing model. The product brief is `build.md`.
 The detailed design and the honest list of what is limited are in `docs/modules/tutor.md`.
 
 ## Where we are (2026-11-13): v3 DEPLOYED
@@ -14,7 +15,10 @@ The detailed design and the honest list of what is limited are in `docs/modules/
 - Live smoke PASSED (v3) incl. Geography. One earlier run timed out (>60 s) on one request just
   after seeding, probably the first Geography model load on the free Render instance; it left one
   smoke-*@example.com account behind.
-- Checks: backend 287 passed, frontend 43 passed, typecheck and build clean.
+- Checks: backend 290 passed, frontend 43 passed, typecheck and build clean.
+- 2026-11-14 review fixes: AI calls release their DB connection before calling the model
+  (`ai._generate`); `PATCH /profile` uses onboarding's checks (`profile.check_update`);
+  site-wide sign-up cap `REGISTRATIONS_GLOBAL_PER_HOUR`.
 - Production scripts from the laptop: put the Render External Database URL in `backend/.env.prod`
   (git-ignored) and set it as DATABASE_URL for the script; never print it.
 
@@ -39,7 +43,8 @@ The detailed design and the honest list of what is limited are in `docs/modules/
 6. After content changes, reseed production from the laptop (`docs/deployment.md`, "Mathematics content").
 
 ## Layout
-- `backend/app/tutor/`: v2 tutor.
+- `backend/app/tutor/`: the tutor (v2 Maths, v3 multi-subject).
+  - Subjects (codes, credits, per-subject options): `subjects.py`; student's local day: `localtime.py`.
   - Answer checking: `answers.py`, `mathexpr.py` (safe SymPy).
   - Question HTML, images, WIRIS → MathML: `html.py`.
   - Model serving: `kt.py`, with NumPy inference in `app/ml/dkt.py`.
@@ -50,11 +55,14 @@ The detailed design and the honest list of what is limited are in `docs/modules/
   - AI tutor: `ai.py`, `llm.py`.
   - Admin and model monitor: `admin.py`.
   - Read models (dashboard, streak, ...): `views.py`.
-  - Seeding: `seed.py`.
+  - Seeding: `seed.py` (Maths), `seed_geo.py` (Geography). Re-checking old answers: `regrade.py`.
 - API: `backend/app/api/v2/tutor.py`. Auth is on `/api/v1/auth`.
-- Frontend: `frontend/src/pages/*`, `components/AiTutor.tsx`, `components/AdminMonitor.tsx`, `api/tutor.ts`.
+- Frontend: `frontend/src/pages/*` (Home, Progress, Skill, Practice, ...), `components/AiTutor.tsx`,
+  `components/MapQuestion.tsx`, `components/SubjectSwitcher.tsx`, `components/AdminMonitor.tsx`, `api/tutor.ts`.
+  Map outlines: `frontend/public/maps/`.
 - ML training: `ml/` and `ml/notebooks/02_foundationalassist_knowledge_tracing.ipynb`.
-  Model artifacts: `backend/model_artifacts/foundationalassist/`.
+  Model artifacts: `backend/model_artifacts/foundationalassist/` and `backend/model_artifacts/geography/`.
+  Geography: `ml/scripts/build_geography_maps.py`, `ml/scripts/train_geography_kt.py`.
 
 ## Commands (Windows; the repo path contains an em dash)
 ```powershell
@@ -69,7 +77,8 @@ In Git Bash, Node needs: `export PATH="$(cygpath "$LOCALAPPDATA")/Programs/node-
 - Reseed: `python scripts/seed_math.py --data-dir "C:/Users/Tanish Gupta/Downloads"`.
   The CSVs and `image_check.json` live there. Never commit the dataset.
 - Image check: `python scripts/check_images.py --data-dir <same folder>`.
-- Migrations: `alembic upgrade head`. The latest is `3a3323760dc2`.
+- Migrations: `alembic upgrade head`. The latest is `c5e8a1f4b2d7`.
+- Geography reseed: `python scripts/seed_geography.py --data-dir "C:/Users/Tanish Gupta/Downloads/mentorx-new-subject/slepemapy-2015-05-21"`.
 
 ## Rules that must hold
 - Observed performance and model predictions are always separate fields and labels. A skill

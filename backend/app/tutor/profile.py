@@ -138,6 +138,19 @@ def onboard(
     return p
 
 
+def check_update(db: Session, p: StudentProfile, data: dict) -> None:
+    """The same rules as onboarding, for a profile edit: a focus topic must be an available
+    skill of the current subject, and "learn a topic" needs one."""
+    if data.get("focus_skill_id") is not None:
+        skill = db.get(Skill, data["focus_skill_id"])
+        if skill is None or not skill.is_available or skill.subject_id != p.subject_id:
+            raise AppError(422, "validation_error", "Choose a topic from your current subject.")
+    goal_type = data.get("goal_type", p.goal_type)
+    focus = data.get("focus_skill_id", p.focus_skill_id)
+    if goal_type == "learn_topic" and focus is None:
+        raise AppError(422, "validation_error", "Choose a topic to learn.")
+
+
 def set_subject(db: Session, user: User, code: str) -> StudentProfile:
     """Switch the current subject (enrolling in it the first time)."""
     p = require(db, user)

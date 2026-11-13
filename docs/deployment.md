@@ -162,6 +162,7 @@ A free cron service can ping it: at https://cron-job.org create a job for
 | `LOG_LEVEL` | `INFO` | JSON logs with a request ID per request (the `X-Request-ID` header) |
 | `LOGIN_ATTEMPTS_PER_MINUTE` | `5` | Per account |
 | `REGISTRATIONS_PER_HOUR` | `10` | Per client IP |
+| `REGISTRATIONS_GLOBAL_PER_HOUR` | `100` | All sign-ups together (backstop for faked IPs) |
 | `EXPOSE_DOCS` | unset | `true` re-enables `/docs` in production |
 | `OPENROUTER_API_KEY` | your OpenRouter key | Empty = AI tutor off. Paste the key only |
 | `AI_MODEL`, `AI_FALLBACK_MODELS` | unset | Defaults in `config.py`; delete old values |
@@ -172,7 +173,7 @@ A free cron service can ping it: at https://cron-job.org create a job for
 ## Hardening in place
 
 - **Security headers**: on every API response (`nosniff`, `DENY` framing, `no-referrer`, a deny-all CSP, `Cache-Control: no-store` on `/api/*`, and HSTS in production), and on the frontend through `vercel.json` (a strict CSP with no inline scripts and no third-party origins).
-- **Rate limits**: login attempts per account, and registrations per client IP (HTTP 429 with `Retry-After`).
+- **Rate limits**: login attempts per account, and registrations per client IP plus a site-wide hourly cap (HTTP 429 with `Retry-After`).
 - **Production config validation**: the app won't boot with the dev JWT secret or insecure cookies.
 - **Smaller attack surface**: no interactive docs or OpenAPI schema in production, and no `Server` header.
 - **Error pages**: the frontend has a not-found route and an error boundary, and the API returns structured JSON errors with a request ID.
@@ -181,14 +182,14 @@ A free cron service can ping it: at https://cron-job.org create a job for
 
 - **Cold starts.** Render's free web service sleeps after about 15 minutes idle, and the first request then takes up to about a minute. Vercel's rewrite may time out on that request, and a retry succeeds. Before a demo or a pilot session, open `/api/v1/health` first, or move to a paid instance.
 - **Free Postgres expiry.** Render's free databases expire after a limited period (check the current Render terms). Before the pilot (M11), either upgrade the database or point `DATABASE_URL` at another managed Postgres such as Neon. The URL is normalised either way. Back up first with `pg_dump`.
-- **Client IP for the registration limit.** Uvicorn trusts `X-Forwarded-For` from any proxy (`FORWARDED_ALLOW_IPS=*`), because Render's proxy addresses aren't fixed. A client calling Render directly could spoof that header to get around the per-IP sign-up limit. The per-account login limit doesn't depend on IP. This is acceptable for the pilot's scale. Revisit it with a shared limiter store.
+- **Client IP for the registration limit.** Uvicorn trusts `X-Forwarded-For` from any proxy (`FORWARDED_ALLOW_IPS=*`), because Render's proxy addresses aren't fixed. A client calling Render directly could spoof that header to get around the per-IP sign-up limit. The per-account login limit doesn't depend on IP. So sign-ups also have a site-wide cap (`REGISTRATIONS_GLOBAL_PER_HOUR`, default 100), which faked IPs can't dodge; the cost is that an abuser could pause new sign-ups for up to an hour. A full fix needs Vercel to prove the request came through it (edge middleware adding a secret header that the API checks).
 - **Single instance.** See "How Render builds and starts the API".
 
 ## Load testing (NFR-PERF-01)
 
 ```bash
 cd backend
-REGISTRATIONS_PER_HOUR=1000 uvicorn app.main:app --port 8000
+REGISTRATIONS_PER_HOUR=1000 REGISTRATIONS_GLOBAL_PER_HOUR=1000 uvicorn app.main:app --port 8000
 python scripts/loadtest.py http://127.0.0.1:8000 --users 50 --questions 20
 ```
 
