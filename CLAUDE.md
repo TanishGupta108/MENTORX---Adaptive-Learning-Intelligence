@@ -4,7 +4,16 @@ AI-powered adaptive Mathematics tutor (grades 4-8, Common Core) on the Foundatio
 dataset with a trained DKT-Q knowledge-tracing model. The product brief is `build.md`.
 The detailed design and the honest list of what is limited are in `docs/modules/tutor.md`.
 
-## Where we are (2026-11-12)
+## v3 (2026-11-13): built and verified locally, NOT committed or deployed yet
+- Multi-subject (Maths + Geography map skills from Slepemapy.cz, `docs/modules/geography.md`),
+  new Home/Progress pages, answer-checking policy + `scripts/regrade.py`, personalization,
+  sturdier LLM chain (`llm.py`). Migration `c5e8a1f4b2d7` (local DB is on it).
+- Checks 2026-11-13: backend 287 passed, ruff clean; frontend 43 passed, typecheck and build clean;
+  `smoke.py http://localhost:8000` PASSED (v3) incl. Geography (16 skills).
+- To ship: commit, push (auto-deploys), then on production run `seed_geography.py` and
+  `regrade.py --dry-run` / `regrade.py` (`docs/deployment.md`), then smoke the Vercel URL.
+
+## Where we were (2026-11-12)
 - v2.1 is DEPLOYED (2026-11-12): `main` = `feat/mentorx-v2-maths-tutor`, pushed. Render (API) and
   Vercel (frontend) run it; the production DB is seeded with Mathematics; `OPENROUTER_API_KEY` and
   `ADMIN_EMAILS` are set on Render. Live check: `python backend/scripts/smoke.py

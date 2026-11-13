@@ -22,7 +22,7 @@ const variants: Record<Variant, string> = {
   danger: "bg-danger/15 text-danger hover:bg-danger/25",
   soft: "bg-brand-soft text-brand hover:bg-brand/25",
 };
-const sizes = { sm: "h-9 px-3 text-sm", md: "h-11 px-4 text-sm", lg: "h-12 px-6 text-base" };
+const sizes = { sm: "h-11 px-3 text-sm sm:h-9", md: "h-11 px-4 text-sm", lg: "h-12 px-6 text-base" };
 
 type BtnProps = ButtonHTMLAttributes<HTMLButtonElement> & {
   variant?: Variant;
@@ -96,10 +96,10 @@ export function PageHeader({ eyebrow, title, subtitle, actions }: { eyebrow?: st
 // ---------------------------------------------------------------- status language
 
 export const STATUS_META: Record<Status, { label: string; dot: string; text: string; bg: string; hex: string }> = {
-  likely_strength: { label: "Likely Strength", dot: "bg-strength", text: "text-strength", bg: "bg-strength/12", hex: "#34d399" },
-  developing: { label: "Developing", dot: "bg-developing", text: "text-developing", bg: "bg-developing/12", hex: "#fbbf24" },
-  potential_weakness: { label: "Potential Weakness", dot: "bg-weakness", text: "text-weakness", bg: "bg-weakness/12", hex: "#fb7185" },
-  needs_assessment: { label: "Needs Assessment", dot: "bg-unassessed", text: "text-unassessed", bg: "bg-unassessed/12", hex: "#94a3b8" },
+  likely_strength: { label: "Strong", dot: "bg-strength", text: "text-strength", bg: "bg-strength/12", hex: "#34d399" },
+  developing: { label: "Getting there", dot: "bg-developing", text: "text-developing", bg: "bg-developing/12", hex: "#fbbf24" },
+  potential_weakness: { label: "Needs practice", dot: "bg-weakness", text: "text-weakness", bg: "bg-weakness/12", hex: "#fb7185" },
+  needs_assessment: { label: "Not tried yet", dot: "bg-unassessed", text: "text-unassessed", bg: "bg-unassessed/12", hex: "#94a3b8" },
 };
 
 export function StatusBadge({ status, className }: { status: Status; className?: string }) {
@@ -113,14 +113,21 @@ export function StatusBadge({ status, className }: { status: Status; className?:
 }
 
 const MODE_META: Record<Mode, { label: string; cls: string }> = {
-  foundation: { label: "Foundation", cls: "bg-[#5aa9ff1f] text-accent" },
+  foundation: { label: "Step by step", cls: "bg-[#5aa9ff1f] text-accent" },
   guided: { label: "Guided", cls: "bg-brand-soft text-brand" },
-  independent: { label: "Independent", cls: "bg-[#34d3991f] text-strength" },
-  advanced: { label: "Advanced", cls: "bg-[#f472b61f] text-[#f472b6]" },
+  independent: { label: "On my own", cls: "bg-[#34d3991f] text-strength" },
+  advanced: { label: "Challenge", cls: "bg-[#f472b61f] text-[#f472b6]" },
+};
+
+export const MODE_LABEL: Record<Mode, string> = {
+  foundation: MODE_META.foundation.label,
+  guided: MODE_META.guided.label,
+  independent: MODE_META.independent.label,
+  advanced: MODE_META.advanced.label,
 };
 
 export function ModeBadge({ mode }: { mode: Mode }) {
-  return <span className={cx("rounded-full px-2.5 py-1 text-xs font-medium", MODE_META[mode].cls)}>{MODE_META[mode].label} mode</span>;
+  return <span className={cx("rounded-full px-2.5 py-1 text-xs font-medium", MODE_META[mode].cls)}>{MODE_META[mode].label}</span>;
 }
 
 const EVIDENCE: Record<Evidence, { n: number; label: string }> = {
@@ -148,12 +155,12 @@ export function EvidenceMeter({ evidence, attempts }: { evidence: Evidence; atte
 /** Model output is always shown with this label so it is never mistaken for mastery. */
 export function ModelEstimate({ p, className }: { p: number | null; className?: string }) {
   if (p === null || p === undefined) {
-    return <span className={cx("text-xs text-ink-faint", className)}>No model estimate yet</span>;
+    return <span className={cx("text-xs text-ink-faint", className)}>No prediction yet</span>;
   }
   return (
-    <span className={cx("inline-flex items-center gap-1.5 text-xs text-ink-muted", className)} title="DKT-Q model: predicted chance of getting a typical question in this skill right on the first try. A prediction, not verified mastery.">
-      <span className="rounded bg-surface-3 px-1.5 py-0.5 font-mono text-[11px] text-accent">model</span>
-      {pct(p)} predicted success
+    <span className={cx("inline-flex items-center gap-1.5 text-xs text-ink-muted", className)} title="A model's predicted chance of getting a typical question in this skill right first time. A prediction, not a result.">
+      <span className="rounded bg-surface-3 px-1.5 py-0.5 text-[11px] font-medium text-accent">Prediction</span>
+      {pct(p)} chance of a right answer
     </span>
   );
 }

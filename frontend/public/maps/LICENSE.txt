@@ -1,0 +1,37 @@
+MENTORX Geography: base map outlines (frontend/public/maps/*.json)
+
+Maps are simplified for practice and do not show official international boundaries.
+
+1. Map outlines
+The outlines are derived (rounded coordinates, labels and place codes removed) from the SVG maps
+of the open-source slepemapy.cz application, https://github.com/adaptive-learning/geography
+(geography/static/map/), used under the MIT licence below.
+
+The MIT License (MIT)
+
+Copyright (c) 2013 Vít Stanislav <slaweet@mail.muni.cz>
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of
+this software and associated documentation files (the "Software"), to deal in
+the Software without restriction, including without limitation the rights to
+use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+the Software, and to permit persons to whom the Software is furnished to do so,
+subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+2. Place names and practice data
+Geography practice data (c) Adaptive Learning group, Masaryk University (slepemapy.cz),
+Open Database License 1.0 (https://opendatacommons.org/licenses/odbl/1-0/); individual contents
+under the Database Contents License 1.0 (https://opendatacommons.org/licenses/dbcl/1-0/).
+Data set: http://www.fi.muni.cz/adaptivelearning/data/slepemapy/2015-05-21.zip
+Citation: Papousek, J., Pelanek, R., & Stanislav, V. (2016). Adaptive Geography Practice Data Set.
+Journal of Learning Analytics, 3(2), 317-321. https://doi.org/10.18608/jla.2016.32.17

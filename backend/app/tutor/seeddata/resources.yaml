@@ -1,7 +1,8 @@
-# Original MENTORX demo learning content, keyed by Common Core code. Written for this project
-# (not copied from any source) and labelled "MENTORX original demo content" in the app.
+# Original MENTORX learning content, keyed by Common Core code. Written for this project with AI
+# assistance (not copied from any source); shown with the label below until a teacher reviews it.
 # Markdown subset: "### heading", "- bullet", "1. step", **bold**, blank line = new paragraph.
 # Every available skill also gets a genuine link to its standard on thecorestandards.org.
+source_label: "MENTORX original (AI-assisted, pending teacher review)"
 resources:
   # ------------------------------------------------------------ 6.RP.A.3a
   - key: notes-ratio-tables

@@ -1,0 +1,17 @@
+# DKT-Q for Geography (Slepemapy.cz 2015-05-21), used by ml/scripts/train_geography_kt.py.
+# Same architecture and input convention as the Mathematics DKT-Q (backend/app/ml/dkt.py).
+seed: 42
+maps: [europe, africa, samerica, namerica, oceania, us]   # the only maps MENTORX ships
+min_places_per_skill: 6
+min_answers_per_skill: 1000
+max_users: 30000            # CPU budget: a seeded random sample of the students
+max_answers_per_user: 500   # each sampled student's first 500 answers on the shipped maps
+split: [0.70, 0.15, 0.15]   # by student, sklearn train_test_split with the seed above
+dim: 128
+dropout: 0.2
+batch_size: 64
+lr: 0.001
+weight_decay: 0.00001
+max_epochs: 12
+patience: 2
+bootstrap_reps: 200

@@ -69,9 +69,38 @@ describe("api client", () => {
     expect(err.fields).toEqual({ password: "too short" });
   });
 
-  it("hides server internals on 5xx", async () => {
+  it("hides server internals on a real 500", async () => {
     mockApi({ "GET /me": { status: 500, body: { error: { code: "internal", message: "Traceback…" } } } });
     const err = (await api.get("/me").catch((e) => e)) as ApiError;
     expect(err.message).toBe("Something went wrong on our side. Please try again.");
+  });
+
+  it("keeps the AI tutor's own 503 message", async () => {
+    mockApi({ "POST /api/v2/ai/explain": { status: 503, body: { error: { code: "ai_unavailable", message: "The AI tutor is busy. Please try again." } } } });
+    const err = (await api.post("/api/v2/ai/explain", {}).catch((e) => e)) as ApiError;
+    expect(err.code).toBe("ai_unavailable");
+    expect(err.message).toBe("The AI tutor is busy. Please try again.");
+  });
+
+  it("explains a proxy's non-JSON 502/504 as the server waking up", async () => {
+    vi.stubGlobal("fetch", vi.fn(async () => new Response("<html>Bad gateway</html>", { status: 504, headers: { "Content-Type": "text/html" } })));
+    const err = (await api.get("/me").catch((e) => e)) as ApiError;
+    expect(err.status).toBe(504);
+    expect(err.message).toBe("The server is waking up or busy. Please try again.");
+  });
+
+  it("gives up after the client timeout", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(
+        (_input: RequestInfo | URL, init?: RequestInit) =>
+          new Promise<Response>((_resolve, reject) => {
+            init?.signal?.addEventListener("abort", () => reject(new DOMException("Aborted", "AbortError")));
+          }),
+      ),
+    );
+    const err = (await api.post("/api/v2/ai/explain", {}, { timeoutMs: 20 }).catch((e) => e)) as ApiError;
+    expect(err).toBeInstanceOf(ApiError);
+    expect(err.code).toBe("client_timeout");
   });
 });

@@ -1,0 +1,321 @@
+# Short notes for the Geography map skills (one per skill), loaded by app/tutor/seed_geo.py.
+# Original text written for MENTORX with AI assistance (Claude). Only well-known textbook facts,
+# no links, no claims about curricula. Shown in the app as AI-assisted, pending teacher review.
+# Names follow seeddata/geography/names.yaml. Disputed places are never asked, so not covered.
+source_label: "MENTORX original (AI-assisted, pending teacher review)"
+resources:
+  - key: notes-geo-europe-countries
+    skill: GEO.EU.COUNTRY
+    kind: notes
+    title: "Finding the countries of Europe"
+    minutes: 3
+    content: |
+      ### Key idea
+      Learn Europe in **groups of neighbours**, then fix each country by its shape or its coast.
+
+      ### Groups that help
+      - **Iberian Peninsula:** Spain and Portugal (Portugal is the strip on the Atlantic side).
+      - **Benelux:** Belgium, the Netherlands and Luxembourg, between France and Germany.
+      - **Nordic countries:** Norway, Sweden, Finland, Denmark and, out in the Atlantic, Iceland.
+      - **Baltic states:** Estonia, Latvia, Lithuania, from north to south (alphabetical order too).
+      - **Balkans:** Slovenia, Croatia, Bosnia and Herzegovina, Serbia, Montenegro, Albania, North Macedonia, Bulgaria and Greece.
+      - Italy is the "boot" in the Mediterranean; Russia is the huge country in the east.
+
+      ### Watch out
+      - **Slovenia** touches Italy and the Adriatic Sea; **Slovakia** is landlocked, north of Hungary.
+      - **Belarus** lies between Poland and Russia; **Moldova** is the small country between Romania and Ukraine.
+  - key: notes-geo-europe-cities
+    skill: GEO.EU.CITY
+    kind: notes
+    title: "Capitals of Europe"
+    minutes: 3
+    content: |
+      ### Key idea
+      Almost every city here is a **capital**. Link each one to its country and, where you can, to a river or a coast.
+
+      ### Memory hooks
+      - On the **Danube**: Vienna, Bratislava, Budapest and Belgrade.
+      - Paris is on the Seine, London on the Thames, Prague on the Vltava, Warsaw on the Vistula, Rome on the Tiber.
+      - On or near the **Baltic Sea**: Stockholm, Helsinki, Tallinn, Riga and Copenhagen.
+      - Tiny states, tiny capitals: San Marino, Vaduz (Liechtenstein), Monaco, Andorra, Luxembourg and Valletta (Malta).
+
+      ### Watch out
+      - **Ljubljana** is the capital of Slovenia; **Bratislava** of Slovakia.
+      - Switzerland's capital is **Bern**, not Zurich or Geneva.
+      - **Reykjavik** (Iceland) is far out in the Atlantic, in the top-left corner of the map.
+  - key: notes-geo-europe-rivers
+    skill: GEO.EU.RIVER
+    kind: notes
+    title: "Rivers of Europe"
+    minutes: 3
+    content: |
+      ### Key idea
+      Remember **which sea each river flows into**: that tells you where to look on the map.
+
+      ### By sea
+      - **Black Sea:** Danube, Dnieper, Dniester. The Danube flows from Germany through Vienna, Budapest and Belgrade.
+      - **Caspian Sea:** Volga, the longest river in Europe (the Kama joins it).
+      - **Baltic Sea:** Oder (Germany–Poland border), Vistula (Poland), Daugava (into the Gulf of Riga).
+      - **North Sea:** Rhine (from the Swiss Alps, through the Netherlands), Elbe, Thames.
+      - **Atlantic and Channel:** Loire (the longest river in France), Garonne, Seine, Tagus (Lisbon), Douro.
+      - **Mediterranean / Adriatic:** Rhône and Ebro; the Po crosses northern Italy to the Adriatic.
+
+      ### Watch out
+      - The **Tisza** and the **Drava** are tributaries of the Danube, not separate routes to the sea.
+      - The **Don** flows into the Sea of Azov, close to the Black Sea.
+  - key: notes-geo-europe-mountains
+    skill: GEO.EU.MOUNTAINS
+    kind: notes
+    title: "Mountains of Europe"
+    minutes: 3
+    content: |
+      ### Key idea
+      Many ranges form **borders** or the **spine** of a country. Learn them with their countries.
+
+      ### Hooks
+      - **Alps:** the great arc through France, Switzerland, Italy and Austria.
+      - **Pyrenees:** the France–Spain border. **Apennines:** the spine of Italy.
+      - **Carpathians:** a long arc through Slovakia, Poland, Ukraine and Romania; the **Tatra Mountains** are their highest part, and the **Transylvanian Alps** are their southern arm in Romania.
+      - **Caucasus Mountains:** between the Black Sea and the Caspian Sea.
+      - **Scandinavian Mountains:** along Norway and Sweden.
+      - Spain: Cantabrian Mountains (north), Sierra Morena and Sierra Nevada (south).
+      - Britain: Grampian Mountains (Scotland), Cambrian Mountains (Wales).
+
+      ### Watch out
+      - The **Dinaric Alps** run along the Adriatic coast of the Balkans; the **Balkan Mountains** are in Bulgaria.
+      - Several lower ranges ring the Czech Republic: the Ore Mountains, the Bohemian Forest and the Sudetes.
+  - key: notes-geo-europe-islands
+    skill: GEO.EU.ISLAND
+    kind: notes
+    title: "Islands of Europe"
+    minutes: 3
+    content: |
+      ### Key idea
+      Group islands **by sea** and by the country they belong to.
+
+      ### Hooks
+      - **Atlantic:** Great Britain (the largest island in Europe), Ireland and Iceland.
+      - **Mediterranean:** Sicily (the largest Mediterranean island) and Sardinia belong to Italy; Corsica to France; Crete, Rhodes and Lesbos to Greece; Malta is a country.
+      - **Balearic Islands (Spain):** Mallorca, Menorca and Ibiza.
+      - **Baltic Sea:** Gotland (Sweden), Saaremaa (Estonia), Åland (Finland) and Zealand (Denmark; Copenhagen is on it).
+      - **Off Norway:** Lofoten and Vesterålen. **Far north-east:** Kolguyev Island (Russia).
+
+      ### Watch out
+      - **Corsica** lies just north of **Sardinia**: the French one is the northern one.
+      - **Mallorca** is the biggest Balearic island, between Ibiza (west) and Menorca (east).
+  - key: notes-geo-africa-countries
+    skill: GEO.AF.COUNTRY
+    kind: notes
+    title: "Finding the countries of Africa"
+    minutes: 3
+    content: |
+      ### Key idea
+      Learn Africa **region by region**, starting from big, easy countries.
+
+      ### Regions
+      - **North:** Morocco, Algeria (the largest country in Africa), Tunisia, Libya, Egypt.
+      - **Horn of Africa:** Ethiopia, Eritrea, Djibouti, Somalia.
+      - **Great Lakes:** Uganda, Kenya, Tanzania, Rwanda, Burundi.
+      - **South:** South Africa, Namibia, Botswana, Zimbabwe, Mozambique; Madagascar is the big island.
+      - **West coast:** from Senegal round to Nigeria, the most populous country in Africa.
+
+      ### Watch out
+      - Two Congos: the **Republic of the Congo** is the smaller one, west of the much larger **Democratic Republic of the Congo**.
+      - **Niger** is the large landlocked country north of **Nigeria**.
+      - **Guinea**, **Guinea-Bissau** and **Equatorial Guinea** are three different countries.
+      - **Lesotho** is completely surrounded by South Africa; **Gambia** is a thin strip surrounded by Senegal except for its short Atlantic coast.
+      - **South Sudan** became independent from **Sudan** in 2011.
+  - key: notes-geo-africa-cities
+    skill: GEO.AF.CITY
+    kind: notes
+    title: "Capitals and cities of Africa"
+    minutes: 3
+    content: |
+      ### Key idea
+      Most cities here are **capitals**, plus a few very large cities. Know which is which.
+
+      ### Capital or biggest city?
+      - **Nigeria:** capital Abuja; largest city Lagos.
+      - **Tanzania:** capital Dodoma; largest city Dar es Salaam.
+      - **Morocco:** capital Rabat; largest city Casablanca.
+      - **Côte d'Ivoire:** capital Yamoussoukro; largest city Abidjan.
+      - **South Africa** has three capitals: Pretoria, Cape Town and Bloemfontein; Johannesburg is its largest city.
+
+      ### Hooks
+      - **Cairo** is on the Nile; **Khartoum** is where the Blue Nile and White Nile meet.
+      - **Kinshasa** is on the Congo River.
+      - Island capitals: Antananarivo (Madagascar), Moroni (Comoros), São Tomé, and Malabo (Equatorial Guinea, on Bioko island).
+
+      ### Watch out
+      - **Niamey** is the capital of Niger; **Abuja** of Nigeria.
+  - key: notes-geo-africa-rivers
+    skill: GEO.AF.RIVER
+    kind: notes
+    title: "Rivers of Africa"
+    minutes: 3
+    content: |
+      ### Key idea
+      Ten rivers: learn **where each one ends**.
+
+      ### Hooks
+      - **Nile:** flows north through Sudan and Egypt into the Mediterranean Sea.
+      - **Congo:** a huge arc through central Africa to the Atlantic; it crosses the equator twice. The **Ubangi** is one of its tributaries.
+      - **Niger:** a big curve from Guinea through Mali and Niger to the Gulf of Guinea in Nigeria.
+      - **Senegal:** along the Senegal–Mauritania border to the Atlantic.
+      - **Zambezi:** Victoria Falls, then east through Mozambique to the Indian Ocean.
+      - **Limpopo:** also to the Indian Ocean, along South Africa's northern border.
+      - **Orange:** west across South Africa to the Atlantic, on the border with Namibia.
+
+      ### Watch out
+      - The **Okavango** never reaches the sea: it ends in the Okavango Delta in Botswana.
+      - The **Chari** flows into Lake Chad.
+  - key: notes-geo-samerica-countries
+    skill: GEO.SA.COUNTRY
+    kind: notes
+    title: "Countries and territories of South America"
+    minutes: 3
+    content: |
+      ### Key idea
+      Start with **Brazil**, which covers almost half of the continent, then go round its edges.
+
+      ### Hooks
+      - **West coast (Pacific), north to south:** Colombia, Ecuador (on the equator), Peru, Chile.
+      - **Chile** is the long, thin country along the Pacific.
+      - **North:** Venezuela, then Guyana, Suriname and French Guiana (an overseas region of France).
+      - **South:** Argentina, the second-largest country, and small Uruguay on the Atlantic.
+
+      ### Watch out
+      - Only two countries are landlocked: **Bolivia** and **Paraguay**.
+      - **Uruguay** has an Atlantic coast; **Paraguay** has none.
+      - From west to east: Guyana, Suriname, French Guiana.
+  - key: notes-geo-samerica-cities
+    skill: GEO.SA.CITY
+    kind: notes
+    title: "Cities of South America"
+    minutes: 3
+    content: |
+      ### Key idea
+      Each country's capital, plus Brazil's two giant cities.
+
+      ### Hooks
+      - **Brazil:** the capital is **Brasília**, a planned city inland; São Paulo and Rio de Janeiro are the largest cities, on the south-east coast.
+      - **Bolivia** has two capitals: **Sucre** (constitutional) and **La Paz** (seat of government).
+      - **Buenos Aires** (Argentina) and **Montevideo** (Uruguay) face each other across the Río de la Plata.
+      - High in the Andes: **Quito** (Ecuador, near the equator) and **Bogotá** (Colombia).
+      - On the Pacific coast: **Lima** (Peru). Inland in Chile: **Santiago**.
+      - North: **Caracas** (Venezuela), **Georgetown** (Guyana), **Paramaribo** (Suriname). **Asunción** is Paraguay's capital.
+
+      ### Watch out
+      - Rio de Janeiro is not Brazil's capital any more: Brasília has been since 1960.
+  - key: notes-geo-namerica-countries
+    skill: GEO.NA.COUNTRY
+    kind: notes
+    title: "Countries and territories of North America"
+    minutes: 3
+    content: |
+      ### Key idea
+      Three big countries (Canada, the United States, Mexico), then **Central America** and the **Caribbean**.
+
+      ### Hooks
+      - **Greenland**, top right, is the world's largest island and part of the Kingdom of Denmark.
+      - **Central America, roughly from north-west to south-east:** Guatemala, Belize, El Salvador, Honduras, Nicaragua, Costa Rica, Panama.
+      - **Caribbean:** Cuba is the largest island; Jamaica lies south of it; the Bahamas north of it.
+      - **Hispaniola** is shared by **Haiti** (west) and the **Dominican Republic** (east).
+      - **Puerto Rico** (a US territory) is east of Hispaniola; **Trinidad and Tobago** is near Venezuela.
+
+      ### Watch out
+      - **El Salvador** is the only Central American country with no Caribbean coast.
+      - **Belize** is the small country on the Caribbean side, east of Guatemala.
+  - key: notes-geo-namerica-cities
+    skill: GEO.NA.CITY
+    kind: notes
+    title: "Cities of North America"
+    minutes: 3
+    content: |
+      ### Key idea
+      Capitals of every country, plus some very large US and Canadian cities.
+
+      ### Hooks
+      - **Capitals of the big three:** Ottawa (Canada), Washington, D.C. (USA), Mexico City.
+      - **Central America:** Guatemala City, Belmopan (Belize), San Salvador, Tegucigalpa (Honduras), Managua (Nicaragua), San José (Costa Rica), Panama City.
+      - **Caribbean:** Havana (Cuba), Kingston (Jamaica), Port-au-Prince (Haiti), Santo Domingo (Dominican Republic), Nassau (Bahamas), Port-of-Spain (Trinidad and Tobago).
+      - The small eastern islands, roughly north to south: Basseterre, Saint John's, Roseau, Castries, Kingstown, Saint George's; Bridgetown (Barbados) is the furthest east.
+
+      ### Watch out
+      - Canada's capital is **Ottawa**, not Toronto; **Vancouver** is on the Pacific coast.
+      - **Monterrey** is a large city in northern Mexico, not a capital.
+  - key: notes-geo-oceania-countries
+    skill: GEO.OC.COUNTRY
+    kind: notes
+    title: "Countries and territories of Oceania"
+    minutes: 3
+    content: |
+      ### Key idea
+      Australia fills most of the map; the others form a chain to its north and east.
+
+      ### Hooks
+      - **Papua New Guinea:** the eastern half of the island of New Guinea, north of Australia.
+      - Going south-east from it: the **Solomon Islands**, then **Vanuatu**.
+      - **New Caledonia** (a French territory) is south-west of Vanuatu.
+      - **Fiji** is further east.
+      - **New Zealand** has two main islands, the North Island and the South Island, south-east of Australia.
+
+      ### Watch out
+      - The small island south of Australia is **Tasmania**, part of Australia, not a separate country.
+  - key: notes-geo-oceania-cities
+    skill: GEO.OC.CITY
+    kind: notes
+    title: "Cities of Oceania"
+    minutes: 3
+    content: |
+      ### Key idea
+      Capitals of the Pacific countries, plus Australia's and New Zealand's largest cities.
+
+      ### Hooks
+      - **Australia:** the capital is **Canberra**, inland between Sydney and Melbourne.
+      - **New Zealand:** the capital is **Wellington**, at the southern tip of the North Island; **Auckland** is the largest city, further north.
+      - **Port Moresby** (Papua New Guinea), **Honiara** (Solomon Islands), **Port Vila** (Vanuatu), **Suva** (Fiji).
+      - Two tiny island countries: **Funafuti** is the capital of Tuvalu and **Tarawa** of Kiribati.
+
+      ### Watch out
+      - Sydney is Australia's largest city but **not** its capital.
+  - key: notes-geo-us-states
+    skill: GEO.US.STATE
+    kind: notes
+    title: "The US states"
+    minutes: 3
+    content: |
+      ### Key idea
+      This map shows the 48 states that touch each other (Alaska and Hawaii are not on it). Learn them **region by region**.
+
+      ### Hooks
+      - **Largest on this map:** Texas. **Smallest:** Rhode Island, in New England.
+      - **New England (north-east):** Maine, New Hampshire, Vermont, Massachusetts, Rhode Island, Connecticut.
+      - **Four Corners:** Utah, Colorado, Arizona and New Mexico meet at one point.
+      - **Pacific coast:** Washington, Oregon, California.
+      - **Michigan** is made of two peninsulas between the Great Lakes; **Florida** is the long peninsula in the south-east.
+
+      ### Watch out
+      - **Washington** (state) is in the north-west; Washington, D.C. is on the east coast.
+      - **North Dakota** is above **South Dakota**; **North Carolina** above **South Carolina**.
+      - **West Virginia** lies west of **Virginia**.
+  - key: notes-geo-us-cities
+    skill: GEO.US.CITY
+    kind: notes
+    title: "Cities of the United States"
+    minutes: 3
+    content: |
+      ### Key idea
+      Big cities cluster in a few states. Find the **state** first, then the city.
+
+      ### Hooks
+      - The four largest cities: New York, Los Angeles, Chicago (on Lake Michigan) and Houston.
+      - **California:** Los Angeles, Long Beach, Irvine, San Bernardino and San Diego in the south; San Francisco, Oakland, San Jose and Sacramento (the state capital) in the north.
+      - **Texas:** Houston, Dallas, Fort Worth, Austin (the state capital) and San Antonio.
+      - **Florida:** Miami, Fort Lauderdale, West Palm Beach, Orlando and Tampa.
+      - **Ohio:** Cleveland (on Lake Erie), Columbus and Cincinnati.
+
+      ### Watch out
+      - **Portland** on this map is Portland, Oregon, in the north-west.
+      - **Kansas City** on this map lies in Missouri.
+      - **Las Vegas** is in Nevada; **Phoenix** and **Mesa** in Arizona.

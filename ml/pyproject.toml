@@ -47,3 +47,5 @@ select = ["E", "F", "I", "B", "UP", "SIM"]
 "scripts/compare.py" = ["E501"]
 "scripts/time_response.py" = ["E501"]
 "scripts/export_model.py" = ["E501"]
+# Log and metadata strings; SIM300 misreads the SPL (split) array as a constant.
+"scripts/train_geography_kt.py" = ["E501", "SIM300"]

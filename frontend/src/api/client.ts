@@ -54,6 +54,7 @@ async function parseError(res: Response): Promise<ApiError> {
   let message = `Request failed (${res.status}).`;
   let requestId: string | undefined;
   const fields: Record<string, string> = {};
+  let json = false;
   try {
     const body = (await res.json()) as {
       error?: {
@@ -71,10 +72,14 @@ async function parseError(res: Response): Promise<ApiError> {
         fields[f.field] = f.message.replace(/^Value error, /, "");
       }
     }
+    json = true;
   } catch {
     // non-JSON error (e.g. a proxy's HTML page): keep the generic message
   }
-  if (res.status >= 500) message = "Something went wrong on our side. Please try again.";
+  // Keep the server's own words for client errors and for the AI tutor's 503s (they tell the
+  // student what to do). Hide internals of real 500s, and explain proxy pages (cold start).
+  if (res.status === 500) message = "Something went wrong on our side. Please try again.";
+  else if (res.status > 500 && !json) message = "The server is waking up or busy. Please try again.";
   return new ApiError(res.status, code, message, requestId, fields);
 }
 
@@ -106,14 +111,44 @@ export type RequestOptions = {
   signal?: AbortSignal;
   /** Don't try to refresh on 401 (used by the auth endpoints themselves). */
   noRetry?: boolean;
+  /** Give up after this many milliseconds (ApiError code "client_timeout"). */
+  timeoutMs?: number;
 };
 
+/** Combine the caller's signal with an optional timeout. */
+function withTimeout(signal: AbortSignal | undefined, timeoutMs: number | undefined) {
+  if (!timeoutMs) return { signal, timedOut: () => false, clear: () => undefined };
+  const ctrl = new AbortController();
+  let fired = false;
+  const timer = setTimeout(() => {
+    fired = true;
+    ctrl.abort();
+  }, timeoutMs);
+  if (signal) {
+    if (signal.aborted) ctrl.abort();
+    else signal.addEventListener("abort", () => ctrl.abort(), { once: true });
+  }
+  return { signal: ctrl.signal, timedOut: () => fired, clear: () => clearTimeout(timer) };
+}
+
 export async function request<T>(method: string, path: string, opts: RequestOptions = {}) {
+  const t = withTimeout(opts.signal, opts.timeoutMs);
+  try {
+    return await perform<T>(method, path, opts, t.signal);
+  } catch (e) {
+    if (t.timedOut()) throw new ApiError(0, "client_timeout", "This is taking too long. Please try again.");
+    throw e;
+  } finally {
+    t.clear();
+  }
+}
+
+async function perform<T>(method: string, path: string, opts: RequestOptions, signal: AbortSignal | undefined) {
   const send = () =>
     fetch(apiUrl(path), {
       method,
       credentials: "include",
-      signal: opts.signal,
+      signal,
       headers: {
         Accept: "application/json",
         ...(opts.body !== undefined ? { "Content-Type": "application/json" } : {}),

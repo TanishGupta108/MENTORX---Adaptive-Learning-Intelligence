@@ -9,6 +9,7 @@ import type { FormEvent } from "react";
 import { Check, CheckCircle2, Lightbulb, X, XCircle } from "lucide-react";
 import { CHOICE_TYPES } from "../api/tutor";
 import type { AnswerBody, CorrectAnswer, Question } from "../api/tutor";
+import { MapQuestion } from "./MapQuestion";
 import { Button, cx } from "./ui";
 
 export function Html({ html, className }: { html: string; className?: string }) {
@@ -66,10 +67,24 @@ export function QuestionView({ question, onSubmit, submitting, locked, feedback,
 
   const ca = feedback?.correct_answer;
   const correctIds = ca && ca.type !== "numeric" && ca.type !== "text" ? ca.option_ids : [];
+  const map = question.media?.kind === "map" ? question.media : null;
+  // "Where is X?" map questions: the options are just the letters drawn on the map.
+  const letterOptions = Boolean(map?.regions.some((r) => r.label)) && question.answer_type === "multiple_choice";
 
   return (
     <form onSubmit={submit} className="space-y-5">
       <Html html={question.body_html} className="question-html" />
+
+      {map && (
+        <MapQuestion
+          media={map}
+          selected={choice}
+          onSelect={letterOptions ? (label) => setChoice(label) : undefined}
+          disabled={locked}
+          answered={Boolean(feedback)}
+          correctIds={correctIds}
+        />
+      )}
 
       {typed && (
         <div className="max-w-md">
@@ -100,9 +115,9 @@ export function QuestionView({ question, onSubmit, submitting, locked, feedback,
       )}
 
       {!typed && (
-        <fieldset className="space-y-2.5">
+        <fieldset className={cx(letterOptions ? "grid grid-cols-2 gap-2.5 sm:grid-cols-4" : "space-y-2.5")}>
           <legend className="mb-2 text-sm font-medium text-ink-muted">
-            {question.answer_type === "check_all" ? "Select all that apply" : "Choose one answer"}
+            {question.answer_type === "check_all" ? "Select all that apply" : letterOptions ? "Choose the letter on the map" : "Choose one answer"}
           </legend>
           {question.options.map((o, i) => {
             const selected = question.answer_type === "multiple_choice" ? choice === o.id : choices.includes(o.id);
@@ -111,7 +126,7 @@ export function QuestionView({ question, onSubmit, submitting, locked, feedback,
               <label
                 key={o.id}
                 className={cx(
-                  "flex cursor-pointer items-center gap-3 rounded-xl border px-4 py-3 transition-colors",
+                  "flex min-h-12 cursor-pointer items-center gap-3 rounded-xl border px-4 py-3 transition-colors has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-brand has-[:focus-visible]:outline-solid",
                   locked && "cursor-default",
                   feedback && isCorrect && "border-strength bg-strength/8",
                   feedback && selected && !isCorrect && "border-weakness bg-weakness/8",
@@ -137,12 +152,13 @@ export function QuestionView({ question, onSubmit, submitting, locked, feedback,
                     "grid size-7 shrink-0 place-items-center border text-xs font-semibold",
                     question.answer_type === "check_all" ? "rounded-md" : "rounded-full",
                     selected ? "border-brand bg-brand text-brand-ink" : "border-line-strong text-ink-muted",
+                    letterOptions && "sr-only",
                   )}
                   aria-hidden
                 >
                   {question.answer_type === "check_all" && selected ? <Check className="size-4" /> : String.fromCharCode(65 + i)}
                 </span>
-                <Html html={o.html} className="option-html flex-1" />
+                <Html html={o.html} className={cx("option-html flex-1", letterOptions && "text-center text-lg font-semibold")} />
                 {feedback && isCorrect && <CheckCircle2 className="size-5 text-strength" aria-label="correct option" />}
               </label>
             );

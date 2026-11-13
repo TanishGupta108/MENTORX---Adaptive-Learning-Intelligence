@@ -257,12 +257,11 @@ def test_streak_and_daily_goal(client, math_keys, learner):
     assert st["current"] == 1 and st["today"] == 10 and st["goal_met"] and st["daily_goal"] == 5
 
 
-def test_revision_gaps_double():
-    from app.tutor.assess import revision_interval
+def test_review_gaps_grow():
+    from app.tutor.state import review_interval
 
-    cfg = get_settings()
-    gaps = [revision_interval(n, cfg) for n in range(6)]
-    assert gaps[:4] == [7, 14, 28, 56] and max(gaps) == 60
+    gaps = [review_interval(n) for n in range(7)]
+    assert gaps[:5] == [3, 7, 14, 30, 60] and max(gaps) == 60
 
 
 # ---------------------------------------------------------------- AI tutor
@@ -278,7 +277,7 @@ class FakeAI(list):
 def fake_ai(monkeypatch):
     fake = FakeAI()
 
-    def complete(messages, max_tokens=1200):
+    def complete(messages, max_tokens=1200, **kw):
         fake.append(messages[-1]["content"])
         if "first step" in messages[-1]["content"]:  # a hint request
             return fake.hint_text, 5, "test-model"
@@ -356,7 +355,7 @@ def test_ai_daily_limit_and_switch_off(client, math_keys, learner, fake_ai, monk
 def test_ai_fallback_models_and_busy_message(monkeypatch):
     tried = []
 
-    def ask(client, model, messages, max_tokens):
+    def ask(client, model, messages, max_tokens, *args):
         tried.append(model)
         raise llm._Retry
 
@@ -403,6 +402,8 @@ def test_learning_content_files_are_well_formed():
 
     keys, notes_codes, example_codes = set(), set(), set()
     for f in sorted(SEED_DIR.glob("resources*.yaml")):
+        if "geography" in f.name:
+            continue  # Geography notes are checked by test_geography_seed.py
         spec = yaml.safe_load(f.read_text(encoding="utf-8"))
         for r in spec["resources"]:
             assert r["key"] not in keys, r["key"]

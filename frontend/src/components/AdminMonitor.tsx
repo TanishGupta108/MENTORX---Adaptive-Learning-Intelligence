@@ -33,8 +33,8 @@ function MetricsRow({ name, m }: { name: string; m: Metrics }) {
   );
 }
 
-export function ModelMonitor() {
-  const r = useApi(() => adminApi.model(), []);
+export function ModelMonitor({ subject }: { subject?: string }) {
+  const r = useApi(() => adminApi.model(subject), [subject]);
   if (r.loading) return <Spinner />;
   if (r.error) return <ErrorState error={r.error} onRetry={r.reload} />;
   const d = r.data!;

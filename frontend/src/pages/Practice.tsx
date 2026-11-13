@@ -1,90 +1,81 @@
 import { useEffect, useState } from "react";
-import { Link, useNavigate, useParams } from "react-router";
-import { ArrowDown, ArrowRight, ArrowUp, Bot, Eye, Flag, HelpCircle, Lightbulb, Shuffle, Sparkles } from "lucide-react";
+import { Link, useLocation, useNavigate, useParams } from "react-router";
+import { ArrowRight, Bot, Eye, Flag, Lightbulb, Sparkles } from "lucide-react";
 import { ApiError } from "../api/client";
 import { tutor } from "../api/tutor";
-import type { AnswerBody, Difficulty, Hint, PracticeAnswer, PracticeSummary, Question } from "../api/tutor";
-import { AiExplain, useAiEnabled } from "../components/AiTutor";
+import type { AnswerBody, Hint, PracticeAnswer, PracticeKind, PracticeSummary, Question } from "../api/tutor";
+import { AI_THINKING, AiErrorNote, AiExplain, AiLabel, toAiError, useAiEnabled } from "../components/AiTutor";
+import type { AiError } from "../components/AiTutor";
 import { useProfile } from "../components/AppShell";
+import { Disclosure } from "../components/Disclosure";
 import { DifficultyTag, HintBox, QuestionView } from "../components/QuestionView";
-import { Button, Card, cx, ErrorState, ModeBadge, ModelEstimate, PageLoader, pct, ProgressBar, Ring, Spinner } from "../components/ui";
+import { launchFor, useLauncher } from "../components/StartAction";
+import { WhyButton } from "../components/WhyButton";
+import { Button, Card, cx, ErrorState, PageLoader, pct, Ring, Spinner } from "../components/ui";
 
-const LEVELS: Difficulty[] = ["easy", "medium", "hard"];
-
-function DifficultyTrack({ level }: { level: Difficulty }) {
+function ProgressDots({ total, results, current }: { total: number; results: (boolean | null)[]; current: number }) {
+  const n = Math.max(total, results.length, 1);
   return (
-    <div className="flex items-center gap-1.5" aria-label={`Current difficulty: ${level}`}>
-      {LEVELS.map((l, i) => (
-        <span key={l} className={cx("h-1.5 w-8 rounded-full", i <= LEVELS.indexOf(level) ? (level === "hard" ? "bg-weakness" : level === "medium" ? "bg-developing" : "bg-strength") : "bg-line-strong")} />
-      ))}
-      <span className="ml-1 text-xs capitalize text-ink-muted">{level}</span>
-    </div>
+    <ol className="flex flex-wrap items-center gap-1.5" aria-label={`Question ${Math.min(current + 1, n)} of ${n}`}>
+      {Array.from({ length: n }, (_, i) => {
+        const r = results[i];
+        return (
+          <li
+            key={i}
+            className={cx(
+              "size-2.5 rounded-full",
+              r === true && "bg-strength",
+              r === false && "bg-weakness",
+              r === null && "bg-ink-faint",
+              r === undefined && (i === current ? "bg-brand ring-2 ring-brand/40 ring-offset-2 ring-offset-canvas" : "bg-line-strong"),
+            )}
+          />
+        );
+      })}
+    </ol>
   );
 }
 
-function Summary({ s, skillId, onAgain }: { s: PracticeSummary; skillId: number | null; onAgain: () => void }) {
-  if (s.mixed || skillId === null) return <MixedSummary s={s} onAgain={onAgain} />;
-  return (
-    <Card className="mx-auto max-w-2xl p-8 text-center">
-      <div className="flex justify-center">
-        <Ring value={s.accuracy} size={110} stroke={9} label={<span className="text-xl">{pct(s.accuracy)}</span>} color={s.accuracy >= 0.7 ? "#34d399" : s.accuracy >= 0.4 ? "#fbbf24" : "#fb7185"} />
-      </div>
-      <h1 className="mt-5 text-2xl font-semibold">Practice complete</h1>
-      <p className="mt-1 text-ink-muted">
-        You answered {s.correct} of {s.answered} correctly in this session.
-      </p>
-      <div className="mt-6 grid gap-3 text-left sm:grid-cols-2">
-        <div className="rounded-2xl border border-line bg-surface-2 p-4">
-          <p className="text-xs font-semibold uppercase tracking-wider text-ink-faint">All your answers in this skill</p>
-          <p className="mt-1 text-xl font-semibold">{pct(s.skill_accuracy)}</p>
-          <p className="text-xs text-ink-faint">{s.skill_attempts} answers (observed)</p>
-        </div>
-        <div className="rounded-2xl border border-line bg-surface-2 p-4">
-          <p className="text-xs font-semibold uppercase tracking-wider text-ink-faint">Model estimate</p>
-          <p className="mt-1 text-xl font-semibold text-accent">{pct(s.predicted_p)}</p>
-          <ModelEstimate p={s.predicted_p} />
-        </div>
-      </div>
-      <div className="mt-6 rounded-2xl border border-brand/30 bg-brand-soft p-4 text-left">
-        <p className="font-medium">{s.next.label}</p>
-        <p className="mt-1 text-sm text-ink-muted">{s.next.why}</p>
-      </div>
-      <div className="mt-6 flex flex-wrap justify-center gap-3">
-        {s.next.action === "reassess" && <Button to={`/assess/start?kind=reassessment&skill=${skillId}`}>Take the reassessment</Button>}
-        {s.next.action !== "reassess" && <Button onClick={onAgain}>Practise again</Button>}
-        <Button variant="secondary" to={`/skills/${skillId}`}>
-          Back to the skill
-        </Button>
-      </div>
-    </Card>
-  );
-}
+const TITLES: Record<PracticeKind, string> = { skill: "Practice complete", mixed: "Mixed practice complete", review: "Review complete" };
 
-function MixedSummary({ s, onAgain }: { s: PracticeSummary; onAgain: () => void }) {
+function Summary({ s, kind, skillId }: { s: PracticeSummary; kind: PracticeKind; skillId: number | null }) {
+  const { launch, busy, error } = useLauncher();
+  const next = launchFor(s.next.action, skillId, s.next.skill_id);
   return (
-    <Card className="mx-auto max-w-2xl p-8 text-center">
+    <Card className="mx-auto max-w-xl p-8 text-center">
       <div className="flex justify-center">
         <Ring value={s.accuracy} size={110} stroke={9} label={<span className="text-xl">{pct(s.accuracy)}</span>} color={s.accuracy >= 0.7 ? "#34d399" : s.accuracy >= 0.4 ? "#fbbf24" : "#fb7185"} />
       </div>
-      <h1 className="mt-5 text-2xl font-semibold">Mixed practice complete</h1>
+      <h1 className="mt-5 text-2xl font-semibold">{TITLES[kind]}</h1>
       <p className="mt-1 text-ink-muted">
-        You answered {s.correct} of {s.answered} mixed problems correctly.
+        You got {s.correct} of {s.answered} right.
       </p>
       <div className="mt-6 rounded-2xl border border-line bg-surface-2 p-4 text-left">
-        <p className="text-xs font-semibold uppercase tracking-wider text-ink-faint">All your mixed problems</p>
-        <p className="mt-1 text-xl font-semibold">{pct(s.skill_accuracy)}</p>
-        <p className="text-xs text-ink-faint">{s.skill_attempts} answers (observed). Mixed problems combine skills, so they never change a single skill&apos;s diagnosis.</p>
-      </div>
-      <div className="mt-6 rounded-2xl border border-brand/30 bg-brand-soft p-4 text-left">
         <p className="font-medium">{s.next.label}</p>
         <p className="mt-1 text-sm text-ink-muted">{s.next.why}</p>
       </div>
       <div className="mt-6 flex flex-wrap justify-center gap-3">
-        {s.next.action === "mixed" && <Button onClick={onAgain}>Another mixed round</Button>}
-        <Button variant="secondary" to="/dashboard">
-          Back to the dashboard
+        {next && (
+          <Button size="lg" onClick={() => void launch(next)} loading={busy} icon={<ArrowRight className="size-4" />}>
+            {s.next.label}
+          </Button>
+        )}
+        <Button size="lg" variant="secondary" to="/home">
+          Back to Home
         </Button>
       </div>
+      {error && (
+        <p className="mt-3 text-sm text-developing" role="alert">
+          {error}
+        </p>
+      )}
+      {kind === "skill" && skillId !== null && (
+        <Disclosure variant="plain" title="Details" className="mt-6 text-left">
+          <p className="text-sm text-ink-muted">
+            All your answers in this skill: {pct(s.skill_accuracy)} over {s.skill_attempts}.
+          </p>
+        </Disclosure>
+      )}
     </Card>
   );
 }
@@ -92,30 +83,41 @@ function MixedSummary({ s, onAgain }: { s: PracticeSummary; onAgain: () => void 
 export function PracticePage() {
   const { id = "" } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
   const { profile } = useProfile();
+  const aiEnabled = useAiEnabled();
   const [q, setQ] = useState<Question | null>(null);
   const [fb, setFb] = useState<PracticeAnswer | null>(null);
   const [hint, setHint] = useState<Hint | null>(null);
   const [hintLoading, setHintLoading] = useState(false);
-  const aiEnabled = useAiEnabled();
+  const [aiHint, setAiHint] = useState<Hint | null>(null);
+  const [aiLoading, setAiLoading] = useState(false);
+  const [aiError, setAiError] = useState<AiError>();
   const [summary, setSummary] = useState<PracticeSummary | null>(null);
+  const [results, setResults] = useState<(boolean | null)[]>([]);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [err, setErr] = useState<string>();
   const [fatal, setFatal] = useState<Error | null>(null);
-  const [whyOpen, setWhyOpen] = useState(false);
+
+  const stateKind = (location.state as { kind?: PracticeKind } | null)?.kind;
+  const kind: PracticeKind = q?.mixed ? "mixed" : stateKind ?? "skill";
 
   async function load() {
     setLoading(true);
     setFb(null);
     setHint(null);
+    setAiHint(null);
+    setAiError(undefined);
     setErr(undefined);
-    setWhyOpen(false);
     try {
-      setQ(await tutor.practiceNext(id));
+      const next = await tutor.practiceNext(id);
+      setQ(next);
+      // answers given before a page reload are shown as grey dots
+      setResults((r) => (r.length < (next.position ?? 1) - 1 ? [...r, ...Array<null>((next.position ?? 1) - 1 - r.length).fill(null)] : r));
     } catch (e) {
       if (e instanceof ApiError && e.code === "practice_closed") {
-        navigate("/dashboard", { replace: true });
+        navigate("/home", { replace: true });
         return;
       }
       setFatal(e as Error);
@@ -125,6 +127,9 @@ export function PracticePage() {
   }
 
   useEffect(() => {
+    setSummary(null);
+    setResults([]);
+    setQ(null);
     void load();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
@@ -135,6 +140,7 @@ export function PracticePage() {
     try {
       const r = await tutor.practiceAnswer(id, { ...body, reveal });
       setFb(r);
+      setResults((rs) => [...rs, r.revealed ? false : r.correct]);
     } catch (e) {
       setErr(e instanceof ApiError ? e.message : "Couldn't submit. Please try again.");
     } finally {
@@ -142,10 +148,11 @@ export function PracticePage() {
     }
   }
 
-  async function getHint(ai = false) {
+  async function getHint() {
     setHintLoading(true);
+    setErr(undefined);
     try {
-      setHint(await tutor.practiceHint(id, ai));
+      setHint(await tutor.practiceHint(id, false));
     } catch (e) {
       setErr(e instanceof ApiError ? e.message : "Couldn't load a hint.");
     } finally {
@@ -153,76 +160,71 @@ export function PracticePage() {
     }
   }
 
-  async function finishEarly() {
-    const r = await tutor.practiceEnd(id);
-    if (r.summary) setSummary(r.summary);
-    else navigate(q && !q.mixed ? `/skills/${q.skill.id}` : "/dashboard");
+  async function getAiHint() {
+    setAiLoading(true);
+    setAiError(undefined);
+    try {
+      setAiHint(await tutor.practiceHint(id, true));
+    } catch (e) {
+      setAiError(toAiError(e));
+    } finally {
+      setAiLoading(false);
+    }
   }
 
-  async function again() {
-    if (!q) return;
-    const p = q.mixed ? await tutor.startMixed() : await tutor.startPractice(q.skill.id, true);
-    setSummary(null);
-    navigate(`/practice/${p.id}`, { replace: true });
+  async function finishEarly() {
+    try {
+      const r = await tutor.practiceEnd(id);
+      if (r.summary) setSummary(r.summary);
+      else navigate(q && kind === "skill" ? `/skills/${q.skill.id}` : "/home");
+    } catch (e) {
+      setErr(e instanceof ApiError ? e.message : "Couldn't finish the session.");
+    }
   }
 
   if (fatal) return <ErrorState error={fatal} onRetry={() => { setFatal(null); void load(); }} />;
-  if (summary && q) return <Summary s={summary} skillId={q.mixed ? null : q.skill.id} onAgain={again} />;
+  if (summary) return <Summary s={summary} kind={summary.mixed ? "mixed" : summary.review ? "review" : kind} skillId={kind === "skill" && q ? q.skill.id : null} />;
   if (!q) return <PageLoader label="Choosing a question for you…" />;
 
-  const level = (fb ? fb.difficulty_next : (q.selection?.requested as Difficulty)) ?? "easy";
-  const answered = fb ? fb.answered : (q.position ?? 1) - 1;
-  const showHintButton = profile.hints_enabled && !fb && !hint;
+  const total = q.total ?? 8;
+  const current = fb ? fb.answered : (q.position ?? 1) - 1;
+  const canHint = profile.hints_enabled && !fb;
+  const backLabel = kind === "mixed" ? "Mixed practice" : kind === "review" ? "Review" : q.skill.name;
+  const backTo = kind === "skill" ? `/skills/${q.skill.id}` : "/home";
+  const sel = q.selection;
 
   return (
-    <div className="mx-auto max-w-3xl">
-      <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
-        <div>
-          {q.mixed ? (
-            <Link to="/dashboard" className="flex items-center gap-1.5 text-sm text-ink-muted hover:text-ink">
-              <Shuffle className="size-3.5" /> Mixed practice
-            </Link>
-          ) : (
-            <Link to={`/skills/${q.skill.id}`} className="text-sm text-ink-muted hover:text-ink">
-              ← {q.skill.name}
-            </Link>
-          )}
-          <div className="mt-1.5 flex flex-wrap items-center gap-3">
-            {q.mode && <ModeBadge mode={q.mode} />}
-            <DifficultyTrack level={level} />
-          </div>
-        </div>
+    <div>
+      <div className="mb-5 flex items-center justify-between gap-3">
+        <Link to={backTo} className="min-w-0 truncate text-sm text-ink-muted hover:text-ink">
+          ← {backLabel}
+        </Link>
         <Button variant="ghost" size="sm" onClick={finishEarly} icon={<Flag className="size-4" />}>
-          Finish session
+          Finish
         </Button>
       </div>
-      <div className="mb-5 flex items-center gap-3">
-        <ProgressBar value={answered} max={q.total ?? 8} />
-        <span className="shrink-0 text-sm text-ink-muted">
-          {Math.min((q.position ?? 1), q.total ?? 8)}/{q.total}
-        </span>
+      <div className="mb-5">
+        <ProgressDots total={total} results={results} current={current} />
       </div>
 
-      <Card className="p-6 sm:p-8">
-        <div className="mb-5 flex flex-wrap items-center gap-2 text-xs">
-          <DifficultyTag level={q.selection?.served === "review" ? "review" : q.difficulty} />
-          {q.mixed &&
-            (q.skills ?? []).map((sk) => (
-              <span key={sk.id} className="rounded-md bg-surface-3 px-2 py-0.5 text-ink-muted" title={sk.name}>
-                {sk.code}
-              </span>
-            ))}
-          <button type="button" onClick={() => setWhyOpen((o) => !o)} className="flex items-center gap-1 text-ink-muted hover:text-ink">
-            <HelpCircle className="size-3.5" /> Why this question?
-          </button>
-        </div>
-        {whyOpen && q.selection && (
-          <div className="mb-5 rounded-xl border border-line bg-surface-2 p-3 text-sm text-ink-muted">
-            <p>{q.selection.how}</p>
-            {q.selection.fallback_note && <p className="mt-1 text-developing">{q.selection.fallback_note}</p>}
+      <Card className="p-5 sm:p-8">
+        <div className="mb-4 flex flex-wrap items-start justify-between gap-2">
+          <div className="flex flex-wrap items-center gap-2 pt-2 text-xs">
+            <DifficultyTag level={sel?.served === "review" ? "review" : q.difficulty} />
+            {kind !== "skill" && <span className="text-ink-muted">{q.mixed ? (q.skills ?? []).map((sk) => sk.name).join(" + ") : q.skill.name}</span>}
           </div>
-        )}
-        {q.selection?.fallback_note && !whyOpen && <p className="mb-4 rounded-xl bg-developing/10 px-3 py-2 text-xs text-developing">{q.selection.fallback_note}</p>}
+          {sel?.how && (
+            <WhyButton label="Why this question?" align="end" className="max-w-full sm:max-w-sm">
+              <p>{sel.how}</p>
+              {sel.fallback_note && <p className="mt-1.5 text-developing">{sel.fallback_note}</p>}
+              {sel.technical && (
+                <Disclosure variant="plain" title="Details" className="mt-1">
+                  <p className="text-xs text-ink-faint">{sel.technical}</p>
+                </Disclosure>
+              )}
+            </WhyButton>
+          )}
+        </div>
 
         {loading ? (
           <Spinner />
@@ -238,39 +240,59 @@ export function PracticePage() {
         )}
 
         {hint && !fb && (
-          <div className="mt-5">
+          <div className="mt-5 space-y-3">
             <HintBox text={hint.text} source={hint.source} label={hint.label} note={hint.note} />
+            {aiEnabled && !aiHint && !aiError && (
+              <Button variant="ghost" size="sm" onClick={getAiHint} loading={aiLoading} icon={<Bot className="size-4" />}>
+                {aiLoading ? AI_THINKING : "Ask the AI tutor for a more specific hint"}
+              </Button>
+            )}
+            {aiError && <AiErrorNote error={aiError} onRetry={getAiHint} />}
+            {aiHint &&
+              (aiHint.ai_failed ? (
+                <div className="flex flex-wrap items-center gap-2" role="status">
+                  <p className="text-sm text-developing">{aiHint.note ?? "The AI tutor couldn't give a specific hint this time."}</p>
+                  <Button variant="secondary" size="sm" onClick={() => { setAiHint(null); void getAiHint(); }} loading={aiLoading} icon={<Bot className="size-4" />}>
+                    {aiLoading ? AI_THINKING : "Try the AI hint again"}
+                  </Button>
+                </div>
+              ) : (
+                <div className="rounded-2xl border border-accent/30 bg-accent/8 p-4 text-sm animate-rise" aria-live="polite">
+                  <p className="mb-1 flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-accent">
+                    <Sparkles className="size-3.5" aria-hidden /> AI tutor
+                  </p>
+                  <p className="leading-6 text-ink/90">{aiHint.text.replace(/\*\*/g, "")}</p>
+                  {aiHint.label && <AiLabel text={aiHint.label} />}
+                </div>
+              ))}
           </div>
         )}
 
         {!fb && (
           <div className="mt-5 flex flex-wrap gap-2 border-t border-line pt-4">
-            {showHintButton && (
-              <Button variant="soft" size="sm" onClick={() => getHint(false)} disabled={hintLoading} icon={<Lightbulb className="size-4" />}>
-                {q.mode === "foundation" || q.mode === "guided" ? "Need a hint?" : "Hint"}
-              </Button>
-            )}
-            {showHintButton && aiEnabled && (
-              <Button variant="soft" size="sm" onClick={() => getHint(true)} loading={hintLoading} icon={<Bot className="size-4" />}>
-                {hintLoading ? "Asking the AI tutor…" : "AI hint for this question"}
+            {canHint && !hint && (
+              <Button variant="soft" size="sm" onClick={getHint} loading={hintLoading} icon={<Lightbulb className="size-4" />}>
+                Hint
               </Button>
             )}
             <Button variant="ghost" size="sm" onClick={() => submit({ item_id: q.item_id }, true)} icon={<Eye className="size-4" />} disabled={submitting}>
-              I'm stuck: show me the answer
+              Show me the answer
             </Button>
           </div>
         )}
 
         {fb && (
           <div className="mt-6 space-y-4">
-            {fb.difficulty_change && (
-              <p className={cx("flex items-center gap-2 text-sm", fb.difficulty_change === "up" ? "text-strength" : "text-accent")}>
-                {fb.difficulty_change === "up" ? <ArrowUp className="size-4" /> : <ArrowDown className="size-4" />}
-                Next question: {fb.difficulty_next}
+            {fb.early_stop && (
+              <p className="rounded-2xl border border-brand/30 bg-brand-soft p-4 text-[15px]" role="status">
+                {fb.early_stop.message}
               </p>
             )}
-            {fb.hint_used && fb.correct && <p className="flex items-center gap-2 text-xs text-ink-faint"><Sparkles className="size-3.5" /> Correct with a hint. Great; next time try it without one.</p>}
-            <AiExplain interactionId={fb.interaction_id} label={fb.correct ? "Why is this right? Explain it" : "Explain this step by step"} />
+            {!fb.early_stop && fb.difficulty_change && (
+              <p className="text-sm text-ink-muted">{fb.difficulty_change === "up" ? "Nice. The next one is a little harder." : "The next one is a little easier."}</p>
+            )}
+            {fb.hint_used && fb.correct && <p className="text-xs text-ink-faint">Correct with a hint. Next time, try it without one.</p>}
+            <AiExplain interactionId={fb.interaction_id} label={fb.correct ? "Explain with AI" : "Explain my mistake with AI"} />
             <div className="flex justify-end">
               {fb.complete ? (
                 <Button size="lg" onClick={() => setSummary(fb.summary)} icon={<Flag className="size-4" />}>

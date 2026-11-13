@@ -31,6 +31,7 @@ from app.db.models import Subject
 from app.tutor import answers
 from app.tutor.html import count_blanks, has_unrenderable, sanitize, scan_images
 from app.tutor.models import Item, ItemSkill, Resource, Skill, SkillPrerequisite
+from app.tutor.subjects import V2_SUBJECTS
 
 logger = logging.getLogger(__name__)
 
@@ -237,8 +238,8 @@ def seed_math(
     model_skills = set(meta["skill_ids"])
 
     subject = _subject(db)
-    if deactivate_other_subjects:  # v1 scope: Mathematics only
-        for s in db.scalars(select(Subject).where(Subject.id != subject.id)):
+    if deactivate_other_subjects:  # hide the v1 demo subject; never the other v2 subjects
+        for s in db.scalars(select(Subject).where(Subject.code.not_in(V2_SUBJECTS))):
             s.is_active = False
 
     # skills (descriptions edited by admins are preserved)
@@ -246,7 +247,7 @@ def seed_math(
     # Several dataset skill IDs share one standard code (different content units). Number
     # them so students can tell them apart: "Solve Problems Involving Percents (set 2 of 3)".
     code_ids = names.groupby("node_code").groups
-    existing = {s.id: s for s in db.scalars(select(Skill))}
+    existing = {s.id: s for s in db.scalars(select(Skill).where(Skill.subject_id == subject.id))}
     for sid, row in names.iterrows():
         code = str(row["node_code"]).strip()
         grade, domain = parse_code(code)
@@ -265,8 +266,9 @@ def seed_math(
     # items and the full question-skill mapping (admin availability toggles are preserved)
     image_ok = load_image_check(data_dir)
     rows = build_items(problems, skills_df, stats, image_ok)
-    current = {i.id: i for i in db.scalars(select(Item))}
-    db.execute(delete(ItemSkill))
+    current = {i.id: i for i in db.scalars(select(Item).where(Item.subject_id == subject.id))}
+    math_items = select(Item.id).where(Item.subject_id == subject.id)
+    db.execute(delete(ItemSkill).where(ItemSkill.item_id.in_(math_items)))
     for r in rows:
         item = current.get(r.item["id"]) or Item(id=r.item["id"], is_active=True)
         for k, v in r.item.items():
@@ -280,7 +282,7 @@ def seed_math(
     for r in rows:
         if r.item["exclusion_reason"] is None and r.item["n_skills"] == 1:
             usable[r.item["skill_id"]] = usable.get(r.item["skill_id"], 0) + 1
-    for s in db.scalars(select(Skill)):
+    for s in db.scalars(select(Skill).where(Skill.subject_id == subject.id)):
         s.n_items = usable.get(s.id, 0)
         s.is_available = s.n_items >= MIN_ITEMS_FOR_SKILL and s.model_supported
 
@@ -334,8 +336,11 @@ def seed_prerequisites(db: Session) -> int:
 def seed_resources(db: Session) -> int:
     """Original notes/worked examples (seeddata/resources.yaml) and one genuine Common Core
     standard link per skill. Upserted by seed_key, so admin-created resources are untouched."""
-    # resources.yaml plus any resources_*.yaml (each file may set its own source_label)
-    files = sorted(SEED_DIR.glob("resources*.yaml"))
+    # resources.yaml plus any resources_*.yaml (each file may set its own source_label);
+    # other subjects' files (resources_geography.yaml) are loaded by their own seed.
+    files = [
+        f for f in sorted(SEED_DIR.glob("resources*.yaml")) if "geography" not in f.name.lower()
+    ]
     specs = [yaml.safe_load(f.read_text(encoding="utf-8")) for f in files]
     by_code = _skills_by_code(db)
     existing = {
@@ -363,7 +368,7 @@ def seed_resources(db: Session) -> int:
             position=90,
         )
     for res, label in (
-        (r, spec.get("source_label", "MENTORX original demo content"))
+        (r, spec.get("source_label", "MENTORX original (AI-assisted, pending teacher review)"))
         for spec in specs
         for r in spec["resources"]
     ):

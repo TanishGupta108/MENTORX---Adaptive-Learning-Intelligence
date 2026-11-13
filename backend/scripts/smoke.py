@@ -6,6 +6,8 @@ Usage:
     python scripts/smoke.py http://localhost:8000
 
 Creates a throwaway account, then tests whichever product is live:
+- v3 (GET /api/v2/subjects exists): onboarding with a grade, Home, two diagnostic answers, one
+  practice answer, AI status, and a Geography map question when Geography is seeded;
 - v2 (Mathematics seeded): onboarding, one adaptive-diagnostic question (no answer key leaked),
   the diagnosis, the dashboard, the model and the AI tutor status;
 - v1 (Machine Learning subject): enrol, one diagnostic question, dashboard, learning path.
@@ -105,6 +107,93 @@ def smoke_v2(s: Smoke) -> None:
         s.base = v1
 
 
+def _answer_body(q: dict) -> dict:
+    body = {"item_id": q["item_id"]}
+    if q["answer_type"] == "multiple_choice":
+        body["choice"] = q["options"][0]["id"]
+    elif q["answer_type"] == "check_all":
+        body["choices"] = [q["options"][0]["id"]]
+    else:
+        body["value"] = "1"
+    return body
+
+
+def _no_leak(q: dict) -> None:
+    assert "answer_key" not in q and "correct_answer" not in q, "answer key leaked"
+    if q.get("media"):
+        for r in q["media"]["regions"]:
+            assert set(r) == {"label", "d", "anchor", "shape"}, "map region leaks data"
+
+
+def v3_is_live(s: Smoke) -> bool:
+    v1 = s.base
+    s.base = v1.removesuffix("/v1") + "/v2"
+    try:
+        s.call("GET", "/subjects")
+        return True
+    except AssertionError as e:
+        print(f"  --  v3 not live ({str(e)[:80]})")
+        return False
+    finally:
+        s.base = v1
+
+
+def smoke_v3(s: Smoke) -> None:
+    """Onboarding with a grade, Home, 2 diagnostic answers, 1 practice answer, AI status, and
+    (if Geography is seeded) a map question in Geography."""
+    v1 = s.base
+    s.base = v1.removesuffix("/v1") + "/v2"
+    try:
+        s.call(
+            "POST",
+            "/onboarding",
+            {"goal_type": "assess_overall", "goal_kind": "weekly_practice", "grade": 6},
+        )
+        sub, _ = s.call("GET", "/subject")
+        assert sub["subject"]["code"] == "MATH" and sub["n_skills"] >= 10, "maths content"
+        assert sub["model"]["available"], "knowledge-tracing model not loaded"
+        print(f"  {sub['n_skills']} skills, {sub['n_questions']} questions")
+        home, _ = s.call("GET", "/home")
+        assert home["next"]["kind"] == "diagnostic", home["next"]
+        a, _ = s.call("POST", "/assessments", {"kind": "diagnostic"}, 201)
+        skill_id = None
+        for _ in range(2):
+            q, _ = s.call("GET", f"/assessments/{a['id']}/next")
+            _no_leak(q)
+            assert q["selection"]["how"], "question unexplained"
+            skill_id = skill_id or q["skill"]["id"]
+            r, _ = s.call("POST", f"/assessments/{a['id']}/answer", _answer_body(q))
+            assert r["correct_answer"], "no feedback after answering"
+        p, _ = s.call("POST", "/practice", {"skill_id": skill_id}, 201)
+        q, _ = s.call("GET", f"/practice/{p['id']}/next")
+        _no_leak(q)
+        r, _ = s.call("POST", f"/practice/{p['id']}/answer", _answer_body(q))
+        assert r["correct_answer"] and "early_stop" in r
+        home, _ = s.call("GET", "/home")
+        assert home["streak"]["today"] == 3, home["streak"]
+        ai, _ = s.call("GET", "/ai/status")
+        print(f"  AI tutor enabled: {ai['enabled']} (key ok: {ai.get('key_ok')})")
+        subjects, _ = s.call("GET", "/subjects")
+        if any(x["code"] == "GEO" for x in subjects):
+            s.call("PUT", "/profile/subject", {"code": "GEO"})
+            geo, _ = s.call("GET", "/subject")
+            first = geo["domains"][0]["skills"][0]
+            a, _ = s.call(
+                "POST", "/assessments", {"kind": "skill_check", "skill_id": first["id"]}, 201
+            )
+            q, _ = s.call("GET", f"/assessments/{a['id']}/next")
+            _no_leak(q)
+            assert q["media"] and q["media"]["kind"] == "map", "map question without a map"
+            r, _ = s.call("POST", f"/assessments/{a['id']}/answer", _answer_body(q))
+            assert r["correct_answer"]["option_ids"], "no map feedback"
+            s.call("PUT", "/profile/subject", {"code": "MATH"})
+            print(f"  Geography: {geo['n_skills']} skills, map question OK")
+        else:
+            print("  --  Geography not seeded (skipped)")
+    finally:
+        s.base = v1
+
+
 def main() -> int:
     if len(sys.argv) != 2:
         print(__doc__)
@@ -139,6 +228,10 @@ def main() -> int:
             print("  --  POST   /auth/refresh: skipped over plain HTTP (Secure cookie)")
 
         s.call("GET", "/me")
+        if v3_is_live(s):
+            smoke_v3(s)
+            print("PASSED (v3)")
+            return 0
         if v2_is_live(s):
             smoke_v2(s)
             print("PASSED (v2)")

@@ -26,7 +26,7 @@ from app.tutor import kt
 
 @asynccontextmanager
 async def lifespan(_: FastAPI) -> AsyncIterator[None]:
-    kt.get_model()  # load the knowledge-tracing model once, at startup
+    kt.load_all()  # load each subject's knowledge-tracing model once, at startup
     yield
 
 

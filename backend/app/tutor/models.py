@@ -124,6 +124,9 @@ class Item(Base):
     problem_set: Mapped[str] = mapped_column(String(40), nullable=False, server_default="")
     exclusion_reason: Mapped[str | None] = mapped_column(String(80))  # None = usable
     is_active: Mapped[bool] = mapped_column(Boolean, nullable=False, server_default=text("true"))
+    # Extra rendering data for non-text questions, e.g. Geography maps: {"kind": "map", "map",
+    # "regions": [{"label", "d", "anchor", "shape"}]}. Never contains the answer (no place codes).
+    media: Mapped[dict | None] = mapped_column(JSON)
 
     @property
     def usable(self) -> bool:
@@ -185,6 +188,7 @@ class StudentProfile(Base):
             "pace_preference IN ('more_support', 'balanced', 'challenge')", name="pace_preference"
         ),
         CheckConstraint("daily_goal BETWEEN 1 AND 200", name="daily_goal"),
+        CheckConstraint("grade IS NULL OR grade BETWEEN 3 AND 8", name="grade"),
     )
 
     user_id: Mapped[uuid.UUID] = mapped_column(Uuid, _user_fk(), primary_key=True)
@@ -198,6 +202,8 @@ class StudentProfile(Base):
         Boolean, nullable=False, server_default=text("true")
     )
     daily_goal: Mapped[int] = mapped_column(SmallInteger, nullable=False, server_default="10")
+    grade: Mapped[int | None] = mapped_column(SmallInteger)  # school grade 3-8; None = not sure
+    pace_suggestion_dismissed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     onboarded_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     diagnostic_completed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     current_skill_id: Mapped[int | None] = mapped_column(
@@ -263,15 +269,16 @@ class PracticeSession(Base):
         CheckConstraint("status IN ('active', 'completed', 'abandoned')", name="status"),
         CheckConstraint("difficulty IN ('easy', 'medium', 'hard')", name="difficulty"),
         CheckConstraint("mode IN ('foundation', 'guided', 'independent', 'advanced')", name="mode"),
-        CheckConstraint("kind IN ('skill', 'mixed')", name="kind"),
-        CheckConstraint("(kind = 'mixed') = (skill_id IS NULL)", name="mixed_has_no_skill"),
+        CheckConstraint("kind IN ('skill', 'mixed', 'review')", name="kind"),
+        CheckConstraint("(kind = 'skill') = (skill_id IS NOT NULL)", name="skill_kind_has_skill"),
         Index("ix_practice_sessions_user_started", "user_id", "started_at"),
     )
 
     id: Mapped[uuid.UUID] = mapped_column(Uuid, primary_key=True, default=uuid.uuid4)
     user_id: Mapped[uuid.UUID] = mapped_column(Uuid, _user_fk(), nullable=False)
     # 'skill': one skill (single-skill questions). 'mixed': multi-skill questions across
-    # the skills the student has worked on (skill_id is NULL).
+    # the skills the student has worked on (skill_id is NULL). 'review': spaced review of the
+    # skills that are due, interleaved (skill_id is NULL; the plan holds skills and items).
     kind: Mapped[str] = mapped_column(String(8), nullable=False, server_default="skill")
     skill_id: Mapped[int | None] = mapped_column(ForeignKey("skills.id", ondelete="CASCADE"))
     mode: Mapped[str] = mapped_column(String(12), nullable=False)
@@ -289,6 +296,8 @@ class PracticeSession(Base):
         Boolean, nullable=False, server_default=text("false")
     )
     current_selection: Mapped[dict] = mapped_column(JSON, nullable=False, default=dict)
+    # review sessions: {"skills": [ids], "items": [ids in serving order]}; null otherwise
+    plan: Mapped[dict | None] = mapped_column(JSON)
     started_at: Mapped[datetime] = _created()
     ended_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
 
@@ -365,10 +374,12 @@ class SkillState(Base):
     mode: Mapped[str] = mapped_column(String(12), nullable=False, server_default="guided")
     mode_override: Mapped[str | None] = mapped_column(String(12))
     reassessed_accuracy: Mapped[float | None] = mapped_column(Float)
+    # first time the mastery rule held (observed answers only); "stuck" needs it to be unset
+    mastered_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     completed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     revision_due_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
-    # spaced revision: 0 = not yet revised; each successful revision moves one step further
-    # along REVISION_INTERVALS (7, 14, 30, 60 days)
+    # spaced review: 0 = first review; each successful review moves one step further along
+    # REVIEW_INTERVALS (3, 7, 14, 30, 60 days)
     revision_stage: Mapped[int] = mapped_column(SmallInteger, nullable=False, server_default="0")
     last_practiced_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     updated_at: Mapped[datetime] = _created()
@@ -391,7 +402,7 @@ class Recommendation(Base):
     __table_args__ = (
         CheckConstraint(
             "reason_code IN ('weakness', 'developing', 'needs_assessment', 'revision', "
-            "'prerequisite', 'next_objective', 'focus')",
+            "'prerequisite', 'next_objective', 'focus', 'stuck', 'review')",
             name="reason_code",
         ),
         Index("ix_recommendations_user_current", "user_id", "is_current"),

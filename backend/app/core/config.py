@@ -1,5 +1,6 @@
 """Application settings, loaded from environment variables (and a local .env file)."""
 
+import re
 from functools import lru_cache
 
 from pydantic import Field, field_validator, model_validator
@@ -71,7 +72,10 @@ class Settings(BaseSettings):
     difficulty_cache_seconds: float = Field(default=60, ge=0)
 
     # --- adaptive tutor (Mathematics on FoundationalASSIST, /api/v2) ---
-    kt_artifacts_dir: str = "model_artifacts/foundationalassist"
+    kt_artifacts_dir: str = "model_artifacts/foundationalassist"  # Mathematics (default)
+    # One knowledge-tracing model per subject: "CODE=dir,CODE=dir". A subject without a model
+    # (missing files) shows observed performance only. MATH uses kt_artifacts_dir unless named.
+    kt_subjects: str = "GEO=model_artifacts/geography"
     kt_model: str = Field(default="dkt_q", pattern="^(dkt_q|dkt)$")  # which exported model serves
     diagnostic_length: int = Field(default=10, ge=3, le=30)  # overall diagnostic questions
     skill_check_length: int = Field(default=6, ge=3, le=20)  # diagnostic for one chosen skill
@@ -83,19 +87,56 @@ class Settings(BaseSettings):
     improvement_margin: float = Field(default=0.15, gt=0, lt=1)  # counts as improved
     revision_after_days: int = Field(default=7, ge=1)  # first revision; later ones double
     mixed_practice_length: int = Field(default=8, ge=3, le=30)
+    # v3 personalization (docs/modules/tutor.md, "Personalization rules")
+    model_agree_threshold: float = Field(default=0.6, gt=0, lt=1)  # model must not disagree
+    mastery_streak: int = Field(default=3, ge=1, le=10)  # last N answers correct ...
+    mastery_window: int = Field(default=8, ge=2, le=20)  # ... and >= mastery_rate of the last W
+    mastery_rate: float = Field(default=0.8, gt=0, le=1)
+    mastery_min_attempts: int = Field(default=5, ge=1, le=30)
+    stuck_min_attempts: int = Field(default=10, ge=3, le=50)
+    stuck_recent_rate: float = Field(default=0.5, gt=0, lt=1)
+    early_stop_min_answers: int = Field(default=5, ge=2, le=20)
+    review_max_skills: int = Field(default=4, ge=1, le=10)
+    recommendations_stale_hours: float = Field(default=6, gt=0)
+    pace_window: int = Field(default=20, ge=5, le=100)
+    pace_dismiss_days: int = Field(default=14, ge=1, le=90)
 
     # --- AI tutor explanations (OpenRouter, OpenAI-compatible chat API) ---
     # Empty key = the feature is switched off and the buttons are hidden.
     openrouter_api_key: str = ""
-    ai_model: str = "google/gemma-4-26b-a4b-it:free"
+    ai_model: str = "nvidia/nemotron-3-ultra-550b-a55b:free"
     # Free models are often rate-limited upstream; these are tried in order when the main
     # model is busy or returns nothing. Comma-separated; empty = no fallback.
     ai_fallback_models: str = (
-        "nvidia/nemotron-3-ultra-550b-a55b:free,baidu/ernie-5.5-flash-preview:free"
+        "google/gemma-4-31b-it:free,google/gemma-4-26b-a4b-it:free,openrouter/free"
     )
     ai_base_url: str = "https://openrouter.ai/api/v1"
-    ai_timeout_seconds: float = Field(default=60, gt=0, le=180)
+    # Total time budget for one AI request across every model tried (stays well under the
+    # 120 s proxy limit). Each attempt reads for at most 25 s.
+    ai_total_seconds: float = Field(default=50, gt=5, le=90)
     ai_daily_limit: int = Field(default=40, ge=0)  # new AI texts one student may request per day
+
+    @field_validator("openrouter_api_key")
+    @classmethod
+    def clean_api_key(cls, v: str) -> str:
+        """Dashboards and .env files often add quotes, spaces, a "Bearer " prefix or the whole
+        .env line ("OPENROUTER_API_KEY=sk-or-...")."""
+        v = re.sub(r"^(export\s+)?OPENROUTER_API_KEY\s*=\s*", "", (v or "").strip(), flags=re.I)
+        if len(v) >= 2 and v[0] == v[-1] and v[0] in "\"'":
+            v = v[1:-1].strip()
+        if v.lower().startswith("bearer "):
+            v = v[7:].strip()
+        return v
+
+    @property
+    def kt_subject_dirs(self) -> dict[str, str]:
+        out: dict[str, str] = {}
+        for part in self.kt_subjects.split(","):
+            code, _, path = part.partition("=")
+            if code.strip() and path.strip():
+                out[code.strip().upper()] = path.strip()
+        out.setdefault("MATH", self.kt_artifacts_dir)
+        return out
 
     @property
     def ai_enabled(self) -> bool:

@@ -26,3 +26,6 @@ ml/artifacts/*
 
 # Notebook run outputs (model weights, logs): regenerate by running the notebook
 ml/notebooks/kt_outputs/
+
+# local archive of the frontend (50 MB), never committed
+/frontend.zip

@@ -1,4 +1,5 @@
-"""MENTORX v2 API: the adaptive Mathematics tutor. Auth is shared with /api/v1/auth."""
+"""MENTORX v2/v3 API: the adaptive tutor (Mathematics, Geography map skills). Auth is shared
+with /api/v1/auth. Reads "for the student" are scoped to the student's current subject."""
 
 from __future__ import annotations
 
@@ -7,7 +8,7 @@ import uuid
 from fastapi import APIRouter, Query, status
 
 from app.api.deps import DB, CurrentUser
-from app.tutor import admin, ai, assess, practice, recommend, resources, state, views
+from app.tutor import admin, ai, assess, llm, practice, recommend, resources, state, views
 from app.tutor import profile as profile_service
 from app.tutor.models import SkillState
 from app.tutor.schemas import (
@@ -19,6 +20,7 @@ from app.tutor.schemas import (
     ItemActive,
     ModeRequest,
     OnboardingRequest,
+    PaceSuggestionAnswer,
     PracticeAnswer,
     PrerequisiteIn,
     ProfileUpdate,
@@ -26,6 +28,7 @@ from app.tutor.schemas import (
     SkillDescription,
     StartAssessment,
     StartPractice,
+    SubjectChoice,
 )
 
 router = APIRouter(tags=["tutor"])
@@ -36,30 +39,72 @@ router = APIRouter(tags=["tutor"])
 
 @router.get("/profile")
 def get_profile(user: CurrentUser, db: DB) -> dict:
-    return profile_service.out(db, user)
+    out = profile_service.out(db, user)
+    db.commit()  # goal achievement timestamp (audit 4.8)
+    return out
 
 
 @router.post("/onboarding")
 def onboarding(req: OnboardingRequest, user: CurrentUser, db: DB) -> dict:
-    profile_service.onboard(
-        db, user, req.goal_type, req.focus_skill_id, req.goal_kind, req.goal_target
+    p = profile_service.onboard(
+        db,
+        user,
+        req.goal_type,
+        req.focus_skill_id,
+        req.goal_kind,
+        req.goal_target,
+        subject_code=req.subject_code,
+        grade=req.grade,
+        pace_preference=req.pace_preference,
     )
-    state.refresh(db, user.id)
+    state.refresh(db, user.id, p.subject_id)
     db.commit()
     return profile_service.out(db, user)
+
+
+NULLABLE_PROFILE_FIELDS = {"grade", "focus_skill_id", "goal_type"}
 
 
 @router.patch("/profile")
 def update_profile(req: ProfileUpdate, user: CurrentUser, db: DB) -> dict:
     p = profile_service.require(db, user)
-    data = req.model_dump(exclude_unset=True)
+    data = {
+        k: v
+        for k, v in req.model_dump(exclude_unset=True).items()
+        if v is not None or k in NULLABLE_PROFILE_FIELDS
+    }
     for k, v in data.items():
         setattr(p, k, v)
     if "pace_preference" in data:
-        state.refresh(db, user.id)  # modes depend on the pace preference
-    if {"pace_preference", "goal_type", "focus_skill_id"} & data.keys():
-        recommend.generate(db, user.id, "profile")
+        state.refresh(db, user.id, p.subject_id)  # modes depend on the pace preference
+    if {"pace_preference", "goal_type", "focus_skill_id", "grade"} & data.keys():
+        recommend.generate(db, user.id, "profile", subject_id=p.subject_id)
     db.commit()
+    return profile_service.out(db, user)
+
+
+@router.get("/subjects")
+def list_subjects(user: CurrentUser, db: DB) -> list[dict]:
+    return profile_service.subjects_out(db, user)
+
+
+@router.put("/profile/subject")
+def set_subject(req: SubjectChoice, user: CurrentUser, db: DB) -> dict:
+    p = profile_service.set_subject(db, user, req.code)
+    state.refresh(db, user.id, p.subject_id)
+    recommend.generate(db, user.id, "profile", subject_id=p.subject_id)
+    db.commit()
+    return profile_service.out(db, user)
+
+
+@router.get("/home")
+def home(user: CurrentUser, db: DB) -> dict:
+    return views.home(db, user)
+
+
+@router.post("/home/pace-suggestion")
+def pace_suggestion(req: PaceSuggestionAnswer, user: CurrentUser, db: DB) -> dict:
+    views.answer_pace_suggestion(db, user, req.accept)
     return profile_service.out(db, user)
 
 
@@ -224,22 +269,31 @@ def complete_resource(resource_id: int, req: CompletionRequest, user: CurrentUse
 # ---------------------------------------------------------------- admin
 
 
+SubjectParam = Query(default="MATH", alias="subject", max_length=20)
+
+
 @router.get("/admin/overview")
-def admin_overview(user: CurrentUser, db: DB) -> dict:
+def admin_overview(user: CurrentUser, db: DB, subject: str = SubjectParam) -> dict:
     admin.require_admin(user)
-    return admin.overview(db)
+    return admin.overview(db, subject)
 
 
 @router.get("/admin/model")
-def admin_model(user: CurrentUser, db: DB) -> dict:
+def admin_model(user: CurrentUser, db: DB, subject: str = SubjectParam) -> dict:
     admin.require_admin(user)
-    return admin.model_monitor(db)
+    return admin.model_monitor(db, subject)
 
 
 @router.get("/admin/ai")
 def admin_ai(user: CurrentUser, db: DB) -> list[dict]:
     admin.require_admin(user)
     return ai.admin_list(db)
+
+
+@router.post("/admin/ai/test")
+def admin_ai_test(user: CurrentUser) -> dict:
+    admin.require_admin(user)
+    return llm.check_connection()
 
 
 @router.patch("/admin/ai/{row_id}")
@@ -250,10 +304,13 @@ def admin_ai_status(row_id: int, req: AiStatusUpdate, user: CurrentUser, db: DB)
 
 @router.get("/admin/skills")
 def admin_skills(
-    user: CurrentUser, db: DB, q: str | None = Query(default=None, max_length=60)
+    user: CurrentUser,
+    db: DB,
+    q: str | None = Query(default=None, max_length=60),
+    subject: str = SubjectParam,
 ) -> list[dict]:
     admin.require_admin(user)
-    return admin.skills(db, q)
+    return admin.skills(db, q, subject)
 
 
 @router.patch("/admin/skills/{skill_id}")

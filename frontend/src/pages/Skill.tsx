@@ -1,345 +1,370 @@
 import { useState } from "react";
-import type { ReactNode } from "react";
-import { useNavigate, useParams } from "react-router";
-import { AlertCircle, ArrowRight, BookOpenText, ClipboardCheck, GitBranch, History, Layers, LifeBuoy, PenLine, PlayCircle, Sparkles, Target, Video } from "lucide-react";
-import { ApiError } from "../api/client";
+import type { KeyboardEvent, ReactNode } from "react";
+import { Link, useParams, useSearchParams } from "react-router";
+import { ArrowLeft, ArrowRight, ExternalLink } from "lucide-react";
 import { tutor } from "../api/tutor";
-import type { Mode, SkillDetail } from "../api/tutor";
+import type { Mistake, Mode, SkillDetail } from "../api/tutor";
 import { useApi } from "../hooks/useApi";
 import { useProfile } from "../components/AppShell";
 import { Html } from "../components/QuestionView";
 import { AiExplain } from "../components/AiTutor";
-import { Markdown } from "../components/Markdown";
+import { MAP_NOTICE, STATIC_CREDITS } from "../components/Credits";
+import { Disclosure } from "../components/Disclosure";
+import { MapQuestion } from "../components/MapQuestion";
 import { ResourceCard } from "../components/ResourceCard";
-import { SkillCard } from "../components/SkillCard";
-import { Button, Card, CardTitle, cx, ErrorState, EvidenceMeter, ModeBadge, ModelEstimate, PageLoader, pct, StatusBadge } from "../components/ui";
+import { SkillRow } from "../components/SkillRow";
+import { launchFor, StartButton, useLauncher } from "../components/StartAction";
+import { Button, cx, EmptyState, ErrorState, EvidenceMeter, MODE_LABEL, ModelEstimate, PageLoader, pct, StatusBadge } from "../components/ui";
 
-const MODES: { id: Mode; label: string; text: string }[] = [
-  { id: "foundation", label: "Foundation", text: "More explanation, basic examples, easy questions, hints offered" },
-  { id: "guided", label: "Guided", text: "Explanations and worked examples, easy to medium questions" },
-  { id: "independent", label: "Independent", text: "Medium to hard questions, less assistance" },
-  { id: "advanced", label: "Advanced", text: "Challenging, application-based questions" },
+const MODES: { id: Mode; text: string }[] = [
+  { id: "foundation", text: "Easier questions, more explanation, hints offered" },
+  { id: "guided", text: "Easy to medium questions with worked examples" },
+  { id: "independent", text: "Medium to hard questions, less help" },
+  { id: "advanced", text: "Challenging, application-style questions" },
 ];
 
-function Step({ n, icon, title, children, done }: { n: number; icon: ReactNode; title: string; children: ReactNode; done?: boolean }) {
+const TABS = [
+  { id: "learn", label: "Learn" },
+  { id: "practice", label: "Practice" },
+  { id: "mistakes", label: "My mistakes" },
+] as const;
+type Tab = (typeof TABS)[number]["id"];
+
+function DetailBlock({ title, children }: { title: string; children: ReactNode }) {
   return (
-    <li className="relative pl-12">
-      <span className={cx("absolute left-0 top-0 grid size-9 place-items-center rounded-xl border text-sm font-semibold", done ? "border-strength/40 bg-strength/10 text-strength" : "border-line bg-surface-2 text-brand")}>
-        {icon}
-      </span>
-      <p className="text-[11px] font-semibold uppercase tracking-wider text-ink-faint">Step {n}</p>
-      <h3 className="font-semibold">{title}</h3>
-      <div className="mt-3">{children}</div>
+    <div>
+      <h3 className="mb-1.5 text-xs font-semibold uppercase tracking-wider text-ink-faint">{title}</h3>
+      <div className="text-sm">{children}</div>
+    </div>
+  );
+}
+
+function optionHtml(m: Mistake, id: string | undefined) {
+  if (id === undefined) return null;
+  return m.options.find((o) => o.id === id)?.html ?? null;
+}
+
+function MistakeItem({ m }: { m: Mistake }) {
+  const ca = m.correct_answer;
+  const yourChoices = m.your_response.choice !== undefined ? [m.your_response.choice] : (m.your_response.choices ?? []);
+  const correctIds = ca.type === "numeric" || ca.type === "text" ? [] : ca.option_ids;
+  return (
+    <li className="rounded-2xl border border-line bg-surface p-4">
+      <Html html={m.body_html} className="question-html line-clamp-6 text-[15px]" />
+      {m.media?.kind === "map" && (
+        <MapQuestion media={m.media} selected={m.your_response.choice ?? null} answered correctIds={correctIds} className="mt-3 max-w-md" />
+      )}
+      <dl className="mt-3 grid gap-1 text-sm">
+        <div className="flex flex-wrap gap-x-2">
+          <dt className="text-ink-muted">Your answer:</dt>
+          <dd className="text-weakness">
+            {m.revealed
+              ? "You asked to see the answer."
+              : m.your_response.value ??
+                yourChoices.map((c) => {
+                  const h = optionHtml(m, c);
+                  return h ? <Html key={c} html={h} className="option-html inline" /> : <span key={c}>{c}</span>;
+                })}
+          </dd>
+        </div>
+        <div className="flex flex-wrap gap-x-2">
+          <dt className="text-ink-muted">Correct answer:</dt>
+          <dd className="text-strength">
+            {ca.type === "numeric" || ca.type === "text"
+              ? ca.values.join(" or ")
+              : ca.options_html.map((h, i) => <Html key={i} html={h} className="option-html mr-2 inline" />)}
+          </dd>
+        </div>
+      </dl>
+      <AiExplain interactionId={m.interaction_id} label="Explain my mistake" className="mt-3" />
     </li>
   );
 }
 
-function keyIdea(md: string | null | undefined) {
-  if (!md) return null;
-  const m = md.match(/###\s*Key idea\s*\n([\s\S]+?)(\n###|$)/);
-  return m?.[1]?.trim() ?? null;
+function ModePicker({ k, onChange }: { k: SkillDetail; onChange: () => void }) {
+  const [busy, setBusy] = useState(false);
+  async function setMode(mode: Mode | null) {
+    setBusy(true);
+    try {
+      await tutor.setMode(k.id, mode);
+      onChange();
+    } finally {
+      setBusy(false);
+    }
+  }
+  return (
+    <div>
+      <p className="text-ink-muted">
+        Now: <span className="font-medium text-ink">{MODE_LABEL[k.mode]}</span> · {k.mode_is_override ? "chosen by you" : "set automatically from your answers"}
+      </p>
+      <div className="mt-2 grid gap-2 sm:grid-cols-2">
+        {MODES.map((m) => (
+          <button
+            key={m.id}
+            type="button"
+            disabled={busy}
+            aria-pressed={k.mode === m.id}
+            onClick={() => setMode(m.id)}
+            className={cx("min-h-11 rounded-xl border p-3 text-left text-sm", k.mode === m.id ? "border-brand bg-brand-soft" : "border-line hover:bg-surface-2")}
+          >
+            <span className="font-medium">{MODE_LABEL[m.id]}</span>
+            <span className="mt-0.5 block text-xs text-ink-muted">{m.text}</span>
+          </button>
+        ))}
+      </div>
+      {k.mode_is_override && (
+        <Button variant="ghost" size="sm" className="mt-2" onClick={() => setMode(null)} disabled={busy}>
+          Go back to automatic
+        </Button>
+      )}
+    </div>
+  );
+}
+
+function Details({ k, onChange }: { k: SkillDetail; onChange: () => void }) {
+  return (
+    <Disclosure title="Details">
+      <div className="grid gap-6">
+        <div className="grid gap-6 sm:grid-cols-2">
+          <DetailBlock title="Your answers">
+            {k.attempts ? (
+              <>
+                <p>
+                  {k.correct} of {k.attempts} correct ({pct(k.observed_accuracy)}) · recent {pct(k.recent_accuracy)}
+                </p>
+                <EvidenceMeter evidence={k.evidence} />
+              </>
+            ) : (
+              <p className="text-ink-muted">No answers in this skill yet.</p>
+            )}
+          </DetailBlock>
+          <DetailBlock title="Prediction">
+            <ModelEstimate p={k.predicted_p} />
+            <p className="mt-1 text-xs text-ink-faint">A model's guess from all your answers. It never changes your status; only your answers in this skill do.</p>
+          </DetailBlock>
+        </div>
+        <DetailBlock title="How you practise this skill">
+          <ModePicker k={k} onChange={onChange} />
+        </DetailBlock>
+        {k.support_plan && (
+          <DetailBlock title="Support plan">
+            <p className="font-medium">{k.support_plan.message}</p>
+            <ol className="ml-5 mt-1.5 list-decimal space-y-1 text-ink-muted">
+              {k.support_plan.steps.map((s) => (
+                <li key={s}>{s}</li>
+              ))}
+            </ol>
+            {k.support_plan.no_prerequisite_note && <p className="mt-1.5 text-ink-muted">{k.support_plan.no_prerequisite_note}</p>}
+          </DetailBlock>
+        )}
+        {(k.prerequisites.length > 0 || k.leads_to.length > 0) && (
+          <div className="grid gap-6 sm:grid-cols-2">
+            {k.prerequisites.length > 0 && (
+              <DetailBlock title="Builds on">
+                <div className="-mx-3">
+                  {k.prerequisites.map((p) => (
+                    <SkillRow key={p.id} skill={p} />
+                  ))}
+                </div>
+              </DetailBlock>
+            )}
+            {k.leads_to.length > 0 && (
+              <DetailBlock title="Leads to">
+                <div className="-mx-3">
+                  {k.leads_to.map((p) => (
+                    <SkillRow key={p.id} skill={p} />
+                  ))}
+                </div>
+              </DetailBlock>
+            )}
+          </div>
+        )}
+        <div className="grid gap-6 sm:grid-cols-2">
+          <DetailBlock title="Question bank">
+            <p>
+              {k.n_items} questions · {k.fresh_questions} you haven't seen
+            </p>
+            <p className="mt-1 text-xs text-ink-muted">
+              {(["easy", "medium", "hard", "unrated"] as const)
+                .filter((d) => k.difficulty_counts[d])
+                .map((d) => `${d} ${k.difficulty_counts[d]}`)
+                .join(" · ")}
+            </p>
+          </DetailBlock>
+          <DetailBlock title="Last check">
+            {k.last_reassessment ? (
+              <p>
+                {pct(k.last_reassessment.result.reassessment_accuracy ?? k.last_reassessment.result.accuracy)} on {new Date(k.last_reassessment.completed_at).toLocaleDateString()}
+              </p>
+            ) : (
+              <p className="text-ink-muted">No check taken yet.</p>
+            )}
+          </DetailBlock>
+        </div>
+        {k.standard_url && (
+          <a href={k.standard_url} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 text-sm text-brand hover:underline">
+            Official standard {k.code} <ExternalLink className="size-3.5" aria-hidden />
+          </a>
+        )}
+      </div>
+    </Disclosure>
+  );
 }
 
 export function SkillPage() {
   const { id = "" } = useParams();
   const skillId = Number(id);
-  const navigate = useNavigate();
   const { profile } = useProfile();
+  const [params, setParams] = useSearchParams();
   const s = useApi(() => tutor.skill(skillId), [skillId]);
-  const [busy, setBusy] = useState<string | null>(null);
-  const [error, setError] = useState<string>();
-  const [modeOpen, setModeOpen] = useState(false);
+  const header = useLauncher();
+  const tabParam = params.get("tab");
+  const tab: Tab = TABS.some((t) => t.id === tabParam) ? (tabParam as Tab) : "learn";
 
-  if (s.loading && !s.data) return <PageLoader label="Opening the learning module…" />;
+  if (s.loading && !s.data) return <PageLoader label="Opening the skill…" />;
   if (s.error) return <ErrorState error={s.error} onRetry={s.reload} />;
   const k: SkillDetail = s.data!;
-  const notes = k.resources.filter((r) => r.kind === "notes");
-  const examples = k.resources.filter((r) => r.kind === "worked_example");
-  const videos = k.resources.filter((r) => r.kind === "video");
-  const others = k.resources.filter((r) => !["notes", "worked_example", "video"].includes(r.kind));
-  const idea = keyIdea(notes[0]?.content_md);
 
-  async function practise(guided: boolean) {
-    setBusy(guided ? "guided" : "practice");
-    setError(undefined);
-    try {
-      const p = await tutor.startPractice(skillId, guided);
-      navigate(`/practice/${p.id}`);
-    } catch (e) {
-      setError(e instanceof ApiError ? e.message : "Couldn't start practice.");
-      setBusy(null);
+  const setTab = (t: Tab) => setParams((p) => {
+    const n = new URLSearchParams(p);
+    n.set("tab", t);
+    return n;
+  }, { replace: true });
+  const onTabKey = (e: KeyboardEvent<HTMLButtonElement>) => {
+    const i = TABS.findIndex((t) => t.id === tab);
+    if (e.key === "ArrowRight" || e.key === "ArrowLeft") {
+      e.preventDefault();
+      const next = TABS[(i + (e.key === "ArrowRight" ? 1 : TABS.length - 1)) % TABS.length]!;
+      setTab(next.id);
+      document.getElementById(`tab-${next.id}`)?.focus();
     }
-  }
+  };
 
-  async function setMode(mode: Mode | null) {
-    setBusy("mode");
-    try {
-      await tutor.setMode(skillId, mode);
-      s.reload();
-      setModeOpen(false);
-    } finally {
-      setBusy(null);
-    }
-  }
-
-  const assessKind = k.attempts === 0 ? "skill_check" : "reassessment";
-  const canReassess = k.fresh_questions >= 3;
+  const na = k.next_activity;
+  const primary = launchFor(na.action, k.id, na.skill_id);
+  const learn = k.resources.filter((r) => r.kind !== "video" && r.kind !== "standard");
+  const learnOrder = { notes: 0, worked_example: 1, practice_tip: 2, article: 3, standard: 4, video: 5 } as const;
+  learn.sort((a, b) => learnOrder[a.kind] - learnOrder[b.kind]);
+  const checkKind = k.attempts === 0 ? "skill_check" : "reassessment";
+  const minFresh = k.check_min_fresh ?? 3;
+  const canCheck = checkKind === "skill_check" || k.fresh_questions >= minFresh;
+  const isGeo = (k.subject?.code ?? profile.subject_code) === "GEO";
+  const geoNotice = k.notice ?? MAP_NOTICE;
+  const geoCredit = k.attribution ?? STATIC_CREDITS.find((c) => c.code === "GEO")!.text;
 
   return (
     <div className="space-y-6">
-      <header>
+      <Link to="/skills" className="inline-flex min-h-11 items-center gap-1.5 text-sm text-ink-muted hover:text-ink sm:min-h-0">
+        <ArrowLeft className="size-4" aria-hidden /> Skills
+      </Link>
+
+      <header className="space-y-3">
         <p className="text-xs font-semibold uppercase tracking-[0.14em] text-brand">
-          {k.domain_name} · Grade {k.grade} · {k.code}
+          {k.domain_name}
+          {k.grade !== null && ` · Grade ${k.grade}`}
         </p>
-        <h1 className="mt-1 text-2xl font-semibold tracking-tight sm:text-[28px]">{k.name}</h1>
-        <div className="mt-3 flex flex-wrap items-center gap-2">
+        <h1 className="text-2xl font-semibold tracking-tight sm:text-[28px]">{k.name}</h1>
+        <div className="flex flex-wrap items-center gap-2">
           <StatusBadge status={k.status} />
-          <ModeBadge mode={k.mode} />
           {k.completed && <span className="rounded-full bg-strength/12 px-2.5 py-1 text-xs font-medium text-strength">Completed</span>}
-          <EvidenceMeter evidence={k.evidence} attempts={k.attempts} />
+          {k.review_due && <span className="rounded-full bg-accent/12 px-2.5 py-1 text-xs font-medium text-accent">Due for review</span>}
         </div>
-      </header>
-
-      <div className="grid gap-4 md:grid-cols-3">
-        <Card>
-          <p className="text-xs font-semibold uppercase tracking-wider text-ink-faint">Your observed performance</p>
-          <p className="mt-2 text-3xl font-semibold">{k.attempts ? pct(k.observed_accuracy) : "—"}</p>
-          <p className="mt-1 text-sm text-ink-muted">{k.attempts ? `${k.correct} of ${k.attempts} correct · recent ${pct(k.recent_accuracy)}` : "No answers in this skill yet"}</p>
-        </Card>
-        <Card>
-          <p className="text-xs font-semibold uppercase tracking-wider text-ink-faint">Model estimate</p>
-          <p className="mt-2 text-3xl font-semibold text-accent">{k.predicted_p === null ? "—" : pct(k.predicted_p)}</p>
-          <ModelEstimate p={k.predicted_p} className="mt-1" />
-        </Card>
-        <Card>
-          <div className="flex items-center justify-between">
-            <p className="text-xs font-semibold uppercase tracking-wider text-ink-faint">Learning mode</p>
-            <button type="button" className="text-xs text-brand hover:underline" onClick={() => setModeOpen((o) => !o)}>
-              {modeOpen ? "Close" : "Adjust"}
-            </button>
-          </div>
-          <p className="mt-2 text-xl font-semibold">{k.mode_label}</p>
-          <p className="mt-1 text-sm text-ink-muted">{MODES.find((m) => m.id === k.mode)?.text}</p>
-          <p className="mt-1 text-xs text-ink-faint">{k.mode_is_override ? "Chosen by you" : "Set automatically from your evidence"}</p>
-        </Card>
-      </div>
-
-      {modeOpen && (
-        <Card>
-          <CardTitle title="Choose how you want to learn this skill" subtitle="Modes are per skill and never a permanent label. Automatic mode follows your accuracy and hint use (never your speed)." />
-          <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
-            {MODES.map((m) => (
-              <button key={m.id} type="button" disabled={busy === "mode"} onClick={() => setMode(m.id)} className={cx("rounded-xl border p-3 text-left text-sm", k.mode === m.id ? "border-brand bg-brand-soft" : "border-line hover:bg-surface-2")}>
-                <span className="font-semibold">{m.label}</span>
-                <span className="mt-1 block text-xs text-ink-muted">{m.text}</span>
-              </button>
-            ))}
-          </div>
-          {k.mode_is_override && (
-            <Button variant="ghost" size="sm" className="mt-3" onClick={() => setMode(null)}>
-              Use the automatic mode again
-            </Button>
-          )}
-        </Card>
-      )}
-
-      {k.support_plan && (
-        <Card className="border-developing/40 bg-developing/5">
-          <CardTitle icon={<LifeBuoy className="size-4 text-developing" />} title={k.support_plan.message} subtitle="Here's a different approach before you try again." />
-          <ol className="ml-5 list-decimal space-y-1.5 text-sm text-ink/90">
-            {k.support_plan.steps.map((st) => (
-              <li key={st}>{st}</li>
-            ))}
-          </ol>
-          {k.support_plan.prerequisites_to_check.length > 0 && (
-            <div className="mt-4">
-              <p className="mb-2 text-sm font-medium">Building blocks worth checking first (curated prerequisites):</p>
-              <div className="grid gap-2 md:grid-cols-2">
-                {k.support_plan.prerequisites_to_check.map((p) => (
-                  <SkillCard key={p.id} skill={p} compact />
-                ))}
-              </div>
-            </div>
-          )}
-          {k.support_plan.no_prerequisite_note && <p className="mt-3 text-sm text-ink-muted">{k.support_plan.no_prerequisite_note}</p>}
-          <Button className="mt-4" onClick={() => practise(true)} loading={busy === "guided"} icon={<PlayCircle className="size-4" />}>
-            Start foundation practice
-          </Button>
-        </Card>
-      )}
-
-      <div className="grid gap-6 lg:grid-cols-[1.55fr_1fr]">
-        <Card>
-          <CardTitle icon={<Layers className="size-4" />} title="Learning module" subtitle={`${k.resources_done} of ${k.resources.length} resources completed. Studying never changes your skill estimate; only your answers do.`} />
-          <ol className="space-y-8">
-            <Step n={1} icon={<Sparkles className="size-4" />} title="Understand the concept">
-              {idea ? (
-                <div className="rounded-xl border border-line bg-surface-2/60 p-4">
-                  <Markdown source={idea} />
-                </div>
-              ) : (
-                <p className="text-sm text-ink-muted">{k.description || "Read the official standard below to see exactly what this skill covers."}</p>
-              )}
-            </Step>
-            <Step n={2} icon={<Video className="size-4" />} title="Watch a relevant educational video">
-              {videos.length ? (
-                <div className="space-y-3">
-                  {videos.map((r) => (
-                    <ResourceCard key={r.id} resource={r} />
-                  ))}
-                </div>
-              ) : (
-                <p className="rounded-xl border border-dashed border-line-strong p-4 text-sm text-ink-muted">No verified video has been added for this skill yet. Use the notes and worked example instead, then practise.</p>
-              )}
-            </Step>
-            <Step n={3} icon={<BookOpenText className="size-4" />} title="Read concept notes" done={notes.length > 0 && notes.every((r) => r.completed)}>
-              <div className="space-y-3">
-                {notes.map((r) => (
-                  <ResourceCard key={r.id} resource={r} onChange={() => s.reload()} />
-                ))}
-                {others.map((r) => (
-                  <ResourceCard key={r.id} resource={r} onChange={() => s.reload()} />
-                ))}
-                {!notes.length && <p className="text-sm text-ink-muted">No written notes for this skill yet. The official standard below describes it, and practice will help.</p>}
-              </div>
-            </Step>
-            <Step n={4} icon={<PenLine className="size-4" />} title="Study worked examples" done={examples.length > 0 && examples.every((r) => r.completed)}>
-              {examples.length ? (
-                <div className="space-y-3">
-                  {examples.map((r) => (
-                    <ResourceCard key={r.id} resource={r} onChange={() => s.reload()} />
-                  ))}
-                </div>
-              ) : (
-                <p className="text-sm text-ink-muted">No worked example for this skill yet. Guided practice shows the correct answer after every question, so you can learn from each one.</p>
-              )}
-            </Step>
-            <Step n={5} icon={<PlayCircle className="size-4" />} title="Attempt guided practice">
-              <p className="mb-3 text-sm text-ink-muted">Starts easy with hints available. Two right in a row makes it harder; two wrong makes it easier.</p>
-              <div className="flex flex-wrap gap-2">
-                <Button onClick={() => practise(true)} loading={busy === "guided"} icon={<PlayCircle className="size-4" />}>
-                  Guided practice
-                </Button>
-                {!["foundation"].includes(k.mode) && (
-                  <Button variant="secondary" onClick={() => practise(false)} loading={busy === "practice"}>
-                    {k.mode_label} practice
-                  </Button>
-                )}
-              </div>
-            </Step>
-            <Step n={6} icon={<ClipboardCheck className="size-4" />} title="Take a short assessment">
-              <p className="mb-3 text-sm text-ink-muted">
-                {assessKind === "skill_check"
-                  ? "A few questions to see where you stand in this skill."
-                  : `A ${k.reassessment_length}-question reassessment with questions you have never seen, compared with your first answers.`}
-              </p>
-              {assessKind === "reassessment" && !canReassess ? (
-                <p className="text-sm text-ink-muted">You've seen almost every question in this skill, so a fair reassessment isn't possible.</p>
-              ) : (
-                <Button variant="secondary" to={`/assess/start?kind=${assessKind}&skill=${k.id}`} icon={<ArrowRight className="size-4" />}>
-                  {assessKind === "skill_check" ? "Take the skill check" : "Take a reassessment"}
-                </Button>
-              )}
-            </Step>
-          </ol>
-          {error && <p className="mt-4 text-sm text-danger" role="alert">{error}</p>}
-        </Card>
-
-        <div className="space-y-6">
-          <Card className="border-brand/30">
-            <CardTitle icon={<Target className="size-4" />} title="Next recommended activity" />
-            <p className="font-medium">{k.next_activity.label}</p>
-            <div className="mt-3">
-              {k.next_activity.action === "skill_check" && <Button to={`/assess/start?kind=skill_check&skill=${k.id}`}>Start</Button>}
-              {k.next_activity.action === "reassess" && <Button to={`/assess/start?kind=reassessment&skill=${k.id}`}>Start reassessment</Button>}
-              {(k.next_activity.action === "practice" || k.next_activity.action === "foundation") && (
-                <Button onClick={() => practise(k.next_activity.action === "foundation")} loading={busy !== null}>
-                  Start practice
-                </Button>
-              )}
-            </div>
-            {k.last_reassessment && (
-              <p className="mt-3 text-xs text-ink-faint">
-                Last reassessment: {pct(k.last_reassessment.result.reassessment_accuracy)} ({k.last_reassessment.result.outcome?.replace("_", " ")})
+        {k.mastery?.progress_hint && <p className="text-[15px] text-ink-muted">{k.mastery.progress_hint}</p>}
+        {primary && (
+          <div className="pt-1">
+            {na.action === "learn" ? (
+              <Button size="lg" onClick={() => setTab("learn")} icon={<ArrowRight className="size-4" />}>
+                {na.label}
+              </Button>
+            ) : (
+              <Button size="lg" onClick={() => void header.launch(primary)} loading={header.busy} icon={<ArrowRight className="size-4" />}>
+                {na.label}
+              </Button>
+            )}
+            {header.error && (
+              <p className="mt-2 text-sm text-developing" role="alert">
+                {header.error}
               </p>
             )}
-          </Card>
+          </div>
+        )}
+      </header>
 
-          <Card>
-            <CardTitle icon={<History className="size-4" />} title="Recent mistakes" subtitle="Compare your answer with the correct one" />
-            {k.recent_mistakes.length ? (
+      <div>
+        <div role="tablist" aria-label="Skill sections" className="flex gap-1 border-b border-line">
+          {TABS.map((t) => (
+            <button
+              key={t.id}
+              id={`tab-${t.id}`}
+              role="tab"
+              type="button"
+              aria-selected={tab === t.id}
+              aria-controls={`panel-${t.id}`}
+              tabIndex={tab === t.id ? 0 : -1}
+              onClick={() => setTab(t.id)}
+              onKeyDown={onTabKey}
+              className={cx("-mb-px min-h-11 border-b-2 px-3 text-sm font-medium", tab === t.id ? "border-brand text-ink" : "border-transparent text-ink-muted hover:text-ink")}
+            >
+              {t.label}
+              {t.id === "mistakes" && k.recent_mistakes.length > 0 && <span className="ml-1.5 rounded-full bg-surface-3 px-1.5 text-xs text-ink-muted">{k.recent_mistakes.length}</span>}
+            </button>
+          ))}
+        </div>
+
+        <div role="tabpanel" id={`panel-${tab}`} aria-labelledby={`tab-${tab}`} className="pt-5">
+          {tab === "learn" &&
+            (learn.length ? (
+              <div className="space-y-3">
+                {learn.map((r, i) => (
+                  <ResourceCard key={r.id} resource={r} defaultOpen={i === 0} onChange={() => s.reload()} />
+                ))}
+              </div>
+            ) : (
+              <EmptyState title="No notes for this skill yet">Practice shows the right answer after every question, so you can learn as you go.</EmptyState>
+            ))}
+
+          {tab === "practice" && (
+            <div className="space-y-4">
+              <p className="text-[15px] text-ink-muted">A short set of questions that adapts to you: two right in a row and they get harder, two wrong and they get easier.</p>
+              <div className="flex flex-wrap gap-3">
+                <StartButton action={{ endpoint: "practice", skill_id: k.id, guided: k.mode === "foundation" || k.mode === "guided" }} variant="secondary">
+                  Start practice
+                </StartButton>
+                {!canCheck && !k.completed && (
+                  <p className="w-full text-sm text-ink-muted">You've seen almost every question here, so there's no fresh check. Meeting the mastery goal in practice completes this skill.</p>
+                )}
+                {canCheck && (
+                  <StartButton action={{ endpoint: "assessment", kind: checkKind, skill_id: k.id }} variant="soft">
+                    {checkKind === "skill_check" ? "Quick skill check" : `Take the ${k.reassessment_length}-question check`}
+                  </StartButton>
+                )}
+              </div>
+            </div>
+          )}
+
+          {tab === "mistakes" &&
+            (k.recent_mistakes.length ? (
               <ul className="space-y-3">
                 {k.recent_mistakes.map((m) => (
-                  <li key={`${m.item_id}-${m.at}`} className="rounded-xl border border-line bg-surface-2/50 p-3 text-sm">
-                    <Html html={m.body_html} className="question-html line-clamp-4 text-sm" />
-                    <p className="mt-2 text-xs text-ink-muted">
-                      {m.revealed ? "You asked to see the answer." : (
-                        <>
-                          You answered: <span className="text-weakness">{m.your_response.value ?? (m.your_response.choice !== undefined ? `option ${String.fromCharCode(65 + Number(m.your_response.choice))}` : (m.your_response.choices ?? []).map((c) => String.fromCharCode(65 + Number(c))).join(", "))}</span>
-                        </>
-                      )}
-                    </p>
-                    <p className="text-xs text-ink-muted">
-                      Correct:{" "}
-                      <span className="text-strength">
-                        {m.correct_answer.type === "numeric" || m.correct_answer.type === "text" ? m.correct_answer.values.join(" or ") : m.correct_answer.option_ids.map((c) => String.fromCharCode(65 + Number(c))).join(", ")}
-                      </span>
-                    </p>
-                    <AiExplain interactionId={m.interaction_id} label="Explain my mistake" className="mt-3" />
-                  </li>
+                  <MistakeItem key={m.interaction_id} m={m} />
                 ))}
               </ul>
             ) : (
-              <p className="text-sm text-ink-muted">No mistakes recorded in this skill.</p>
-            )}
-          </Card>
-
-          <Card>
-            <CardTitle icon={<GitBranch className="size-4" />} title="How this skill connects" />
-            {k.prerequisites.length > 0 ? (
-              <>
-                <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-ink-faint">Builds on</p>
-                <div className="space-y-2">
-                  {k.prerequisites.map((p) => (
-                    <SkillCard key={p.id} skill={p} compact />
-                  ))}
-                </div>
-                <p className="mt-2 text-xs text-ink-faint">{k.prerequisites[0]?.source}</p>
-              </>
-            ) : (
-              <p className="text-sm text-ink-muted">No curated prerequisite is mapped for this skill.</p>
-            )}
-            {k.leads_to.length > 0 && (
-              <>
-                <p className="mb-2 mt-4 text-xs font-semibold uppercase tracking-wider text-ink-faint">Leads to</p>
-                <div className="space-y-2">
-                  {k.leads_to.map((p) => (
-                    <SkillCard key={p.id} skill={p} compact />
-                  ))}
-                </div>
-              </>
-            )}
-          </Card>
-
-          <Card>
-            <CardTitle icon={<AlertCircle className="size-4" />} title="Question bank" />
-            <p className="text-sm text-ink-muted">
-              {k.n_items} questions · {k.fresh_questions} you haven't seen yet
-            </p>
-            <div className="mt-2 flex flex-wrap gap-2 text-xs">
-              {(["easy", "medium", "hard", "unrated"] as const).map((d) =>
-                k.difficulty_counts[d] ? (
-                  <span key={d} className="rounded-md bg-surface-3 px-2 py-0.5 capitalize text-ink-muted">
-                    {d}: {k.difficulty_counts[d]}
-                  </span>
-                ) : null,
-              )}
-            </div>
-            <p className="mt-2 text-xs text-ink-faint">Difficulty comes from how often students in the training data got each question right on their first try.</p>
-          </Card>
-          {profile.focus_skill?.id === k.id && <p className="text-center text-xs text-brand">This is your chosen focus topic.</p>}
+              <EmptyState title="No mistakes here">Questions you get wrong in this skill will show up here, with the right answer.</EmptyState>
+            ))}
         </div>
       </div>
+
+      <Details k={k} onChange={s.reload} />
+
+      {profile.focus_skill?.id === k.id && <p className="text-center text-xs text-brand">This is your chosen focus topic.</p>}
+
+      {isGeo && (
+        <footer className="space-y-1 border-t border-line pt-4 text-xs text-ink-faint">
+          <p>{geoNotice}</p>
+          <p>{geoCredit}</p>
+        </footer>
+      )}
     </div>
   );
 }

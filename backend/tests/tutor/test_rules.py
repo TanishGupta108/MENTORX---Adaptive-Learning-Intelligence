@@ -98,7 +98,10 @@ def test_diagnosis_needs_evidence_and_model_agreement():
 def test_learning_mode_per_evidence_and_preference():
     assert learning_mode(Evidence(4, 0, [0, 0, 0, 0]), 0.3) == "foundation"
     assert learning_mode(Evidence(6, 6, [1] * 6), 0.9) == "advanced"
-    assert learning_mode(Evidence(6, 6, [1] * 6, hints=6), 0.9) == "independent"  # hints lower it
+    hinted = Evidence(6, 6, [1] * 6, hints=6, recent_hints=[1] * 6)
+    assert learning_mode(hinted, 0.9) == "independent"  # recent hints lower it
+    old_hints = Evidence(12, 12, [1] * 10, hints=4, recent_hints=[1] * 4 + [0] * 6)
+    assert learning_mode(old_hints, 0.9) == "advanced"  # hints long ago no longer count
     assert learning_mode(Evidence(4, 2, [1, 0, 1, 0]), 0.5, "challenge") == "independent"
     assert learning_mode(Evidence(0, 0, []), None) == "guided"
 

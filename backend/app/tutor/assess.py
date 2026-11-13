@@ -1,13 +1,14 @@
-"""Assessments: the diagnostic, a single-skill check, and reassessment with fresh questions.
+"""Assessments: the diagnostic (placement check), a single-skill check, and reassessment with
+fresh questions. Every assessment belongs to one subject.
 
-- Overall diagnostic: one question in each of `diagnostic_length` core skills, spread across
-  domains and grades, using rated MEDIUM questions (the most informative difficulty), easiest
-  grade first. A small random choice among comparable questions means two students don't get
-  identical tests.
+- Diagnostic: adaptive, one question at a time across the subject's core skills (see
+  choose_diagnostic_item). It starts near the student's grade (grade - 1, at least 3).
 - Skill check: several questions from one chosen skill, easy -> hard.
 - Reassessment: only questions the student has NEVER seen, so improvement is measured on
-  fresh material. It compares the student's initial observed accuracy in the skill with the
-  reassessment, and shows the model's estimate separately.
+  fresh material. It needs at least state.CHECK_MIN_FRESH of them (`state.can_check`, the same
+  rule every "Take the short check" button uses); a skill with fewer left is completed by the
+  mastery rule instead (state.refresh). It compares the student's initial observed accuracy in the skill (single-skill
+  answers only) with the reassessment, and shows the model's estimate separately.
 Immediate feedback (correct or not, plus the correct answer) is given after every answer.
 """
 
@@ -22,7 +23,7 @@ from sqlalchemy.orm import Session
 
 from app.core.config import get_settings
 from app.core.errors import AppError
-from app.db.models import User
+from app.db.models import Subject, User
 from app.tutor import engine, kt, recommend, state
 from app.tutor import profile as profile_service
 from app.tutor.models import (
@@ -32,24 +33,23 @@ from app.tutor.models import (
     Skill,
     SkillPrerequisite,
     SkillState,
+    StudentProfile,
 )
+from app.tutor.subjects import meta as subject_meta
 
 _rng = random.SystemRandom()
-CORE_MIN_ITEMS = 20
 DIFF_ORDER = {"easy": 0, "medium": 1, "hard": 2, "unrated": 1}
+MAX_PREREQ_PROBES = 2
+OUTCOME_MESSAGES = {
+    "improved": "Great work! You've shown you can do this skill.",
+    "progressing": "You're improving. A bit more practice will make it solid.",
+    "not_improved": "Let's practise a bit more with step-by-step questions.",
+}
 
 
 def _pick(cands: list[Item], target_rate: float = 0.6, k: int = 3) -> Item:
     ranked = sorted(cands, key=lambda i: abs((i.success_rate or 0.6) - target_rate))
     return _rng.choice(ranked[:k])
-
-
-MAX_PREREQ_PROBES = 2
-MAX_REVISION_DAYS = 60
-
-
-def revision_interval(stage: int, cfg) -> int:
-    return min(cfg.revision_after_days * 2**stage, MAX_REVISION_DAYS)
 
 
 def _info(p: float) -> float:
@@ -62,22 +62,34 @@ def _diagnostic_candidates(
     db: Session, user: User, asked_codes: set[str], skills: list[Skill]
 ) -> list[tuple[Skill, Item]]:
     """One representative unseen question per candidate skill: a rated medium question if
-    possible (closest to 60% historical success), else any rated one."""
+    possible (closest to 60% historical success), else any rated one. One query for all."""
+    skills = [s for s in skills if s.code not in asked_codes]  # one question per standard
+    if not skills:
+        return []
     seen = engine.attempted_item_ids(db, user.id)
+    by_skill: dict[int, list[Item]] = {}
+    for i in db.scalars(engine.usable_items(db).where(Item.skill_id.in_([s.id for s in skills]))):
+        if i.id not in seen and i.difficulty != "unrated":
+            by_skill.setdefault(i.skill_id, []).append(i)
     out = []
     for s in skills:
-        if s.code in asked_codes:
-            continue  # one question per standard
-        pool = [
-            i
-            for i in db.scalars(engine.usable_items(db, s.id))
-            if i.id not in seen and i.difficulty != "unrated"
-        ]
+        pool = by_skill.get(s.id)
         if not pool:
             continue
         medium = [i for i in pool if i.difficulty == "medium"] or pool
         out.append((s, _pick(medium)))
     return out
+
+
+def start_grade(grade: int | None, grades: list[int]) -> int | None:
+    """The grade the diagnostic starts at: one below the student's grade (at least 3), or
+    the nearest available grade; the lowest grade when the student isn't sure."""
+    if not grades:
+        return None
+    if grade is None:
+        return min(grades)
+    want = max(3, grade - 1)
+    return min(grades, key=lambda g: (abs(g - want), g))
 
 
 def choose_diagnostic_item(db: Session, user: User, a: Assessment) -> tuple[Item, dict]:
@@ -87,15 +99,17 @@ def choose_diagnostic_item(db: Session, user: User, a: Assessment) -> tuple[Item
        checked, check the building block next (at most MAX_PREREQ_PROBES times).
     2. Otherwise cover the curriculum: only domains asked least so far are eligible, and among
        them the model picks the question it is LEAST sure about (predicted success closest to
-       50%), which is the most informative one. Before any answer exists, the first question
-       is a typical-difficulty question from the lowest grade.
-    The reason for every choice is stored and shown on the diagnosis page.
+       50%), which is the most informative one. Before any answer exists in the subject, the
+       first question is a typical-difficulty question near the student's grade.
+    The reason for every choice is stored (plain `how` + `technical`).
     """
+    subject = db.get(Subject, a.subject_id)
     trace = list((a.result or {}).get("trace", []))
     asked = [db.get(Item, i) for i in a.planned_item_ids]
     asked_skills = [db.get(Skill, i.skill_id) for i in asked if i]
     asked_codes = {s.code for s in asked_skills}
     probes = sum(1 for t in trace if t.get("kind") == "prerequisite")
+    plain = "This question helps us find your level."
 
     last = db.scalar(
         select(Interaction)
@@ -109,7 +123,11 @@ def choose_diagnostic_item(db: Session, user: User, a: Assessment) -> tuple[Item
             db.scalars(
                 select(Skill)
                 .join(SkillPrerequisite, SkillPrerequisite.prerequisite_id == Skill.id)
-                .where(SkillPrerequisite.skill_id == missed.id, Skill.is_available)
+                .where(
+                    SkillPrerequisite.skill_id == missed.id,
+                    Skill.is_available,
+                    Skill.subject_id == a.subject_id,
+                )
                 .order_by(Skill.grade, Skill.code)
             )
         )
@@ -120,6 +138,7 @@ def choose_diagnostic_item(db: Session, user: User, a: Assessment) -> tuple[Item
                 "kind": "prerequisite",
                 "skill_id": skill.id,
                 "skill": skill.name,
+                "how": "A building block of the last question, to see where to start.",
                 "reason": f"You missed the {missed.name} question, so MENTORX checks one of its "
                 f"building blocks ({skill.code}) before moving on.",
             }
@@ -127,7 +146,11 @@ def choose_diagnostic_item(db: Session, user: User, a: Assessment) -> tuple[Item
     core = list(
         db.scalars(
             select(Skill)
-            .where(Skill.is_available, Skill.n_items >= CORE_MIN_ITEMS)
+            .where(
+                Skill.subject_id == a.subject_id,
+                Skill.is_available,
+                Skill.n_items >= subject_meta(subject.code)["core_min_items"],
+            )
             .order_by(Skill.grade, Skill.code)
         )
     )
@@ -140,8 +163,8 @@ def choose_diagnostic_item(db: Session, user: User, a: Assessment) -> tuple[Item
     least = min(per_domain.get(s.domain_code, 0) for s, _ in cands)
     cands = [(s, i) for s, i in cands if per_domain.get(s.domain_code, 0) == least]
 
-    h = kt.state_for(db, user.id)
-    preds = kt.predict_items(h, [i for _, i in cands])
+    h = kt.state_for(db, user.id, subject.id, subject.code)
+    preds = kt.predict_items(h, [i for _, i in cands], code=subject.code)
     if preds and preds[0] is not None:
         ranked = sorted(zip(cands, preds, strict=True), key=lambda cp: -_info(cp[1]))
         (skill, item), p = _rng.choice(ranked[:2])
@@ -150,49 +173,24 @@ def choose_diagnostic_item(db: Session, user: User, a: Assessment) -> tuple[Item
             "skill_id": skill.id,
             "skill": skill.name,
             "predicted_p": p,
+            "how": plain,
             "reason": f"The model was least sure how you'd do on {skill.domain_name} "
             f"(predicted success {round(100 * p)}%), so this question tells us the most.",
         }
-    lowest = min(s.grade or 99 for s, _ in cands)
-    first = [(s, i) for s, i in cands if (s.grade or 99) == lowest]
+    prof = db.get(StudentProfile, user.id)
+    grades = sorted({s.grade for s, _ in cands if s.grade is not None})
+    g = start_grade(prof.grade if prof else None, grades)
+    first = [(s, i) for s, i in cands if s.grade == g] or cands
     skill, item = _rng.choice(first)
+    level = f"grade-{g} " if g is not None else ""
     return item, {
         "kind": "start",
         "skill_id": skill.id,
         "skill": skill.name,
-        "reason": f"A typical grade-{lowest} question to start with "
+        "how": plain,
+        "reason": f"A typical {level}question to start with "
         f"({round(100 * (item.success_rate or 0.6))}% of students got it right first time).",
     }
-
-
-def plan_diagnostic(db: Session, n: int) -> list[int]:
-    """Fixed (non-adaptive) diagnostic plan. Kept for reference and tests; the app now uses
-    choose_diagnostic_item, which picks each question after seeing the previous answers."""
-    core = list(
-        db.scalars(select(Skill).where(Skill.is_available, Skill.n_items >= CORE_MIN_ITEMS))
-    )
-    by_domain: dict[str, list[Skill]] = {}
-    for s in sorted(core, key=lambda s: (s.grade or 0, -s.n_items)):
-        by_domain.setdefault(s.domain_code, []).append(s)
-    chosen: list[Skill] = []
-    codes: set[str] = set()
-    while len(chosen) < n and any(by_domain.values()):
-        for dom in list(by_domain):
-            while by_domain[dom] and by_domain[dom][0].code in codes:
-                by_domain[dom].pop(0)  # one skill per standard code
-            if by_domain[dom] and len(chosen) < n:
-                s = by_domain[dom].pop(0)
-                chosen.append(s)
-                codes.add(s.code)
-    items = []
-    for s in sorted(chosen, key=lambda s: (s.grade or 0, s.code)):
-        cands = list(db.scalars(engine.usable_items(db, s.id).where(Item.difficulty == "medium")))
-        cands = cands or list(
-            db.scalars(engine.usable_items(db, s.id).where(Item.difficulty != "unrated"))
-        )
-        if cands:
-            items.append(_pick(cands).id)
-    return items
 
 
 def plan_skill(
@@ -204,8 +202,10 @@ def plan_skill(
         for i in db.scalars(engine.usable_items(db, skill_id))
         if i.id not in seen or not fresh_only
     ]
-    rated = [i for i in pool if i.difficulty != "unrated"] or pool
+    rated = [i for i in pool if i.difficulty != "unrated"]
     _rng.shuffle(rated)
+    unrated = [i for i in pool if i.difficulty == "unrated"]
+    _rng.shuffle(unrated)
     # a spread of difficulties: mostly medium, at least one easy and one hard when available
     want = ["easy", "medium", "medium", "hard", "medium", "easy", "hard", "medium"] * 3
     picked: list[Item] = []
@@ -215,7 +215,7 @@ def plan_skill(
         nxt = next((i for i in rated if i.difficulty == d and i not in picked), None)
         if nxt:
             picked.append(nxt)
-    for i in rated:  # top up if a level ran out
+    for i in [*rated, *unrated]:  # top up if a level ran out (unrated questions last)
         if len(picked) >= n:
             break
         if i not in picked:
@@ -236,31 +236,48 @@ def _own(db: Session, user: User, assessment_id: uuid.UUID, lock: bool = False) 
     return a
 
 
+def available_skill(db: Session, skill_id: int | None) -> Skill:
+    """A skill that can be served now: available and in an active subject."""
+    skill = db.get(Skill, skill_id) if skill_id is not None else None
+    if skill is None or not skill.is_available:
+        raise AppError(404, "skill_not_found", "That skill isn't available.")
+    subject = db.get(Subject, skill.subject_id)
+    if subject is None or not subject.is_active:
+        raise AppError(404, "skill_not_found", "That skill isn't available.")
+    return skill
+
+
 def start(db: Session, user: User, kind: str, skill_id: int | None) -> Assessment:
     cfg = get_settings()
-    prof = profile_service.require(db, user)
+    profile_service.require(db, user)
     active = db.scalar(
         select(Assessment)
         .where(Assessment.user_id == user.id, Assessment.status == "active")
         .with_for_update()
     )
+    skill = None
+    if kind != "diagnostic":
+        skill = available_skill(db, skill_id)
+        subject = db.get(Subject, skill.subject_id)
+    else:
+        subject = profile_service.current_subject(db, user)
     if active:
-        if active.kind == kind and active.skill_id == skill_id:
+        if active.kind == kind and active.skill_id == skill_id and active.subject_id == subject.id:
             return active  # resume
         active.status = "abandoned"
         active.completed_at = engine.now()
-    skill = None
-    if kind != "diagnostic":
-        skill = db.get(Skill, skill_id) if skill_id else None
-        if skill is None or not skill.is_available:
-            raise AppError(404, "skill_not_found", "That skill isn't available.")
+    profile_service.enroll(db, user, subject)
     target_n = None
     if kind == "diagnostic":
         planned, target_n = [], cfg.diagnostic_length  # chosen one at a time (adaptive)
         n_core = db.scalar(
             select(func.count())
             .select_from(Skill)
-            .where(Skill.is_available, Skill.n_items >= CORE_MIN_ITEMS)
+            .where(
+                Skill.subject_id == subject.id,
+                Skill.is_available,
+                Skill.n_items >= subject_meta(subject.code)["core_min_items"],
+            )
         )
         if not n_core:
             raise AppError(409, "no_content", "There are no questions available yet.")
@@ -269,7 +286,7 @@ def start(db: Session, user: User, kind: str, skill_id: int | None) -> Assessmen
         planned = plan_skill(db, user.id, skill.id, cfg.skill_check_length, fresh_only=True)
     else:
         planned = plan_skill(db, user.id, skill.id, cfg.reassessment_length, fresh_only=True)
-        if len(planned) < 3:
+        if len(planned) < state.CHECK_MIN_FRESH:
             raise AppError(
                 409,
                 "not_enough_fresh_questions",
@@ -287,7 +304,7 @@ def start(db: Session, user: User, kind: str, skill_id: int | None) -> Assessmen
         }
     a = Assessment(
         user_id=user.id,
-        subject_id=prof.subject_id,
+        subject_id=subject.id,
         kind=kind,
         skill_id=skill.id if skill else None,
         planned_item_ids=planned,
@@ -302,10 +319,12 @@ def start(db: Session, user: User, kind: str, skill_id: int | None) -> Assessmen
 
 def to_out(db: Session, a: Assessment) -> dict:
     skill = db.get(Skill, a.skill_id) if a.skill_id else None
+    subject = db.get(Subject, a.subject_id)
     return {
         "id": a.id,
         "kind": a.kind,
         "status": a.status,
+        "subject": {"code": subject.code, "name": subject.name} if subject else None,
         "skill": {"id": skill.id, "name": skill.name, "code": skill.code} if skill else None,
         "answered": a.answered_count,
         "correct": a.correct_count,
@@ -320,6 +339,7 @@ def next_item(db: Session, user: User, assessment_id: uuid.UUID) -> dict:
     a = _own(db, user, assessment_id, lock=True)
     if a.status != "active":
         raise AppError(409, "assessment_closed", "This assessment has finished.")
+    subject = db.get(Subject, a.subject_id)
     if a.current_item_id is None:
         if a.answered_count >= a.target_count:
             raise AppError(409, "assessment_complete", "No questions left.")
@@ -337,17 +357,29 @@ def next_item(db: Session, user: User, assessment_id: uuid.UUID) -> dict:
             if not remaining:
                 raise AppError(409, "assessment_complete", "No questions left.")
             item = db.get(Item, remaining[0])
-        h = kt.state_for(db, user.id)
+        h = kt.state_for(db, user.id, subject.id, subject.code)
         a.current_item_id = item.id
         a.current_served_at = engine.now()
-        a.current_predicted_p = kt.predict_items(h, [item])[0]
+        a.current_predicted_p = kt.predict_items(h, [item], code=subject.code)[0]
         db.commit()
     item = db.get(Item, a.current_item_id)
     out = engine.public_item(db, item, a.answered_count + 1, a.target_count)
     if a.kind == "diagnostic":
         trace = (a.result or {}).get("trace", [])
         why = next((t for t in reversed(trace) if t.get("item_id") == item.id), None)
-        out["selection"] = {"how": why["reason"]} if why else None
+        out["selection"] = (
+            {
+                "how": why.get("how") or "This question helps us find your level.",
+                "technical": why.get("reason"),
+            }
+            if why
+            else None
+        )
+    else:
+        out["selection"] = {
+            "how": "A fresh question from this skill, from easier to harder.",
+            "technical": None,
+        }
     return out
 
 
@@ -355,9 +387,9 @@ def answer(db: Session, user: User, assessment_id: uuid.UUID, item_id: int, resp
     a = _own(db, user, assessment_id, lock=True)
     if a.status != "active":
         raise AppError(409, "assessment_closed", "This assessment has finished.")
-    if a.current_item_id != item_id:
+    if not engine.is_current(db, a.current_item_id, item_id):
         raise AppError(409, "question_mismatch", "That isn't the question currently shown.")
-    item = db.get(Item, item_id)
+    item = db.get(Item, a.current_item_id)
     inter = engine.record(
         db,
         user.id,
@@ -376,7 +408,7 @@ def answer(db: Session, user: User, assessment_id: uuid.UUID, item_id: int, resp
     if complete:
         result = finish(db, user, a)
     else:
-        state.refresh(db, user.id)
+        state.refresh(db, user.id, a.subject_id)
     db.commit()
     return {
         "interaction_id": inter.id,
@@ -396,8 +428,9 @@ def finish(db: Session, user: User, a: Assessment) -> dict:
     cfg = get_settings()
     t = engine.now()
     a.status, a.completed_at = "completed", t
-    states = state.refresh(db, user.id, t)
-    prof = profile_service.require(db, user)
+    states = state.refresh(db, user.id, a.subject_id, t)
+    profile_service.require(db, user)
+    subject = db.get(Subject, a.subject_id)
     result = dict(a.result or {})
     result.update(
         {
@@ -407,33 +440,32 @@ def finish(db: Session, user: User, a: Assessment) -> dict:
         }
     )
     if a.kind == "diagnostic":
-        prof.diagnostic_completed_at = prof.diagnostic_completed_at or t
+        profile_service.mark_diagnostic_done(db, user, subject, t)
         counts: dict[str, int] = {}
         for st in states.values():
             counts[st.status] = counts.get(st.status, 0) + 1
         result["status_counts"] = counts
         trigger = "diagnostic"
     elif a.kind == "skill_check":
-        prof.diagnostic_completed_at = prof.diagnostic_completed_at or t
+        profile_service.mark_diagnostic_done(db, user, subject, t)
         trigger = "skill_check"
     else:
         result.update(_reassessment_outcome(db, user.id, a, states.get(a.skill_id), cfg))
         trigger = "reassessment"
     a.result = result
-    recommend.generate(db, user.id, trigger, t)
+    recommend.generate(db, user.id, trigger, t, a.subject_id)
     return result
 
 
-def _reassessment_outcome(
-    db: Session, user_id: uuid.UUID, a: Assessment, st: SkillState | None, cfg
-) -> dict:
-    """Initial observed accuracy (first answers in the skill, before this reassessment) vs now."""
-    before_rows = (
+def initial_accuracy_rows(db: Session, user_id: uuid.UUID, a: Assessment) -> list[bool]:
+    """The student's first (up to 5) single-skill answers in the skill before this check."""
+    return list(
         db.execute(
             select(Interaction.is_correct)
             .where(
                 Interaction.user_id == user_id,
                 Interaction.skill_id == a.skill_id,
+                Interaction.n_skills == 1,  # mixed answers are never per-skill evidence
                 Interaction.created_at < a.started_at,
             )
             .order_by(Interaction.created_at, Interaction.id)
@@ -442,9 +474,17 @@ def _reassessment_outcome(
         .scalars()
         .all()
     )
+
+
+def _reassessment_outcome(
+    db: Session, user_id: uuid.UUID, a: Assessment, st: SkillState | None, cfg
+) -> dict:
+    """Initial observed accuracy (first answers in the skill, before this reassessment) vs now."""
+    before_rows = initial_accuracy_rows(db, user_id, a)
     initial = sum(before_rows) / len(before_rows) if before_rows else None
     recent = a.correct_count / max(a.answered_count, 1)
-    if recent >= cfg.reassessment_pass or (
+    passed = recent >= cfg.reassessment_pass
+    if passed or (
         recent >= 0.7 and initial is not None and recent - initial >= cfg.improvement_margin
     ):
         outcome = "improved"
@@ -455,25 +495,33 @@ def _reassessment_outcome(
     if st is not None:
         st.reassessed_accuracy = recent
         now = engine.now()
-        was_revision = bool(st.completed_at and st.revision_due_at and st.revision_due_at <= now)
-        if recent >= cfg.reassessment_pass:
-            # spaced revision: each successful review doubles the gap (7, 14, 28, 56 days)
-            st.revision_stage = (st.revision_stage + 1) if was_revision else 0
+        was_completed = st.completed_at is not None
+        was_due = bool(st.revision_due_at and st.revision_due_at <= now)
+        if passed:
+            if was_completed and was_due:
+                st.revision_stage = (st.revision_stage or 0) + 1  # a successful review
+            # an early (not-due) pass keeps the stage; a first completion starts at stage 0
             st.completed_at = st.completed_at or now
-            st.revision_due_at = now + timedelta(days=revision_interval(st.revision_stage, cfg))
-        elif was_revision:
-            st.revision_stage = 0  # the review showed it needs work: keep it due
+            st.revision_due_at = now + timedelta(days=state.review_interval(st.revision_stage))
+            if st.mode_override == "foundation":
+                st.mode_override = None  # the step-by-step period ends with a passed check
+        else:
+            if was_completed:
+                st.completed_at = None  # no longer shown as completed
+                st.revision_stage = 0
+                st.revision_due_at = now + timedelta(days=1)
         if outcome == "not_improved":
-            st.mode_override = None  # let the evidence-based mode step down to more support
+            st.mode_override = "foundation"  # step-by-step until the next passed check
     before = (a.result or {}).get("before", {})
     return {
         "initial_accuracy": initial,
         "initial_attempts": len(before_rows),
         "reassessment_accuracy": recent,
         "outcome": outcome,
+        "message": OUTCOME_MESSAGES[outcome],
         "predicted_before": before.get("predicted_p"),
         "predicted_after": st.predicted_p if st else None,
-        "completed": bool(st and st.completed_at and recent >= cfg.reassessment_pass),
+        "completed": bool(st and st.completed_at and passed),
         "revision_due_at": st.revision_due_at.isoformat() if st and st.revision_due_at else None,
     }
 

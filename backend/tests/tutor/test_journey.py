@@ -95,8 +95,13 @@ def test_full_student_journey(client, math_keys, learner):
                 f"/api/v2/practice/{p['id']}/answer", json=answer_body(keys, q, True), headers=h
             )
             assert dup.status_code == 409
+        if r.json()["complete"]:
+            break
     assert r.json()["complete"] and r.json()["summary"]["next"]["action"]
     assert "medium" in levels or "hard" in levels, "correct streaks should raise the difficulty"
+    # all correct: the session stops early once the mastery rule holds (>= 5 answers)
+    assert r.json()["early_stop"]["reason"] == "mastered" and len(levels) >= 5
+    assert r.json()["summary"]["next"]["action"] == "reassess"
 
     # reassessment uses only fresh questions and compares with initial accuracy
     seen_all = {s for s in seen}
@@ -117,7 +122,7 @@ def test_full_student_journey(client, math_keys, learner):
     path = client.get("/api/v2/path", headers=h).json()
     assert any(s["skill"]["id"] == skill_id for s in path["completed"])
     analytics = client.get("/api/v2/analytics", headers=h).json()
-    assert analytics["totals"]["questions"] >= 10 + p["total"] + a["total"]
+    assert analytics["totals"]["questions"] >= 10 + len(levels) + a["total"]
     assert analytics["totals"]["resources_completed"] == 1
 
     # log out and back in: progress persists

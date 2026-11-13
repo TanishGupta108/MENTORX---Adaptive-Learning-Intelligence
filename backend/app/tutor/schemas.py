@@ -9,6 +9,7 @@ from pydantic import BaseModel, ConfigDict, Field, model_validator
 GoalType = Literal["assess_overall", "improve_weak", "learn_topic"]
 GoalKind = Literal["strengthen_skills", "weekly_practice", "master_skill"]
 Mode = Literal["foundation", "guided", "independent", "advanced"]
+Pace = Literal["more_support", "balanced", "challenge"]
 
 
 class Strict(BaseModel):
@@ -20,6 +21,9 @@ class OnboardingRequest(Strict):
     focus_skill_id: int | None = None
     goal_kind: GoalKind = "strengthen_skills"
     goal_target: int | None = Field(default=None, ge=1, le=500)
+    subject_code: str = Field(default="MATH", min_length=2, max_length=20)
+    grade: int | None = Field(default=None, ge=3, le=8)  # None = not sure
+    pace_preference: Pace | None = None
 
     @model_validator(mode="after")
     def topic_needs_skill(self) -> OnboardingRequest:
@@ -31,7 +35,8 @@ class OnboardingRequest(Strict):
 
 
 class ProfileUpdate(Strict):
-    pace_preference: Literal["more_support", "balanced", "challenge"] | None = None
+    pace_preference: Pace | None = None
+    grade: int | None = Field(default=None, ge=3, le=8)
     hints_enabled: bool | None = None
     goal_type: GoalType | None = None
     focus_skill_id: int | None = None
@@ -73,8 +78,16 @@ class AnswerRequest(Strict):
         }
 
 
+class SubjectChoice(Strict):
+    code: str = Field(min_length=2, max_length=20)
+
+
+class PaceSuggestionAnswer(Strict):
+    accept: bool
+
+
 class StartPractice(Strict):
-    kind: Literal["skill", "mixed"] = "skill"
+    kind: Literal["skill", "mixed", "review"] = "skill"
     skill_id: int | None = None
     guided: bool = False
 

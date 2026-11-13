@@ -1,22 +1,18 @@
-import { ArrowRight, BrainCircuit, CheckCircle2, Compass, GitBranch, Info, Route, Sparkles, X, Check } from "lucide-react";
+import { Link } from "react-router";
+import { ArrowRight, Check, Compass, X } from "lucide-react";
 import { tutor } from "../api/tutor";
 import type { Status, TraceStep } from "../api/tutor";
 import { useApi } from "../hooks/useApi";
-import { SkillCard } from "../components/SkillCard";
-import { RecommendationCard } from "./Dashboard";
-import { Button, Card, CardTitle, EmptyState, ErrorState, PageHeader, PageLoader, pct, Ring, STATUS_META } from "../components/ui";
+import { useProfile } from "../components/AppShell";
+import { Disclosure } from "../components/Disclosure";
+import { StartButton } from "../components/StartAction";
+import { Button, Card, EmptyState, ErrorState, ModelEstimate, PageHeader, PageLoader, STATUS_META, StatusBadge } from "../components/ui";
 
 const ORDER: Status[] = ["likely_strength", "developing", "potential_weakness", "needs_assessment"];
-const EXPLAIN: Record<Status, string> = {
-  likely_strength: "Your answers here were consistently right.",
-  developing: "A mix of right and wrong answers, or too little evidence to be sure.",
-  potential_weakness: "Your answers suggest this needs more practice.",
-  needs_assessment: "Not tested yet. We won't guess a weakness without evidence.",
-};
 
 const KIND_LABEL: Record<TraceStep["kind"], string> = {
   start: "Starting point",
-  model: "Most informative",
+  model: "Most useful next",
   prerequisite: "Building block",
 };
 
@@ -24,15 +20,12 @@ export function SelectionTrace({ steps }: { steps: TraceStep[] }) {
   return (
     <ol className="space-y-2">
       {steps.map((t) => (
-        <li key={t.position} className="flex gap-3 rounded-xl border border-line bg-surface-2/60 p-3">
+        <li key={t.position} className="flex gap-3 rounded-xl bg-surface-2/60 p-3">
           <span className="grid size-7 shrink-0 place-items-center rounded-full bg-surface-3 text-xs font-semibold">{t.position}</span>
           <div className="min-w-0 flex-1">
             <p className="flex flex-wrap items-center gap-2 text-sm font-medium">
               {t.skill}
-              <span className="inline-flex items-center gap-1 rounded-md bg-accent/10 px-1.5 py-0.5 text-[11px] font-medium text-accent">
-                {t.kind === "prerequisite" ? <GitBranch className="size-3" /> : <Route className="size-3" />}
-                {KIND_LABEL[t.kind]}
-              </span>
+              <span className="rounded-md bg-accent/10 px-1.5 py-0.5 text-[11px] font-medium text-accent">{KIND_LABEL[t.kind]}</span>
             </p>
             <p className="mt-0.5 text-xs text-ink-muted">{t.reason}</p>
           </div>
@@ -48,93 +41,85 @@ export function SelectionTrace({ steps }: { steps: TraceStep[] }) {
 }
 
 export function DiagnosisPage() {
-  const d = useApi(() => tutor.diagnosis(), []);
-  if (d.loading) return <PageLoader label="Analysing your answers…" />;
+  const { profile } = useProfile();
+  const d = useApi(() => tutor.diagnosis(), [profile.subject_code]);
+  if (d.loading && !d.data) return <PageLoader label="Looking at your answers…" />;
   if (d.error) return <ErrorState error={d.error} onRetry={d.reload} />;
   const data = d.data!;
   if (!data.assessment) {
     return (
-      <EmptyState icon={<Compass className="size-8" />} title="No assessment yet" action={<Button to="/assess/start?kind=diagnostic">Start the diagnostic</Button>}>
-        Take the diagnostic first, so MENTORX can build your learning profile.
+      <EmptyState icon={<Compass className="size-8" />} title="No placement check yet" action={<Button to="/assess/start?kind=diagnostic">Start the placement check</Button>}>
+        Take the short placement check first, so MENTORX knows where to start.
       </EmptyState>
     );
   }
-  const acc = data.assessment.answered ? data.assessment.correct / data.assessment.answered : 0;
 
   return (
     <div className="space-y-6">
-      <PageHeader eyebrow="AI skill diagnosis" title="Your learning profile is ready." subtitle={data.headline} actions={<Button to="/dashboard" icon={<ArrowRight className="size-4" />}>Go to my dashboard</Button>} />
-
-      <div className="grid gap-4 lg:grid-cols-[320px_1fr]">
-        <Card className="flex items-center gap-5">
-          <Ring value={acc} size={92} stroke={8} label={pct(acc)} />
-          <div>
-            <p className="text-sm text-ink-muted">Assessment result</p>
-            <p className="text-xl font-semibold">
-              {data.assessment.correct} of {data.assessment.answered} correct
-            </p>
-            <p className="mt-1 text-xs text-ink-faint">Observed in this assessment</p>
-          </div>
-        </Card>
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-          {ORDER.map((s) => (
-            <div key={s} className="rounded-2xl border border-line bg-surface p-4">
-              <span className={`inline-block size-2 rounded-full ${STATUS_META[s].dot}`} />
-              <p className="mt-2 text-2xl font-semibold">{data.counts[s] ?? 0}</p>
-              <p className="text-xs text-ink-muted">{STATUS_META[s].label}</p>
-            </div>
-          ))}
-        </div>
-      </div>
+      <PageHeader title="Your learning profile is ready." subtitle={data.headline} actions={<Button to="/home" icon={<ArrowRight className="size-4" />}>Go to Home</Button>} />
 
       <Card>
-        <CardTitle icon={<CheckCircle2 className="size-4" />} title="Skills you were assessed on" subtitle="Each label comes from your answers. The model estimate is shown separately and is a prediction, not a verified result." />
-        <div className="grid gap-3 md:grid-cols-2">
-          {data.assessed.map((s) => (
-            <SkillCard key={s.id} skill={s} explain={EXPLAIN[s.status]} />
+        <p className="text-lg font-semibold">
+          {data.assessment.correct} of {data.assessment.answered} correct
+        </p>
+        <ul className="mt-3 flex flex-wrap gap-x-5 gap-y-2 text-sm">
+          {ORDER.map((s) => (
+            <li key={s} className="flex items-center gap-2">
+              <span className={`size-2 rounded-full ${STATUS_META[s].dot}`} aria-hidden />
+              <span className="font-semibold">{data.counts[s] ?? 0}</span>
+              <span className="text-ink-muted">{STATUS_META[s].label}</span>
+            </li>
           ))}
-        </div>
+        </ul>
       </Card>
+
+      <section aria-labelledby="assessed">
+        <h2 id="assessed" className="mb-3 text-sm font-semibold uppercase tracking-wider text-ink-faint">
+          Skills in your check
+        </h2>
+        <ul className="divide-y divide-line/60 rounded-2xl border border-line bg-surface">
+          {data.assessed.map((s) => (
+            <li key={s.id} className="flex flex-col gap-2 px-4 py-3 sm:flex-row sm:items-center sm:gap-3">
+              <Link to={`/skills/${s.id}`} className="min-w-0 flex-1 font-medium hover:text-brand">
+                {s.name}
+                <span className="block text-sm font-normal text-ink-muted">
+                  {s.correct} of {s.attempts} correct
+                </span>
+              </Link>
+              <div className="flex items-center justify-between gap-3">
+                <StatusBadge status={s.status} />
+                <StartButton action={{ endpoint: "practice", skill_id: s.id, guided: s.status !== "likely_strength" }} variant="secondary" size="sm" />
+              </div>
+            </li>
+          ))}
+        </ul>
+      </section>
 
       {data.selection_trace.length > 0 && (
-        <Card>
-          <CardTitle
-            icon={<Route className="size-4" />}
-            title="How MENTORX chose your questions"
-            subtitle="The diagnostic adapts: after each answer the model picks the question it is least sure about, and a wrong answer leads to a check of a curated building block."
-          />
+        <Disclosure title="How were the questions chosen?">
+          <p className="mb-3 text-sm text-ink-muted">The check adapts: after each answer it picks the question that tells us the most, and a wrong answer leads to a check of a building block.</p>
           <SelectionTrace steps={data.selection_trace} />
-        </Card>
+        </Disclosure>
       )}
 
-      {data.recommendations.length > 0 && (
-        <Card>
-          <CardTitle icon={<Sparkles className="size-4" />} title="Recommended for you" subtitle="Where to start, and why" />
-          <div className="grid gap-3 lg:grid-cols-3">
-            {data.recommendations.map((r) => (
-              <RecommendationCard key={r.skill.id} rec={r} />
+      {data.model_estimates_for_unassessed.length > 0 && (
+        <Disclosure title="Predictions for skills you haven't tried">
+          <p className="mb-3 text-sm text-ink-muted">These skills stay &quot;{STATUS_META.needs_assessment.label}&quot; until you answer questions in them. The model&apos;s guess is shown only as a hint of where to look next.</p>
+          <ul className="space-y-1">
+            {data.model_estimates_for_unassessed.map((s) => (
+              <li key={s.id}>
+                <Link to={`/skills/${s.id}`} className="flex min-h-11 flex-wrap items-center justify-between gap-2 rounded-xl px-3 py-2 hover:bg-surface-2">
+                  <span className="font-medium">{s.name}</span>
+                  <span className="flex items-center gap-3">
+                    <StatusBadge status={s.status} />
+                    <ModelEstimate p={s.predicted_p} />
+                  </span>
+                </Link>
+              </li>
             ))}
-          </div>
-        </Card>
+          </ul>
+        </Disclosure>
       )}
-
-      <Card>
-        <CardTitle icon={<BrainCircuit className="size-4" />} title="Skills that need assessment" subtitle={`${data.counts.needs_assessment ?? 0} skills haven't been tested yet, so they stay "Needs Assessment" whatever the model predicts.`} />
-        {data.model_estimates_for_unassessed.length > 0 ? (
-          <>
-            <p className="mb-3 flex items-center gap-2 text-sm text-ink-muted">
-              <Info className="size-4 text-accent" /> From your answers so far, the {data.model.display_name ?? "model"} expects these could be your harder topics. A short skill check would confirm it.
-            </p>
-            <div className="grid gap-3 md:grid-cols-2">
-              {data.model_estimates_for_unassessed.map((s) => (
-                <SkillCard key={s.id} skill={s} />
-              ))}
-            </div>
-          </>
-        ) : (
-          <p className="text-sm text-ink-muted">{data.model.available ? "No model estimates yet." : "The model isn't available right now. Only your observed results are shown."}</p>
-        )}
-      </Card>
     </div>
   );
 }

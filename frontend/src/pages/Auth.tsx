@@ -26,7 +26,7 @@ function AuthShell({ title, subtitle, children, footer }: { title: string; subti
 
 /** Only allow redirects to paths inside the app (no open redirect). */
 function safeNext(next: string | null) {
-  return next && next.startsWith("/") && !next.startsWith("//") ? next : "/dashboard";
+  return next && next.startsWith("/") && !next.startsWith("//") ? next : "/home";
 }
 
 export function LoginPage() {

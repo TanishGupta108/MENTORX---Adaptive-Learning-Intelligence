@@ -9,7 +9,7 @@ from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 from app.core.errors import AppError
-from app.db.models import User
+from app.db.models import Subject, User
 from app.tutor import kt
 from app.tutor import resources as res_service
 from app.tutor.html import plain_text
@@ -23,39 +23,67 @@ def require_admin(user: User) -> None:
         raise AppError(403, "forbidden", "Admins only.")
 
 
-def overview(db: Session) -> dict:
+def subject_for(db: Session, code: str | None) -> Subject:
+    """The subject an admin page is about (any seeded subject, active or not)."""
+    s = db.scalar(select(Subject).where(Subject.code == (code or "MATH").upper()))
+    if s is None:
+        raise AppError(404, "subject_not_found", "That subject hasn't been loaded.")
+    return s
+
+
+def overview(db: Session, code: str = "MATH") -> dict:
+    subject = subject_for(db, code)
+    in_subject = Item.subject_id == subject.id
     reasons = db.execute(
         select(Item.exclusion_reason, func.count())
+        .where(in_subject)
         .group_by(Item.exclusion_reason)
         .order_by(func.count().desc())
     ).all()
+    subject_skills = select(Skill.id).where(Skill.subject_id == subject.id)
     return {
-        "skills": db.scalar(select(func.count()).select_from(Skill)),
-        "available_skills": db.scalar(
-            select(func.count()).select_from(Skill).where(Skill.is_available)
+        "subject": {"code": subject.code, "name": subject.name, "is_active": subject.is_active},
+        "skills": db.scalar(
+            select(func.count()).select_from(Skill).where(Skill.subject_id == subject.id)
         ),
-        "items": db.scalar(select(func.count()).select_from(Item)),
+        "available_skills": db.scalar(
+            select(func.count())
+            .select_from(Skill)
+            .where(Skill.subject_id == subject.id, Skill.is_available)
+        ),
+        "items": db.scalar(select(func.count()).select_from(Item).where(in_subject)),
         "usable_items": db.scalar(
             select(func.count())
             .select_from(Item)
-            .where(Item.is_active, Item.exclusion_reason.is_(None))
+            .where(in_subject, Item.is_active, Item.exclusion_reason.is_(None))
         ),
         "usable_mixed_items": db.scalar(
             select(func.count())
             .select_from(Item)
-            .where(Item.is_active, Item.exclusion_reason.is_(None), Item.n_skills > 1)
+            .where(in_subject, Item.is_active, Item.exclusion_reason.is_(None), Item.n_skills > 1)
         ),
         "disabled_by_admin": db.scalar(
-            select(func.count()).select_from(Item).where(~Item.is_active)
+            select(func.count()).select_from(Item).where(in_subject, ~Item.is_active)
         ),
         "exclusions": [{"reason": r or "usable", "count": n} for r, n in reasons],
-        "resources": db.scalar(select(func.count()).select_from(Resource)),
-        "prerequisites": db.scalar(select(func.count()).select_from(SkillPrerequisite)),
+        "resources": db.scalar(
+            select(func.count()).select_from(Resource).where(Resource.skill_id.in_(subject_skills))
+        ),
+        "prerequisites": db.scalar(
+            select(func.count())
+            .select_from(SkillPrerequisite)
+            .where(SkillPrerequisite.skill_id.in_(subject_skills))
+        ),
     }
 
 
-def skills(db: Session, q: str | None) -> list[dict]:
-    stmt = select(Skill).order_by(Skill.grade, Skill.code, Skill.id)
+def skills(db: Session, q: str | None, code: str = "MATH") -> list[dict]:
+    subject = subject_for(db, code)
+    stmt = (
+        select(Skill)
+        .where(Skill.subject_id == subject.id)
+        .order_by(Skill.grade, Skill.code, Skill.id)
+    )
     if q:
         like = f"%{q.strip()[:60]}%"
         stmt = stmt.where(Skill.name.ilike(like) | Skill.code.ilike(like))
@@ -243,7 +271,7 @@ def _metrics(p: np.ndarray, y: np.ndarray) -> dict:
     return out
 
 
-def model_monitor(db: Session) -> dict:
+def model_monitor(db: Session, code: str = "MATH") -> dict:
     """How well the served model predicts REAL students' answers in this app.
 
     Every prediction is stored before the answer is seen, so this is an honest out-of-sample
@@ -252,15 +280,18 @@ def model_monitor(db: Session) -> dict:
     success rate, which narrows the spread of predictions and usually lowers AUC compared
     with the offline test set.
     """
+    subject = subject_for(db, code)
     rows = db.execute(
         select(
             Interaction.predicted_p,
             Interaction.model_label,
             Interaction.context,
             Interaction.n_skills,
-        ).where(Interaction.predicted_p.is_not(None))
+        )
+        .join(Item, Item.id == Interaction.item_id)
+        .where(Interaction.predicted_p.is_not(None), Item.subject_id == subject.id)
     ).all()
-    info = kt.info()
+    info = kt.info(subject.code)
     if not rows:
         return {
             "model": info.__dict__,

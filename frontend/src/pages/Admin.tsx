@@ -1,18 +1,59 @@
 import { useState } from "react";
 import { Navigate } from "react-router";
-import { Plus, Trash2 } from "lucide-react";
+import { Bot, Plus, Trash2 } from "lucide-react";
 import { ApiError } from "../api/client";
 import { adminApi } from "../api/tutor";
-import type { AdminSkill } from "../api/tutor";
+import type { AdminSkill, AiTest } from "../api/tutor";
 import { useApi } from "../hooks/useApi";
-import { useProfile } from "../components/AppShell";
+import { useProfile, useSubjects } from "../components/AppShell";
 import { AiTexts, ModelMonitor } from "../components/AdminMonitor";
 import { Button, Card, CardTitle, cx, ErrorState, Field, inputClass, PageHeader, Spinner, Stat } from "../components/ui";
 
 const TABS = ["Overview", "Model monitor", "AI tutor", "Skills & questions", "Resources", "Prerequisites"] as const;
 
-function Overview() {
-  const o = useApi(() => adminApi.overview(), []);
+function TestAi() {
+  const [busy, setBusy] = useState(false);
+  const [res, setRes] = useState<AiTest | null>(null);
+  const [err, setErr] = useState<string>();
+  async function run() {
+    setBusy(true);
+    setErr(undefined);
+    setRes(null);
+    try {
+      setRes(await adminApi.testAi());
+    } catch (e) {
+      setErr(e instanceof ApiError ? e.message : "The test request failed.");
+    } finally {
+      setBusy(false);
+    }
+  }
+  return (
+    <Card>
+      <CardTitle title="Test the AI tutor" subtitle="Sends a tiny prompt through the same model chain the students use. The key is never shown." />
+      <Button onClick={run} loading={busy} icon={<Bot className="size-4" />}>
+        {busy ? "Testing… up to a minute" : "Test AI"}
+      </Button>
+      {res && (
+        <div className={cx("mt-4 rounded-xl border p-3 text-sm", res.ok ? "border-strength/40 bg-strength/8" : "border-weakness/40 bg-weakness/8")} role="status">
+          <p className="font-medium">{res.ok ? "OK: the AI tutor answered." : "Not working."}</p>
+          <p className="mt-1 text-ink-muted">{res.message}</p>
+          <p className="mt-1 text-xs text-ink-faint">
+            Model: {res.model ?? "—"} · Time: {res.latency_ms === null ? "—" : `${(res.latency_ms / 1000).toFixed(1)} s`}
+            {res.error_code ? ` · Error: ${res.error_code}` : ""}
+          </p>
+        </div>
+      )}
+      {err && (
+        <p className="mt-3 text-sm text-danger" role="alert">
+          {err}
+        </p>
+      )}
+    </Card>
+  );
+}
+
+function Overview({ subject }: { subject: string }) {
+  const o = useApi(() => adminApi.overview(subject), [subject]);
   if (o.loading) return <Spinner />;
   if (o.error) return <ErrorState error={o.error} onRetry={o.reload} />;
   const d = o.data!;
@@ -40,10 +81,10 @@ function Overview() {
   );
 }
 
-function SkillsTab() {
+function SkillsTab({ subject }: { subject: string }) {
   const [q, setQ] = useState("");
   const [query, setQuery] = useState("");
-  const skills = useApi(() => adminApi.skills(query), [query]);
+  const skills = useApi(() => adminApi.skills(query, subject), [query, subject]);
   const [sel, setSel] = useState<AdminSkill | null>(null);
   const [desc, setDesc] = useState("");
   const items = useApi(() => (sel ? adminApi.items(sel.id) : Promise.resolve([])), [sel?.id]);
@@ -199,11 +240,33 @@ function PrereqTab() {
 
 export function AdminPage() {
   const { profile } = useProfile();
+  const { subjects } = useSubjects();
   const [tab, setTab] = useState<(typeof TABS)[number]>("Overview");
-  if (!profile.is_admin) return <Navigate to="/dashboard" replace />;
+  const [subject, setSubject] = useState("MATH");
+  if (!profile.is_admin) return <Navigate to="/home" replace />;
+  const subjectOptions = subjects?.length ? subjects.map((s) => ({ code: s.code, name: s.name })) : [{ code: "MATH", name: "Mathematics" }];
+  const bySubject = tab === "Overview" || tab === "Model monitor" || tab === "Skills & questions";
   return (
     <div>
-      <PageHeader eyebrow="Admin" title="Content management" subtitle="Resources, skill descriptions, question availability and prerequisite links." />
+      <PageHeader
+        eyebrow="Admin"
+        title="Content management"
+        subtitle="Resources, skill descriptions, question availability, prerequisite links, the model and the AI tutor."
+        actions={
+          bySubject && subjectOptions.length > 1 ? (
+            <label className="flex items-center gap-2 text-sm text-ink-muted">
+              Subject
+              <select className={cx(inputClass, "h-10 w-auto")} value={subject} onChange={(e) => setSubject(e.target.value)}>
+                {subjectOptions.map((s) => (
+                  <option key={s.code} value={s.code}>
+                    {s.name}
+                  </option>
+                ))}
+              </select>
+            </label>
+          ) : undefined
+        }
+      />
       <div className="mb-6 flex flex-wrap gap-2">
         {TABS.map((t) => (
           <button key={t} type="button" onClick={() => setTab(t)} className={cx("rounded-full border px-3.5 py-1.5 text-sm", tab === t ? "border-brand bg-brand-soft" : "border-line text-ink-muted hover:text-ink")}>
@@ -211,10 +274,15 @@ export function AdminPage() {
           </button>
         ))}
       </div>
-      {tab === "Overview" && <Overview />}
-      {tab === "Model monitor" && <ModelMonitor />}
-      {tab === "AI tutor" && <AiTexts />}
-      {tab === "Skills & questions" && <SkillsTab />}
+      {tab === "Overview" && <Overview subject={subject} />}
+      {tab === "Model monitor" && <ModelMonitor subject={subject} />}
+      {tab === "AI tutor" && (
+        <div className="space-y-6">
+          <TestAi />
+          <AiTexts />
+        </div>
+      )}
+      {tab === "Skills & questions" && <SkillsTab key={subject} subject={subject} />}
       {tab === "Resources" && <ResourcesTab />}
       {tab === "Prerequisites" && <PrereqTab />}
     </div>

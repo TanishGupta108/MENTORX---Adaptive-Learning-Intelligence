@@ -65,11 +65,15 @@ def for_skill(db: Session, user: User, skill_id: int) -> list[dict]:
 
 
 def library(db: Session, user: User, kind: str | None = None, q: str | None = None) -> list[dict]:
+    """Resources of the student's current subject."""
+    from app.tutor.profile import current_subject
+
+    subject = current_subject(db, user)
     done = completed_ids(db, user)
     stmt = (
         select(Resource, Skill)
         .join(Skill, Skill.id == Resource.skill_id)
-        .where(Resource.is_active, Skill.is_available)
+        .where(Resource.is_active, Skill.is_available, Skill.subject_id == subject.id)
     )
     if kind:
         stmt = stmt.where(Resource.kind == kind)

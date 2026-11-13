@@ -5,13 +5,14 @@ Rules:
   requested by interaction id), so it can never leak an answer before submission.
 - A hint is requested while the question is open. The model is told the answer only so the
   hint is correct, and every hint is checked on the server: if it contains the answer (the
-  number, the expression, the correct option's text or letter) it is thrown away and the
-  skill-level hint is shown instead.
+  number in any accepted form, the expression, the correct option's text or letter) it is
+  thrown away and the skill-level hint is shown instead.
 - Texts are cached per question (and per kind of wrong answer), so the same request never
   costs twice, and admins can hide any text. Every text is labelled as AI-generated.
 - Only the question and the student's response to it are sent. Nothing identifies the student.
 - AI help never changes skill estimates. Asking for a hint counts as "used a hint", exactly
   like the skill hint, because that is how the model's training label was defined.
+- The daily limit resets at the student's local midnight.
 """
 
 from __future__ import annotations
@@ -19,8 +20,6 @@ from __future__ import annotations
 import hashlib
 import json
 import re
-import uuid
-from datetime import UTC, datetime
 from fractions import Fraction
 
 from sqlalchemy import func, select
@@ -30,7 +29,7 @@ from sqlalchemy.orm import Session
 from app.core.config import get_settings
 from app.core.errors import AppError
 from app.db.models import User
-from app.tutor import answers, llm
+from app.tutor import answers, llm, localtime
 from app.tutor.html import math_text, plain_text
 from app.tutor.models import AiExplanation, Interaction, Item, Skill
 
@@ -39,34 +38,54 @@ LABEL = (
     "worked examples and your teacher's method."
 )
 SYSTEM = (
-    "You are MENTORX, a patient and encouraging maths tutor for students aged 11 to 14 "
-    "(US grades 6 to 8, Common Core). Be accurate, clear and brief. Never call the student bad "
+    "You are MENTORX, a patient and encouraging maths tutor for students aged 9 to 14 "
+    "(US grades 4 to 8, Common Core). Be accurate, clear and brief. Never call the student bad "
     "at maths. Format: short paragraphs or a numbered list (1. 2. 3.); you may use **bold** "
     "for key words. No LaTeX, no tables, no headings. Write fractions like 3/4, powers like "
     "x^2 and square roots like sqrt(5). If the question contains a [diagram] you cannot see, "
     "do not guess what it shows; explain the method in general terms instead."
 )
+SYSTEM_GEO = (
+    "You are MENTORX, a patient and encouraging geography tutor for students aged 9 to 14 who "
+    "are practising map skills (finding countries, cities, rivers, lakes, mountains and islands "
+    "on a map). Be accurate, clear and brief. Format: short paragraphs; you may use **bold** "
+    "for key words. No tables, no headings. You cannot see the map image: describe locations "
+    "with neighbours, coasts, rivers and compass directions."
+)
 LETTERS = "ABCDEFGHIJKL"
+MAP_NAMES = {
+    "europe": "Europe",
+    "africa": "Africa",
+    "samerica": "South America",
+    "namerica": "North America",
+    "oceania": "Oceania",
+    "us": "the United States",
+}
+HINT_TOKENS = 600
+EXPLAIN_TOKENS = 1500
 
 
 def status(db: Session, user: User) -> dict:
     cfg = get_settings()
+    key_ok = llm.key_ok() if cfg.ai_enabled else None
+    enabled = cfg.ai_enabled and key_ok is not False
     return {
-        "enabled": cfg.ai_enabled,
-        "model": cfg.ai_model if cfg.ai_enabled else None,
+        "enabled": enabled,
+        "key_ok": key_ok,
+        "model": cfg.ai_model if enabled else None,
         "daily_limit": cfg.ai_daily_limit,
-        "used_today": _used_today(db, user.id),
+        "used_today": _used_today(db, user),
         "label": LABEL,
     }
 
 
-def _used_today(db: Session, user_id: uuid.UUID) -> int:
-    start = datetime.now(UTC).replace(hour=0, minute=0, second=0, microsecond=0)
+def _used_today(db: Session, user: User) -> int:
+    start = localtime.day_start(user)
     return int(
         db.scalar(
             select(func.count())
             .select_from(AiExplanation)
-            .where(AiExplanation.requested_by == user_id, AiExplanation.created_at >= start)
+            .where(AiExplanation.requested_by == user.id, AiExplanation.created_at >= start)
         )
         or 0
     )
@@ -75,9 +94,25 @@ def _used_today(db: Session, user_id: uuid.UUID) -> int:
 # ---------------------------------------------------------------- prompt pieces
 
 
+def is_map(item: Item) -> bool:
+    return isinstance(item.media, dict) and item.media.get("kind") == "map"
+
+
+def _letter_options(item: Item) -> bool:
+    return bool(item.options) and all(
+        re.fullmatch(r"[A-Z]", plain_text(o["html"]).strip()) for o in item.options
+    )
+
+
 def question_text(db: Session, item: Item) -> str:
     skill = db.get(Skill, item.skill_id)
     parts = [f"Topic: {skill.name} ({skill.code})" if skill else "", math_text(item.body_html)]
+    if is_map(item):
+        name = MAP_NAMES.get(str(item.media.get("map")), "a region")
+        parts.append(
+            f"(The question shows a map of {name}; the student cannot see coordinates.)"
+            + (" The options are letters marked on the map." if _letter_options(item) else "")
+        )
     if item.options:
         parts.append(
             "Answer options:\n"
@@ -91,14 +126,47 @@ def _option_letter(item: Item, option_id: str) -> str:
     return LETTERS[ids.index(option_id)] if option_id in ids else "?"
 
 
+def _asked_place(item: Item) -> str | None:
+    m = re.search(r"\bWhere (?:is|are) (.+?)\?", plain_text(item.body_html))
+    return m.group(1).strip() if m else None
+
+
 def correct_text(item: Item) -> str:
     key = answers.describe_key(item.answer_type, item.answer_key, item.options)
     if key["type"] in ("numeric", "text"):
         return " or ".join(key["values"])
     opts = {o["id"]: o for o in item.options}
+    if is_map(item) and _letter_options(item):
+        place = _asked_place(item)
+        return "; ".join(
+            f"{plain_text(opts[i]['html']).strip()}" + (f" ({place})" if place else "")
+            for i in key["option_ids"]
+        )
     return "; ".join(
         f"{_option_letter(item, i)}. {math_text(opts[i]['html'])}" for i in key["option_ids"]
     )
+
+
+def accepted_text(item: Item) -> str:
+    """Every form the checker accepts, so the AI never calls a correct answer wrong."""
+    keys = _numeric_keys(item)
+    if not keys:
+        return ""
+    exact = answers.true_values(keys)
+    forms = []
+    for v in exact:
+        if answers.recover(v) is not None:
+            continue
+        mixed = answers.mixed_text(v)
+        forms.append(f"{v}" + (f" (or {mixed})" if mixed else ""))
+    text = "Accepted answers: " + ", ".join(forms)
+    ctx = answers.question_context(item.body_html)
+    if ctx.round_to:
+        n = min(ctx.round_to)
+        text += f"; a value correctly rounded to {n} decimal place{'s' if n != 1 else ''}"
+    elif any(not answers.terminating(v) for v in exact) and not ctx.fraction_required:
+        text += "; or a decimal correctly rounded to 2 or more decimal places"
+    return text + "."
 
 
 def response_text(item: Item, response: dict) -> str:
@@ -116,7 +184,10 @@ def _signature(inter: Interaction) -> str:
         return "revealed"
     if inter.is_correct:
         return "correct"
-    r = inter.response or {}
+    return wrong_signature(inter.response or {})
+
+
+def wrong_signature(r: dict) -> str:
     norm = (
         re.sub(r"\s+", "", str(r.get("value", ""))).lower()
         if "value" in r
@@ -128,7 +199,30 @@ def _signature(inter: Interaction) -> str:
 # ---------------------------------------------------------------- answer-leak check
 
 
-_NUMBER = re.compile(r"(?<![\w.])-?\d+(?:\.\d+)?(?:\s*/\s*\d+)?(?![\w.])")
+# a number may end a sentence ("... is 3.667."), but "3.6" is not a prefix of "3.667"
+_NUMBER = re.compile(r"(?<![\w.])-?\d+(?:\.\d+)?(?:\s*/\s*\d+)?(?!\w|\.\d)")
+_MIXED = re.compile(r"(?<![\w.])-?\d+\s+\d+\s*/\s*\d+(?!\w|\.\d)")
+
+
+def _numeric_keys(item: Item) -> list[Fraction]:
+    if item.answer_type == "numeric":
+        out = []
+        for k in item.answer_key or []:
+            try:
+                out.append(Fraction(k))
+            except (ValueError, ZeroDivisionError):
+                continue
+        return out
+    if item.answer_type in answers.TEXT_TYPES and isinstance(item.answer_key, dict):
+        out = []
+        for raw in item.answer_key.get("alts", []):
+            n = answers.parse_number(raw)
+            if n is None:
+                n = answers.parse_number(answers.fraction_form(raw) or "")
+            if n is not None:
+                out.append(n)
+        return out
+    return []
 
 
 def leaks_answer(item: Item, text: str) -> bool:
@@ -138,28 +232,72 @@ def leaks_answer(item: Item, text: str) -> bool:
         return True
     key = answers.describe_key(item.answer_type, item.answer_key, item.options)
     if key["type"] in ("numeric", "text"):
-        values: list[Fraction] = []
-        for v in key["values"]:
-            raw = v.split(" (")[0]
-            n = answers.parse_number(raw) or answers.parse_number(answers.fraction_form(raw) or "")
-            if n is not None:
-                values.append(n)
+        keys = _numeric_keys(item)
+        values = answers.accepted_number_forms(keys)
+        flats = [v.split(" (")[0] for v in key["values"]]
+        if item.answer_type in answers.TEXT_TYPES and isinstance(item.answer_key, dict):
+            flats += list(item.answer_key.get("alts", []))
+        for v in answers.true_values(keys):
+            flats += [str(v), answers.mixed_text(v) or ""]
+        squashed = re.sub(r"\s+", "", low)
+        for raw in flats:
             flat = re.sub(r"\s+", "", raw).casefold()
-            if len(flat) >= 2 and flat in re.sub(r"\s+", "", low):
+            if len(flat) >= 2 and flat in squashed:
                 return True
-        for m in _NUMBER.findall(text):
+        # any number the checker would accept as a correct answer, with any number of
+        # decimals ("about 3.66667"), with or without the question's own instructions
+        contexts = (answers.NO_CONTEXT, answers.question_context(item.body_html or ""))
+        for m in [*_MIXED.findall(text), *_NUMBER.findall(text)]:
             n = answers.parse_number(m)
             if n is not None and n in values:
                 return True
+            sn = answers.student_number(m)
+            if sn is not None and any(answers.numeric_accepts(keys, sn, c) for c in contexts):
+                return True
         return False
-    for oid in key["option_ids"]:
-        letter = _option_letter(item, oid).casefold()
-        if re.search(rf"\b(option|choice|answer)\s*\(?{letter}\)?(?![a-z])", low):
+    key_ids = set(key["option_ids"])
+    for oid in key_ids:
+        if _named_letter(_option_letter(item, oid), text):
             return True
         opt = next((o for o in item.options if o["id"] == oid), None)
-        opt_text = plain_text(opt["html"]).casefold() if opt else ""
-        if len(opt_text) >= 2 and opt_text in low:
+        opt_text = plain_text(opt["html"]).strip() if opt else ""
+        if re.fullmatch(r"[A-Z]", opt_text) and _mentions_letter(opt_text, text):
             return True
+        if len(opt_text) >= 2 and opt_text.casefold() in low:
+            return True
+    # elimination: naming every wrong option ("Not A, C or D.") gives the answer away too
+    others = [_shown_letter(item, o) for o in item.options if o["id"] not in key_ids]
+    return len(others) >= 2 and all(_mentions_letter(L, text) for L in others)
+
+
+# words that point at an option: "option b", "pick b", "go with (B)"
+_LETTER_WORDS = r"(?:option|choice|answer|letter|pick|choose|select|try|go\s+with)"
+
+
+def _shown_letter(item: Item, option: dict) -> str:
+    """The letter the student sees for an option (map options ARE letters)."""
+    t = plain_text(option["html"]).strip()
+    return t if re.fullmatch(r"[A-Z]", t) else _option_letter(item, option["id"])
+
+
+def _named_letter(letter: str, text: str) -> bool:
+    """An option letter after an option word, in any case ("option B", "pick b")."""
+    pat = rf"\b{_LETTER_WORDS}\s*\(?{letter}\)?(?![A-Za-z])"
+    for m in re.finditer(pat, text, re.I):
+        if letter == "A" and re.match(r"\s+[a-z]", text[m.end() :]):
+            continue  # "choose a country ..." is the article
+        return True
+    return False
+
+
+def _mentions_letter(letter: str, text: str) -> bool:
+    """An option letter named after an option word, or as a standalone capital."""
+    if _named_letter(letter, text):
+        return True
+    for m in re.finditer(rf"(?<![A-Za-z]){letter}(?![A-Za-z])", text):
+        if letter == "A" and re.match(r"\s+[a-z]", text[m.end() :]):
+            continue  # the article: "A good first step ..."
+        return True
     return False
 
 
@@ -177,17 +315,25 @@ def _cached(db: Session, item_id: int, kind: str, sig: str) -> AiExplanation | N
 
 
 def _generate(
-    db: Session, user: User, item: Item, kind: str, sig: str, prompt: str, validate=None
+    db: Session,
+    user: User,
+    item: Item,
+    kind: str,
+    sig: str,
+    prompt: str,
+    max_tokens: int,
+    validate=None,
 ) -> AiExplanation:
     cfg = get_settings()
-    if _used_today(db, user.id) >= cfg.ai_daily_limit:
+    if _used_today(db, user) >= cfg.ai_daily_limit:
         raise AppError(
             429,
             "ai_daily_limit",
-            "You've used today's AI tutor requests. They reset at midnight (UTC).",
+            "You've used today's AI tutor requests. They reset at midnight.",
         )
+    system = SYSTEM_GEO if is_map(item) else SYSTEM
     text, latency, model = llm.complete(
-        [{"role": "system", "content": SYSTEM}, {"role": "user", "content": prompt}]
+        [{"role": "system", "content": system}, {"role": "user", "content": prompt}], max_tokens
     )
     if validate is not None and not validate(text):
         raise llm.AIUnavailable("leak")
@@ -242,6 +388,7 @@ def explain(db: Session, user: User, interaction_id: int) -> dict:
             )
         return _out(row, cached=True)
     q, correct = question_text(db, item), correct_text(item)
+    accepted = accepted_text(item)
     if sig == "correct":
         task = (
             "The student answered this correctly. In at most 120 words, explain why the answer "
@@ -256,14 +403,19 @@ def explain(db: Session, user: User, interaction_id: int) -> dict:
         mine = ""
     else:
         task = (
-            "The student's answer is incorrect. In at most 180 words: (1) solve the question step "
-            "by step; (2) in one kind sentence, say what mistake most likely led to their answer. "
-            "Finish with one line starting 'Tip:'."
+            "The student's answer was marked incorrect. In at most 180 words: (1) solve the "
+            "question step by step; (2) in one kind sentence, say what mistake most likely led "
+            "to their answer. If the student's answer equals the correct value or is a correctly "
+            "rounded value, say so kindly and explain which form is expected. Finish with one "
+            "line starting 'Tip:'."
         )
         mine = f"\nThe student answered: {response_text(item, inter.response)}"
-    prompt = f"{q}\n\nCorrect answer: {correct}{mine}\n\n{task}"
+    prompt = f"{q}\n\nCorrect answer: {correct}" + (f"\n{accepted}" if accepted else "")
+    prompt += f"{mine}\n\n{task}"
     try:
-        row = _generate(db, user, item, "explanation", sig, prompt)
+        row = _generate(db, user, item, "explanation", sig, prompt, EXPLAIN_TOKENS)
+    except llm.AIKeyRejected as exc:
+        raise AppError(503, "ai_key_rejected", "The AI tutor isn't available right now.") from exc
     except llm.AIUnavailable as exc:
         raise AppError(503, "ai_unavailable", str(exc)) from exc
     return _out(row, cached=False)
@@ -276,7 +428,10 @@ def hint(db: Session, user: User, item: Item) -> dict | None:
         return None
     row = _cached(db, item.id, "hint", "")
     if row is not None:
-        return None if row.status == "hidden" else _out(row, cached=True)
+        # re-checked on every serve: hints cached before a stricter leak check stay safe
+        if row.status == "hidden" or leaks_answer(item, row.content):
+            return None
+        return _out(row, cached=True)
     prompt = (
         f"{question_text(db, item)}\n\n"
         f"Correct answer, for your reference ONLY (never reveal it, not even partly, and never "
@@ -286,11 +441,35 @@ def hint(db: Session, user: User, item: Item) -> dict | None:
     )
     try:
         row = _generate(
-            db, user, item, "hint", "", prompt, validate=lambda t: not leaks_answer(item, t)
+            db,
+            user,
+            item,
+            "hint",
+            "",
+            prompt,
+            HINT_TOKENS,
+            validate=lambda t: not leaks_answer(item, t),
         )
     except llm.AIUnavailable:
         return None
     return _out(row, cached=False)
+
+
+def hide_explanations(db: Session, item: Item, signatures: set[str]) -> int:
+    """Hide cached wrong-answer explanations (used by the regrade when a "wrong" answer turns
+    out to be correct, so the AI never tells the student a right answer was wrong)."""
+    n = 0
+    for row in db.scalars(
+        select(AiExplanation).where(
+            AiExplanation.item_id == item.id,
+            AiExplanation.kind == "explanation",
+            AiExplanation.answer_sig.in_(list(signatures)),
+            AiExplanation.status == "ok",
+        )
+    ):
+        row.status = "hidden"
+        n += 1
+    return n
 
 
 # ---------------------------------------------------------------- admin

@@ -1,0 +1,72 @@
+# Display names for Geography places (keys = lower-case place codes from the Slepemapy data).
+# The dataset (2015, English) abbreviates some names, writes some in capitals or in the local
+# language, and predates a few official renames. Places not listed keep the dataset's name.
+# `by_map` wins over `names` (one dataset place, San Jose, is a different city on two maps).
+names:
+  # countries and territories
+  ba: Bosnia and Herzegovina
+  cz: Czech Republic
+  mk: North Macedonia          # renamed in 2019
+  sz: Eswatini                 # renamed in 2018 (formerly Swaziland)
+  cd: Democratic Republic of the Congo
+  cg: Republic of the Congo
+  ss: South Sudan
+  gq: Equatorial Guinea
+  cf: Central African Republic
+  do: Dominican Republic
+  sb: Solomon Islands
+  # cities
+  kiev: Kyiv
+  kobenhavn: Copenhagen
+  ndjamena: N'Djamena
+  sao_tome: São Tomé
+  yaounde: Yaoundé
+  lome: Lomé
+  bogota: Bogotá
+  brasilia: Brasília
+  asuncion: Asunción
+  sao_paulo: São Paulo
+  guatemala: Guatemala City
+  ft._worth: Fort Worth
+  port-vila: Port Vila
+  # rivers
+  daugava_(zapadnaya_dvina): Daugava (Western Dvina)
+  svernaya_dvina: Northern Dvina
+  dnepre: Dnieper
+  tisa: Tisza
+  tajo: Tagus
+  duero: Douro
+  okawango: Okavango
+  senegal: Senegal
+  # mountains
+  hardanger-vidda: Hardangervidda
+  bohmerwald: Bohemian Forest
+  tatra_mts.: Tatra Mountains
+  pindus_mts.: Pindus Mountains
+  calabria: Calabrian Apennines
+  sudetes_mts.: Sudetes
+  erzgebirge: Ore Mountains
+  grampian_mts.: Grampian Mountains
+  cambrian_mts.: Cambrian Mountains
+  balkan_mts.: Balkan Mountains
+  cord._cantabrica: Cantabrian Mountains
+  s._nevada: Sierra Nevada
+  kjlen_mountains: Scandinavian Mountains
+  carpathian_mountains: Carpathian Mountains
+  appennini: Apennines
+  pyrenees: Pyrenees
+  alps: Alps
+  caucasus_mts.: Caucasus Mountains
+  # islands
+  kolguyev_i.: Kolguyev Island
+  sardegna: Sardinia
+  corse: Corsica
+  sicilia: Sicily
+  ireland: Ireland
+  great_britain: Great Britain
+  iceland: Iceland
+by_map:
+  namerica:
+    san_jose: San José
+  us:
+    san_jose: San Jose

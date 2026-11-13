@@ -1,6 +1,9 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate, useParams, useSearchParams } from "react-router";
 import { ArrowRight, CalendarClock, ClipboardCheck, Clock, Flag, Info, RefreshCw, Sparkles, TrendingUp } from "lucide-react";
+import { useProfile } from "../components/AppShell";
+import { Disclosure } from "../components/Disclosure";
+import { WhyButton } from "../components/WhyButton";
 import { ApiError } from "../api/client";
 import { tutor } from "../api/tutor";
 import type { Assessment, AssessmentAnswer, Question, ReassessmentResult } from "../api/tutor";
@@ -9,7 +12,7 @@ import { DifficultyTag, QuestionView } from "../components/QuestionView";
 import { Button, Card, ErrorState, PageLoader, pct, ProgressBar, Spinner } from "../components/ui";
 
 const TITLES: Record<Assessment["kind"], string> = {
-  diagnostic: "Diagnostic assessment",
+  diagnostic: "Placement check",
   skill_check: "Skill check",
   reassessment: "Reassessment",
 };
@@ -22,6 +25,8 @@ export function AssessmentStartPage() {
   const skill = useApi(() => (skillId ? tutor.skill(skillId) : Promise.resolve(null)), [skillId]);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string>();
+  const { profile } = useProfile();
+  const subject = profile.subject ?? "this subject";
 
   async function start() {
     setBusy(true);
@@ -37,16 +42,16 @@ export function AssessmentStartPage() {
 
   const copy = {
     diagnostic: {
-      lead: "Before creating your personalized learning plan, MENTORX needs to understand what you already know.",
-      points: ["About 10 questions from different areas of grade 6–8 mathematics", "One question at a time, with feedback after each answer", "No time limit. A wrong answer is useful information, not a failure"],
+      lead: "A short placement check shows what you already know, so your plan starts in the right place.",
+      points: [`About 10 questions from different areas of ${subject}`, "One question at a time, with feedback after each answer", "No time limit. A wrong answer is useful information, not a failure"],
     },
     skill_check: {
       lead: "A few questions in this skill, from easier to harder, show where to start.",
-      points: ["Questions are new to you", "Feedback after each answer", "Your learning mode for this skill is set from the result"],
+      points: ["Questions are new to you", "Feedback after each answer", "Your practice in this skill starts at the right level"],
     },
     reassessment: {
       lead: "Fresh questions you haven't seen before measure whether your practice has paid off.",
-      points: ["Only questions you've never answered", "Compared with your first answers in this skill", "Model estimates are shown separately from your results"],
+      points: ["Only questions you've never answered", "Compared with your first answers in this skill", "No time limit"],
     },
   }[kind];
 
@@ -74,7 +79,7 @@ export function AssessmentStartPage() {
           <Button size="lg" onClick={start} loading={busy} icon={<ArrowRight className="size-4" />}>
             Begin
           </Button>
-          <Button size="lg" variant="ghost" to="/dashboard">
+          <Button size="lg" variant="ghost" to="/home">
             Not now
           </Button>
         </div>
@@ -94,6 +99,13 @@ export function AssessmentRunPage() {
   const [error, setError] = useState<string>();
   const [fatal, setFatal] = useState<Error | null>(null);
 
+  const doneUrl = () => {
+    const m = meta.data;
+    if (m?.kind === "reassessment") return `/assess/${id}/result`;
+    if (m?.kind === "skill_check" && m.skill) return `/skills/${m.skill.id}`;
+    return "/diagnosis";
+  };
+
   async function loadNext() {
     setLoadingQ(true);
     setFeedback(null);
@@ -102,7 +114,7 @@ export function AssessmentRunPage() {
       setQuestion(await tutor.assessmentNext(id));
     } catch (e) {
       if (e instanceof ApiError && (e.code === "assessment_closed" || e.code === "assessment_complete")) {
-        navigate(meta.data?.kind === "reassessment" ? `/assess/${id}/result` : "/diagnosis", { replace: true });
+        navigate(doneUrl(), { replace: true });
         return;
       }
       setFatal(e as Error);
@@ -130,7 +142,7 @@ export function AssessmentRunPage() {
 
   function next() {
     if (feedback?.complete) {
-      navigate(meta.data?.kind === "reassessment" ? `/assess/${id}/result` : "/diagnosis", { replace: true });
+      navigate(doneUrl(), { replace: true });
     } else {
       void loadNext();
     }
@@ -157,17 +169,23 @@ export function AssessmentRunPage() {
         <ProgressBar value={answered} max={total} />
       </div>
 
-      <Card className="p-6 sm:p-8">
-        <div className="mb-5 flex flex-wrap items-center gap-2 text-xs">
-          <span className="rounded-md bg-surface-3 px-2 py-0.5 font-medium text-ink-muted">{question.skill.code}</span>
-          <span className="text-ink-muted">{question.skill.name}</span>
-          <DifficultyTag level={question.difficulty} />
+      <Card className="p-5 sm:p-8">
+        <div className="mb-4 flex flex-wrap items-start justify-between gap-2">
+          <div className="flex flex-wrap items-center gap-2 pt-2 text-xs">
+            <DifficultyTag level={question.difficulty} />
+            <span className="text-ink-muted">{question.skill.name}</span>
+          </div>
+          {question.selection?.how && (
+            <WhyButton label="Why this question?" align="end" className="max-w-full sm:max-w-sm">
+              <p>{question.selection.how}</p>
+              {question.selection.technical && (
+                <Disclosure variant="plain" title="Details" className="mt-1">
+                  <p className="text-xs text-ink-faint">{question.selection.technical}</p>
+                </Disclosure>
+              )}
+            </WhyButton>
+          )}
         </div>
-        {question.selection?.how && (
-          <p className="-mt-2 mb-5 flex items-start gap-1.5 text-xs text-ink-faint">
-            <Info className="mt-px size-3.5 shrink-0" /> {question.selection.how}
-          </p>
-        )}
         {loadingQ ? (
           <Spinner />
         ) : (
@@ -226,43 +244,47 @@ export function ReassessmentResultPage() {
         <p className="mt-2 text-ink-muted">
           You answered {r.correct} of {r.answered} fresh questions correctly.
         </p>
-        <div className="mt-6 grid gap-3 sm:grid-cols-2">
+        <div className="mt-6 max-w-sm">
           <Compare
-            label="Your observed performance"
+            label="Your answers"
             before={r.initial_accuracy}
             after={r.reassessment_accuracy}
-            note={r.initial_attempts ? `First ${r.initial_attempts} answers in this skill → this reassessment` : "No earlier answers to compare with"}
+            note={r.initial_attempts ? `Your first ${r.initial_attempts} answers in this skill, then this check` : "No earlier answers to compare with"}
           />
-          <Compare label="Model estimate (prediction)" before={r.predicted_before} after={r.predicted_after} note="DKT-Q predicted success on a typical question. A prediction, not a score." />
         </div>
+        <Disclosure variant="plain" title="Details" className="mt-4">
+          <p className="text-sm text-ink-muted">
+            Prediction before and after: {pct(r.predicted_before)} → {pct(r.predicted_after)}. This is a model&apos;s guess of your chance on a typical question, not a score.
+          </p>
+        </Disclosure>
       </Card>
 
       <Card>
         <h2 className="mb-3 font-semibold">What happens next</h2>
         {outcome === "improved" ? (
           <ul className="space-y-3 text-sm">
-            <li className="flex gap-3"><TrendingUp className="size-4 text-strength" /> Your learning profile is updated, and practice in this skill now uses harder questions.</li>
+            <li className="flex gap-3"><TrendingUp className="size-4 shrink-0 text-strength" /> Your skill status is updated from these answers.</li>
             {r.completed && r.revision_due_at && (
-              <li className="flex gap-3"><CalendarClock className="size-4 text-accent" /> A short revision is scheduled for {new Date(r.revision_due_at).toLocaleDateString()} to keep it fresh.</li>
+              <li className="flex gap-3"><CalendarClock className="size-4 shrink-0 text-accent" /> A short revision is scheduled for {new Date(r.revision_due_at).toLocaleDateString()} to keep it fresh.</li>
             )}
-            <li className="flex gap-3"><Sparkles className="size-4 text-brand" /> Your dashboard now recommends your next learning objective.</li>
+            <li className="flex gap-3"><Sparkles className="size-4 shrink-0 text-brand" /> Home now suggests what to learn next.</li>
           </ul>
         ) : outcome === "progressing" ? (
           <p className="text-sm text-ink-muted">You've made real gains. A little more practice at your current level should get you over the line. Then try another reassessment.</p>
         ) : (
           <ul className="space-y-3 text-sm">
-            <li className="flex gap-3"><Clock className="size-4 text-developing" /> We'll review your recent mistakes and check the building blocks this skill depends on.</li>
-            <li className="flex gap-3"><RefreshCw className="size-4 text-accent" /> Practice switches to Foundation mode: easier questions, worked examples and hints.</li>
-            <li className="flex gap-3"><Sparkles className="size-4 text-brand" /> When you're ready, a new reassessment will use questions you haven't seen.</li>
+            <li className="flex gap-3"><Clock className="size-4 shrink-0 text-developing" /> Look at your recent mistakes in this skill, and the building blocks it depends on.</li>
+            <li className="flex gap-3"><RefreshCw className="size-4 shrink-0 text-accent" /> Let&apos;s practise a bit more with step-by-step questions.</li>
+            <li className="flex gap-3"><Sparkles className="size-4 shrink-0 text-brand" /> When you&apos;re ready, a new check will use questions you haven&apos;t seen.</li>
           </ul>
         )}
         <div className="mt-6 flex flex-wrap gap-3">
-          <Button to={`/skills/${skill.id}`}>{outcome === "not_improved" ? "Open the support plan" : "Back to the skill"}</Button>
-          <Button variant="secondary" to="/dashboard">Go to dashboard</Button>
+          <Button to={`/skills/${skill.id}`}>Back to the skill</Button>
+          <Button variant="secondary" to="/home">Go to Home</Button>
         </div>
       </Card>
       <p className="text-center text-xs text-ink-faint">
-        <Link to="/analytics" className="hover:text-ink">See all your results in Analytics →</Link>
+        <Link to="/progress" className="hover:text-ink">See all your results in Progress →</Link>
       </p>
     </div>
   );

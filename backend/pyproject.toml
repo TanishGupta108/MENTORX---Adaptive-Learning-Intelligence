@@ -27,6 +27,7 @@ dependencies = [
   "scikit-learn==1.9.1",  # must equal the version the model was saved with
   "sympy>=1.13",  # checking typed algebra answers (app/tutor/mathexpr.py)
   "httpx>=0.27",  # AI tutor calls (app/tutor/llm.py) and scripts/check_images.py
+  "tzdata>=2024.1",  # IANA time zones for zoneinfo on Windows (streaks use the local day)
 ]
 
 [project.optional-dependencies]

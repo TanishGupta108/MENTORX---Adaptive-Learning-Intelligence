@@ -58,7 +58,7 @@ python scripts/smoke.py https://<your-app>.vercel.app      # through the rewrite
 python scripts/smoke.py https://<your-render-service>.onrender.com   # the API directly
 ```
 
-The script creates a throwaway account, enrols, answers one diagnostic question, reads the dashboard and the learning path, checks the security headers, HSTS and the refresh cookie round trip, then deletes the account. It exits non-zero on the first failure. Run it after every production deploy.
+The script creates a throwaway account and tests whichever version is live. For v3 it onboards with a grade, reads Home, answers two placement-check questions and one practice question, reads the AI status and, when Geography is seeded, answers one map question in Geography; it prints `PASSED (v3)`. It also checks the security headers, HSTS and the refresh cookie round trip, then deletes the account. It exits non-zero on the first failure. Run it after every production deploy.
 
 CI runs the same script in its `e2e` job ([.github/workflows/ci.yml](../.github/workflows/ci.yml)): it installs the API with Render's build command, starts it with Render's start command in production mode against PostgreSQL, and runs the smoke test. Every push to `main` is therefore checked for a working install, migrations, seeding and model loading before Render auto-deploys it.
 
@@ -97,14 +97,53 @@ as a model prediction.
 Admins: set `ADMIN_EMAILS` to give accounts the Content admin page (it also has the live
 Model monitor and the AI tutor texts).
 
+## Geography content (v3, optional)
+
+Geography map skills come from the Slepemapy.cz 2015 dataset (ODbL; see
+`docs/modules/geography.md`). The CSVs are never committed. Seed after the v3 deploy (the
+migration must have run):
+```
+python scripts/seed_geography.py --data-dir "C:/Users/Tanish Gupta/Downloads/mentorx-new-subject/slepemapy-2015-05-21"
+```
+Until it runs, Geography is invisible and the app is Maths only. Seeding Maths again never hides
+Geography (and vice versa). The Geography model files are in `backend/model_artifacts/geography/`
+(`KT_SUBJECTS`).
+
+## Regrading old answers after the v3 answer-checking change
+
+v3 accepts correctly rounded decimals, recovered fractions, units, "$" and so on (see
+`docs/modules/tutor.md`, "Answer checking"). Answers given before v3 can be re-checked once:
+```
+python scripts/regrade.py --dry-run     # shows what would change; changes nothing
+python scripts/regrade.py               # applies it (safe to run again)
+```
+It only turns wrong into right, records `regraded_at` on each changed answer, hides the cached AI
+explanations of those answers, and rebuilds the affected students' skill states and
+recommendations. It prints question and answer ids, never who answered.
+
 ## AI tutor (optional)
 
 Set `OPENROUTER_API_KEY` on the API service to switch on AI explanations and AI hints (free
-OpenRouter models; leave it empty to switch the feature off and hide its buttons). `AI_MODEL`
-and `AI_FALLBACK_MODELS` choose the models; free models are often rate-limited upstream, so
-the fallbacks are tried in order. `AI_DAILY_LIMIT` caps new AI texts per student per day.
-Free models may log prompts: only the question, its answer and the student's response are
-sent, never a name, email or id.
+OpenRouter models; leave it empty to switch the feature off and hide its buttons). Paste the key
+alone: quotes, spaces and a "Bearer " prefix are removed, but nothing else is fixed. The default
+model chain is in `app/core/config.py` (`AI_MODEL`, `AI_FALLBACK_MODELS`); if those variables
+exist on Render from an older version, delete them so the new defaults apply.
+`AI_TOTAL_SECONDS` (default 50, max 90) caps one AI request across all models. `AI_DAILY_LIMIT`
+caps new AI texts per student per day (reset at the student's midnight).
+
+Check it: Admin → **Test AI** (`POST /api/v2/admin/ai/test`) shows OK with the model and the time
+taken, or the error. If OpenRouter rejects the key, the log says "OpenRouter rejected the API key
+(status 401)", `GET /api/v2/ai/status` reports `key_ok: false`, and the AI buttons hide for 10
+minutes (or until a successful Test AI). Free models may log prompts: only the question, its answer
+and the student's response are sent, never a name, email or id.
+
+## Keeping the free server awake (optional)
+
+Render's free API sleeps after about 15 idle minutes, and the first request then takes up to
+about a minute (83.9 s measured on 2026-11-13), which can also make the first AI request time out.
+A free cron service can ping it: at https://cron-job.org create a job for
+`https://mentorx-backend-uco2.onrender.com/api/v1/health` every 10 minutes. Render's free plan has
+750 instance hours a month, enough for one always-on service.
 
 ## Environment variables
 
@@ -124,6 +163,11 @@ sent, never a name, email or id.
 | `LOGIN_ATTEMPTS_PER_MINUTE` | `5` | Per account |
 | `REGISTRATIONS_PER_HOUR` | `10` | Per client IP |
 | `EXPOSE_DOCS` | unset | `true` re-enables `/docs` in production |
+| `OPENROUTER_API_KEY` | your OpenRouter key | Empty = AI tutor off. Paste the key only |
+| `AI_MODEL`, `AI_FALLBACK_MODELS` | unset | Defaults in `config.py`; delete old values |
+| `AI_TOTAL_SECONDS` | unset (50) | Time budget for one AI request (max 90) |
+| `AI_DAILY_LIMIT` | unset (40) | New AI texts per student per day |
+| `KT_SUBJECTS` | unset | Default `GEO=model_artifacts/geography`; Maths uses `KT_ARTIFACTS_DIR` |
 
 ## Hardening in place
 

@@ -1,0 +1,17 @@
+MENTORX Geography knowledge-tracing model (dkt_q.npz, kt_meta.json, question_stats.json)
+
+These files are derived from the Slepemapy.cz "Adaptive Geography Practice" data set
+(2015-05-21 release): model weights trained on a sample of its answers, per-question success
+rates of the training students, and the places students most often confused with each one.
+No individual answer rows are included.
+
+Geography practice data (c) Adaptive Learning group, Masaryk University (slepemapy.cz),
+made available under the Open Database License 1.0
+(https://opendatacommons.org/licenses/odbl/1-0/); individual contents under the
+Database Contents License 1.0 (https://opendatacommons.org/licenses/dbcl/1-0/).
+Data set: http://www.fi.muni.cz/adaptivelearning/data/slepemapy/2015-05-21.zip
+
+Please cite: Papousek, J., Pelanek, R., & Stanislav, V. (2016). Adaptive Geography Practice
+Data Set. Journal of Learning Analytics, 3(2), 317-321. https://doi.org/10.18608/jla.2016.32.17
+
+Produced by ml/scripts/train_geography_kt.py (config ml/configs/geography.yaml).

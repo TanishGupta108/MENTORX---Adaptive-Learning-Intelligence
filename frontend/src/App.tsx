@@ -8,18 +8,17 @@ import { AssessmentRunPage, AssessmentStartPage, ReassessmentResultPage } from "
 import { LoginPage, RegisterPage } from "./pages/Auth";
 import { LandingPage } from "./pages/Landing";
 import { NotFoundPage } from "./pages/NotFound";
+import { HomePage } from "./pages/Home";
 import { OnboardingPage } from "./pages/Onboarding";
-import { PathPage } from "./pages/Path";
 import { PracticePage } from "./pages/Practice";
 import { ProfilePage } from "./pages/Profile";
-import { ResourcesPage } from "./pages/Resources";
 import { SkillPage } from "./pages/Skill";
 import { SkillsPage } from "./pages/Skills";
 
 // Chart-heavy and admin screens load on demand, so the landing and sign-in pages stay small.
-const DashboardPage = lazy(() => import("./pages/Dashboard").then((m) => ({ default: m.DashboardPage })));
+
 const DiagnosisPage = lazy(() => import("./pages/Diagnosis").then((m) => ({ default: m.DiagnosisPage })));
-const AnalyticsPage = lazy(() => import("./pages/Analytics").then((m) => ({ default: m.AnalyticsPage })));
+const ProgressPage = lazy(() => import("./pages/Progress").then((m) => ({ default: m.ProgressPage })));
 const AdminPage = lazy(() => import("./pages/Admin").then((m) => ({ default: m.AdminPage })));
 
 function Checking() {
@@ -44,7 +43,7 @@ function RequireAuth() {
 function PublicOnly() {
   const { user } = useAuth();
   if (user === undefined) return <Checking />;
-  if (user) return <Navigate to="/dashboard" replace />;
+  if (user) return <Navigate to="/home" replace />;
   return <Outlet />;
 }
 
@@ -60,13 +59,16 @@ export function AppRoutes() {
         <Route path="onboarding" element={<OnboardingPage />} />
         <Route element={<ProfileGate />}>
           <Route element={<AppShell />}>
-            <Route path="dashboard" element={<DashboardPage />} />
+            <Route path="home" element={<HomePage />} />
             <Route path="diagnosis" element={<DiagnosisPage />} />
-            <Route path="path" element={<PathPage />} />
             <Route path="skills" element={<SkillsPage />} />
             <Route path="skills/:id" element={<SkillPage />} />
-            <Route path="resources" element={<ResourcesPage />} />
-            <Route path="analytics" element={<AnalyticsPage />} />
+            <Route path="progress" element={<ProgressPage />} />
+            {/* old addresses from v2 */}
+            <Route path="dashboard" element={<Navigate to="/home" replace />} />
+            <Route path="path" element={<Navigate to="/home" replace />} />
+            <Route path="analytics" element={<Navigate to="/progress" replace />} />
+            <Route path="resources" element={<Navigate to="/skills" replace />} />
             <Route path="profile" element={<ProfilePage />} />
             <Route path="assess/start" element={<AssessmentStartPage />} />
             <Route path="assess/:id" element={<AssessmentRunPage />} />

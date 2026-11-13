@@ -82,6 +82,9 @@ def clean_tables(migrated_database):
     feedback_limiter.reset()
     reset_cache()
     reset_stats_cache()
+    from app.tutor import llm
+
+    llm.reset_state()
 
 
 @pytest.fixture
