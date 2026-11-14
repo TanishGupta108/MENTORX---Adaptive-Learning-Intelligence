@@ -88,7 +88,8 @@ The correct answer is shown exactly first, with a rounded hint: `11/3 (about 3.6
 ## Personalization rules (thresholds in `core/config.py`)
 
 - **Diagnosis** (`state.diagnose`): no answers → **Not tried yet**, whatever the model says. Recent
-  observed accuracy ≥ 75% (2+ answers) with the model not disagreeing (≥ `MODEL_AGREE_THRESHOLD`
+  observed accuracy ≥ 75% (2+ answers) with the model not disagreeing (from `ANSWERS_DECIDE_AFTER`
+  = 5 answers on, the answers decide alone and the model has no veto) (≥ `MODEL_AGREE_THRESHOLD`
   0.6) → **Strong**. ≤ 45% with 2+ answers and the model not disagreeing → **Needs practice** (one
   wrong answer is not enough). Otherwise **Getting there**. Only single-skill answers count.
 - **Mastery** (observed only): the last 3 answers right, ≥ 80% of the last 8 right, ≥ 5 answers.

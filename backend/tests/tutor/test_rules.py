@@ -95,6 +95,18 @@ def test_diagnosis_needs_evidence_and_model_agreement():
     )  # one answer isn't a strength
 
 
+def test_enough_answers_decide_without_the_model():
+    # Seen live: 0 of 5 correct was shown as "Getting there" because the model guessed 0.6+,
+    # and 6 of 6 correct could not be Strong. From 5 answers on, the answers decide alone.
+    zero_of_five = Evidence(5, 0, [0, 0, 0, 0, 0])
+    assert diagnose(zero_of_five, 0.9, 0.75, 0.45, 0.6, decide_after=5) == "potential_weakness"
+    six_of_six = Evidence(6, 6, [1] * 6)
+    assert diagnose(six_of_six, 0.2, 0.75, 0.45, 0.6, decide_after=5) == "likely_strength"
+    # below the threshold the model may still hold a label back
+    four_wrong = Evidence(4, 0, [0, 0, 0, 0])
+    assert diagnose(four_wrong, 0.9, 0.75, 0.45, 0.6, decide_after=5) == "developing"
+
+
 def test_learning_mode_per_evidence_and_preference():
     assert learning_mode(Evidence(4, 0, [0, 0, 0, 0]), 0.3) == "foundation"
     assert learning_mode(Evidence(6, 6, [1] * 6), 0.9) == "advanced"

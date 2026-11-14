@@ -92,6 +92,9 @@ class Settings(BaseSettings):
     mixed_practice_length: int = Field(default=8, ge=3, le=30)
     # v3 personalization (docs/modules/tutor.md, "Personalization rules")
     model_agree_threshold: float = Field(default=0.6, gt=0, lt=1)  # model must not disagree
+    # ... but only while evidence is thin: from this many answers on, the student's own answers
+    # decide alone (0 of 5 correct is never "Getting there" because the model guesses higher)
+    answers_decide_after: int = Field(default=5, ge=2, le=50)
     mastery_streak: int = Field(default=3, ge=1, le=10)  # last N answers correct ...
     mastery_window: int = Field(default=8, ge=2, le=20)  # ... and >= mastery_rate of the last W
     mastery_rate: float = Field(default=0.8, gt=0, le=1)

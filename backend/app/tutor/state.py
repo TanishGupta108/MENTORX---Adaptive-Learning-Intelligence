@@ -160,14 +160,21 @@ def diagnose(
     strength: float,
     weakness: float,
     agree: float | None = None,
+    decide_after: int | None = None,
 ) -> str:
-    """One of likely_strength / developing / potential_weakness / needs_assessment."""
-    agree = get_settings().model_agree_threshold if agree is None else agree
+    """One of likely_strength / developing / potential_weakness / needs_assessment.
+
+    With few answers the model may hold a label back (it must not disagree); from
+    `decide_after` answers on, the student's own answers decide alone."""
+    cfg = get_settings()
+    agree = cfg.model_agree_threshold if agree is None else agree
+    decide_after = cfg.answers_decide_after if decide_after is None else decide_after
     acc = ev.recent_accuracy
     if acc is None:
         return "needs_assessment"  # never call a skill weak (or strong) on the model alone
-    model_agrees_strong = predicted is None or predicted >= agree
-    model_agrees_weak = predicted is None or predicted < agree
+    settled = ev.attempts >= decide_after
+    model_agrees_strong = settled or predicted is None or predicted >= agree
+    model_agrees_weak = settled or predicted is None or predicted < agree
     if acc >= strength and ev.attempts >= 2 and model_agrees_strong:
         return "likely_strength"
     if acc <= weakness and ev.attempts >= 2 and model_agrees_weak:
