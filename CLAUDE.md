@@ -25,7 +25,7 @@ The detailed design and the honest list of what is limited are in `docs/modules/
 - Production scripts from the laptop: put the Render External Database URL in `backend/.env.prod`
   (git-ignored) and set it as DATABASE_URL for the script; never print it.
 
-## Hallmark redesign (2026-11-14), committed locally, NOT deployed
+## Hallmark redesign (2026-11-14), DEPLOYED (c24f9b1); live smoke PASSED (v3); refresh_states run on production (3 students, 0 changed)
 - `design.md` (root) locks the system: navy, one periwinkle signal (old blue accent removed),
   Bricolage Grotesque on headings only, system body face, hairlines before cards. Tokens in
   `frontend/src/index.css` `@theme` (OKLCH). Landing keeps its own scoped block (`landing.css`).
