@@ -1,0 +1,179 @@
+/* Hallmark · shape: 05 Workbench · genre: editorial · theme: brand · redesign: full · job: try
+ * paper: oklch(17.2% 0.032 269) · accent: oklch(69.1% 0.166 281) · display: Bricolage Grotesque Variable · body: the app's system stack · hero: Stage · nav: edge-aligned, quiet · footer: mast · signature: the real learning profile after the ten-question check, every label from the student's own answers
+ * axes: navy/grotesque/periwinkle · posture: Restrained · contrast: pass · fold: pass · copy: verbatim (the brief's headline, lede and button words) · imagery: screenshots 5 (Playwright, logged-in local sample student; capture.mjs has no session support) · scope: page (.landing) · v2.0.0 */
+/* Hallmark · pre-emit critique: P4 H4 E4 S5 R4 V4 · weakest: P, the brief's headline is a slogan; the page argues instead through the real profile and the honest status words beside it */
+/* Hallmark · reworded "Maths for grades 4–8 · Geography map skills" to "Free to start. Maths for grades 4 to 8, and Geography map skills." · 19 and 63 name the dash and the dots */
+/* Hallmark · reworded "How it works" (section head) to "Ten questions, then your next step" · 54 named it; the nav link keeps the brief's words */
+/* Hallmark · dropped the "Example" skill panel · it was a mock of a product that runs (84); the real profile replaces it */
+/* Hallmark · dropped the six icon tiles · 3 names them; the same six lines live on as captioned screens and rows */
+/* Hallmark · dropped adapts to you, honest progress, help when stuck · the same words are now the dt titles of the promise rows, as craft.md sets features in a dl */
+/* Hallmark · answered F16 · the scrollbar belongs to the whole app (index.css), which this page-scoped redesign leaves untouched */
+
+/* Tokens: the page's own theme block. Scoped to .landing so the app's screens never move
+   (export-formats.md: one new page in a project whose other pages must not move). Brand values
+   come from the project's tokens (src/index.css), converted to OKLCH. */
+[data-theme="landing"] {
+  --color-paper: oklch(17.2% 0.032 269);
+  --color-paper-2: oklch(21.3% 0.039 268);
+  --color-paper-3: oklch(24.7% 0.044 266);
+  --color-ink: oklch(94.1% 0.014 273);
+  --color-ink-2: oklch(84% 0.025 271);
+  --color-muted: oklch(72.4% 0.047 270);
+  --color-rule: oklch(31.8% 0.058 267);
+  --color-rule-strong: oklch(38.3% 0.073 269);
+  --color-accent: oklch(69.1% 0.166 281);
+  --color-accent-hover: oklch(74% 0.15 281);
+  --color-accent-press: oklch(64% 0.17 281);
+  --color-accent-ink: oklch(17.2% 0.032 269);
+  --color-focus: oklch(72% 0.19 281);
+  --color-frame: oklch(94.1% 0.014 273 / 0.08);
+  --font-display: "Bricolage Grotesque Variable", ui-sans-serif, system-ui, sans-serif;
+  --font-body: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+
+  --space-2xs: 4px; --space-xs: 8px; --space-sm: 12px; --space-md: 16px; --space-lg: 24px;
+  --space-xl: 40px; --space-2xl: 64px; --space-3xl: 96px; --space-4xl: 144px;
+  --text-sm: 0.875rem; --text-md: 1rem;
+  --text-lead: clamp(1.125rem, 0.35vw + 1rem, 1.3125rem);
+  --text-title: clamp(1.25rem, 0.6vw + 0.9rem, 1.5rem);
+  --text-section: clamp(2rem, 1.6vw + 1.2rem, 2.75rem); /* the brief: no giant headings */
+  --text-display-s: clamp(2.25rem, 2.2vw + 1.1rem, 3.25rem);
+  --text-wordmark: clamp(3rem, 9vw, 8rem);
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --dur-micro: 120ms; --dur-short: 220ms;
+  --container: 1440px; --gutter: 64px; --gap-columns: 32px;
+  --section-gap-s: 120px; --section-gap: 144px; --section-gap-l: 176px;
+  --radius-control: 12px; --radius-frame: 16px;
+  --nav-height: 72px;
+  --z-raised: 10;
+}
+
+.landing {
+  background: var(--color-paper);
+  color: var(--color-ink);
+  font-family: var(--font-body);
+  font-size: var(--text-md);
+  line-height: 1.55;
+}
+
+html, body { overflow-x: clip; }
+
+/* Base, inside the page only */
+:where(.landing) h1, :where(.landing) h2, :where(.landing) h3 {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 650;
+  font-synthesis: none;
+  letter-spacing: -0.02em;
+  line-height: 1.06;
+  overflow-wrap: break-word;
+  min-width: 0;
+  text-wrap: balance;
+}
+:where(.landing) h1 { font-size: var(--text-display-s); max-width: none; }
+:where(.landing) h2 { font-size: var(--text-section); max-width: 24ch; }
+:where(.landing) h3 { font-size: var(--text-title); line-height: 1.2; max-width: 30ch; }
+:where(.landing) p { margin: 0; text-wrap: pretty; }
+:where(.landing) ol, :where(.landing) dl, :where(.landing) dd { margin: 0; padding: 0; }
+:where(.landing) figure { margin: 0; }
+:where(.landing) img { display: block; max-width: 100%; height: auto; }
+:where(.landing) a { color: inherit; text-decoration-thickness: 1px; text-underline-offset: 0.18em; }
+:where(.landing) :focus-visible { outline: 2px solid var(--color-focus); outline-offset: 3px; }
+:where(.landing) ::selection { background: color-mix(in oklab, var(--color-accent) 30%, transparent); color: var(--color-ink); }
+
+.lp-container {
+  width: 100%;
+  max-width: var(--container);
+  margin-inline: auto;
+  padding-inline: var(--gutter);
+}
+
+/* Wordmark: the brand's badge and name, solid (no gradient) */
+.lp-wordmark { display: inline-flex; align-items: center; gap: var(--space-xs); font-family: var(--font-display); font-weight: 650; font-size: 1.125rem; letter-spacing: -0.01em; text-decoration: none; }
+.lp-wordmark-badge { display: grid; place-items: center; width: 32px; height: 32px; border-radius: 10px; background: var(--color-accent); color: var(--color-accent-ink); font-size: var(--text-sm); }
+.lp-wordmark-x { color: var(--color-accent); }
+
+/* Nav: edge-aligned, one line */
+.lp-nav { display: flex; align-items: center; justify-content: space-between; gap: var(--space-md); min-height: var(--nav-height); }
+.lp-nav-links { display: flex; align-items: center; gap: var(--space-lg); }
+.lp-nav-link { color: var(--color-muted); font-size: var(--text-sm); text-decoration: none; white-space: nowrap; padding-block: var(--space-sm); transition: color var(--dur-micro) var(--ease-out); }
+.lp-nav-link:hover { color: var(--color-ink); }
+.lp-nav-link:active { color: var(--color-ink-2); }
+
+/* Controls: one primary style, one quiet style; 48px tall */
+.lp-button {
+  display: inline-flex; align-items: center; justify-content: center; gap: var(--space-xs);
+  min-height: 48px; padding-inline: var(--space-lg);
+  border-radius: var(--radius-control);
+  font-weight: 600; font-size: var(--text-md); white-space: nowrap; text-decoration: none;
+  transition: background-color var(--dur-micro) var(--ease-out), color var(--dur-micro) var(--ease-out), border-color var(--dur-micro) var(--ease-out);
+}
+.lp-button-primary { background: var(--color-accent); color: var(--color-accent-ink); }
+.lp-button-primary:hover { background: var(--color-accent-hover); }
+.lp-button-primary:active { background: var(--color-accent-press); }
+.lp-button-quiet { border: 1px solid var(--color-rule-strong); color: var(--color-ink); }
+.lp-button-quiet:hover { border-color: var(--color-muted); }
+.lp-button-quiet:active { background: var(--color-paper-2); }
+.lp-button[aria-disabled="true"], .lp-button:disabled { opacity: 0.55; cursor: not-allowed; }
+.lp-nav .lp-button { min-height: 44px; padding-inline: var(--space-md); }
+
+/* Captures: the real screens, framed in the brand's radius with an inset keyline, no chrome */
+.lp-shot { position: relative; overflow: hidden; border-radius: var(--radius-frame); background: var(--color-paper-2); }
+.lp-shot img { width: 100%; height: 100%; object-fit: cover; object-position: top left; }
+.lp-shot::after { content: ""; position: absolute; inset: 0; border-radius: inherit; outline: 1px solid var(--color-frame); outline-offset: -1px; pointer-events: none; }
+.lp-caption { margin-top: var(--space-md); color: var(--color-muted); font-size: var(--text-sm); max-width: 60ch; }
+
+/* Hero: Stage, the text on the left, the real profile on the right */
+.lp-hero { display: grid; align-items: center; min-height: calc(100dvh - var(--nav-height)); padding-block: var(--space-lg); }
+.lp-hero-grid { display: grid; grid-template-columns: minmax(0, 6fr) minmax(0, 7fr); gap: var(--space-3xl); align-items: center; }
+.lp-hero .lead { margin-top: var(--space-lg); font-size: var(--text-lead); line-height: 1.45; color: var(--color-ink-2); max-width: 44ch; }
+.lp-actions { display: flex; flex-wrap: wrap; gap: var(--space-sm); margin-top: var(--space-xl); }
+.lp-terms { margin-top: var(--space-lg); color: var(--color-muted); font-size: var(--text-sm); }
+.lp-hero .lp-shot { aspect-ratio: 1800 / 1240; } /* the first nine rows of the list */
+
+/* How it works: three real screens as a numbered run, each stage a split */
+.lp-how { padding-block: var(--section-gap) var(--section-gap-s); border-top: 1px solid var(--color-rule); }
+.lp-how h2 { margin-bottom: var(--space-2xl); }
+.lp-stages { list-style: none; counter-reset: stage; display: grid; gap: var(--space-3xl); }
+.lp-stage { counter-increment: stage; display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: var(--space-3xl); align-items: center; }
+.lp-stage-text::before { content: counter(stage); display: block; margin-bottom: var(--space-md); font-family: var(--font-display); font-size: var(--text-section); line-height: 1; color: var(--color-accent); font-variant-numeric: tabular-nums; }
+.lp-stage-text p { margin-top: var(--space-sm); color: var(--color-ink-2); font-size: var(--text-lead); line-height: 1.45; max-width: 46ch; }
+.lp-stage .shot-check { aspect-ratio: 1212 / 820; } /* the question and its first four options */
+.lp-stage .shot-today { aspect-ratio: 1824 / 430; }
+.lp-stage .shot-improving { aspect-ratio: 1212 / 500; }
+.lp-stage .shot-improving img { object-position: bottom left; }
+
+/* Why MENTORX: the three promises as rows, parted by hairlines */
+.lp-why { padding-block: var(--section-gap-s) var(--section-gap); }
+.lp-why-grid { display: grid; grid-template-columns: minmax(0, 4fr) minmax(0, 8fr); gap: var(--gap-columns); align-items: start; }
+.lp-rows > div { display: grid; grid-template-columns: minmax(0, 3fr) minmax(0, 5fr); gap: var(--gap-columns); padding-block: var(--space-xl); border-top: 1px solid var(--color-rule); }
+.lp-rows > div:last-child { border-bottom: 1px solid var(--color-rule); }
+.lp-rows dt { font-family: var(--font-display); font-weight: 650; font-size: var(--text-title); letter-spacing: -0.01em; }
+.lp-rows dd { color: var(--color-ink-2); font-size: var(--text-lead); line-height: 1.45; }
+
+/* Close: a change of paper, the action beside one last screen */
+.lp-close { background: var(--color-paper-2); padding-block: var(--section-gap-s); }
+.lp-close-grid { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: var(--space-3xl); align-items: center; }
+.lp-close .lp-actions { margin-top: var(--space-xl); }
+.lp-close .lp-shot { aspect-ratio: 1224 / 1108; background: var(--color-paper-3); }
+
+/* Footer: a mast, the wordmark large over the links */
+.lp-footer { padding-block: var(--space-3xl) var(--space-2xl); }
+.lp-mast { font-family: var(--font-display); font-weight: 650; font-size: var(--text-wordmark); line-height: 0.95; letter-spacing: -0.03em; color: var(--color-ink); }
+.lp-footer-row { display: flex; flex-wrap: wrap; align-items: flex-start; justify-content: space-between; gap: var(--space-lg); margin-top: var(--space-xl); padding-top: var(--space-lg); border-top: 1px solid var(--color-rule); color: var(--color-muted); font-size: var(--text-sm); }
+.lp-footer-credits { flex: 1 1 28rem; max-width: 70ch; }
+.lp-footer-credits button { min-height: 44px; }
+
+@media (max-width: 60rem) {
+  .landing { --gutter: 24px; --section-gap-s: 80px; --section-gap: 96px; --section-gap-l: 120px; }
+  .lp-hero { min-height: 0; }
+  .lp-hero-grid, .lp-stage, .lp-why-grid, .lp-rows > div, .lp-close-grid { grid-template-columns: minmax(0, 1fr); gap: var(--space-xl); }
+  .lp-rows > div { gap: var(--space-xs); }
+  .lp-nav-link-optional { display: none; }
+}
+@media (max-width: 40rem) {
+  .landing { --gutter: 16px; --section-gap-s: 56px; --section-gap: 72px; }
+  .lp-nav-links { gap: var(--space-md); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .lp-button, .lp-nav-link { transition: none; }
+}

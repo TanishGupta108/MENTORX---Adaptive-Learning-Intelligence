@@ -1,0 +1,28 @@
+[
+ {
+  "mode": "redesign",
+  "depth": "full",
+  "scope": "page",
+  "shape": "05 Workbench",
+  "theme": "brand",
+  "axes": "navy/grotesque/periwinkle",
+  "hero": "Stage",
+  "nav": "edge-aligned quiet bar",
+  "footer": "mast",
+  "imagery": "screenshots 5 (Playwright, local sample student)",
+  "photos": [],
+  "entry": "none",
+  "fingerprint": "stage/steps-split/rows/band/mast",
+  "sections": [
+   "hero: profile capture",
+   "steps: three captured screens",
+   "rows: three promises",
+   "band: close beside AI tutor capture",
+   "footer: mast"
+  ],
+  "signature": "the real learning profile after the ten-question check",
+  "waived": [],
+  "prompt": "MENTORX landing: adaptive maths and geography tutor for grades 4 to 8, sign up",
+  "date": "2026-11-14"
+ }
+]
