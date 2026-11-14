@@ -136,6 +136,8 @@ def correct_text(item: Item) -> str:
     if key["type"] in ("numeric", "text"):
         return " or ".join(key["values"])
     opts = {o["id"]: o for o in item.options}
+    if item.answer_type == "ordering":
+        return "in this order: " + " , ".join(math_text(opts[i]["html"]) for i in key["option_ids"])
     if is_map(item) and _letter_options(item):
         place = _asked_place(item)
         return "; ".join(
@@ -179,20 +181,24 @@ def response_text(item: Item, response: dict) -> str:
     )
 
 
-def _signature(inter: Interaction) -> str:
+def _signature(inter: Interaction, item: Item) -> str:
     if inter.saw_answer:
         return "revealed"
     if inter.is_correct:
         return "correct"
-    return wrong_signature(inter.response or {})
+    return wrong_signature(inter.response or {}, ordered=item.answer_type == "ordering")
 
 
-def wrong_signature(r: dict) -> str:
-    norm = (
-        re.sub(r"\s+", "", str(r.get("value", ""))).lower()
-        if "value" in r
-        else json.dumps(sorted([r.get("choice")] if "choice" in r else r.get("choices", [])))
-    )
+def wrong_signature(r: dict, ordered: bool = False) -> str:
+    """Cache key of a wrong answer. Ticked options are a set; an ordering answer's order IS
+    the answer, so two different wrong orders never share an explanation."""
+    if "value" in r:
+        norm = re.sub(r"\s+", "", str(r.get("value", ""))).lower()
+    else:
+        ids = [r.get("choice")] if "choice" in r else list(r.get("choices", []))
+        norm = json.dumps(ids if ordered else sorted(ids))
+        if ordered:
+            norm = "order:" + norm
     return "wrong:" + hashlib.sha256(norm.encode()).hexdigest()[:32]
 
 
@@ -382,7 +388,7 @@ def explain(db: Session, user: User, interaction_id: int) -> dict:
     if inter is None:
         raise AppError(404, "answer_not_found", "That answer wasn't found.")
     item = db.get(Item, inter.item_id)
-    sig = _signature(inter)
+    sig = _signature(inter, item)
     row = _cached(db, item.id, "explanation", sig)
     if row is not None:
         if row.status == "hidden":

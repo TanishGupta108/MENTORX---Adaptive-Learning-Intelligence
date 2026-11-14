@@ -98,7 +98,7 @@ class Item(Base):
     __table_args__ = (
         CheckConstraint(
             "answer_type IN ('numeric', 'multiple_choice', 'check_all', 'algebraic', "
-            "'numeric_expression', 'exact_fraction', 'exact_match', 'other')",
+            "'numeric_expression', 'exact_fraction', 'exact_match', 'ordering', 'other')",
             name="answer_type",
         ),
         CheckConstraint("difficulty IN ('easy', 'medium', 'hard', 'unrated')", name="difficulty"),

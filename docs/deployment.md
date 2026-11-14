@@ -80,6 +80,8 @@ so a fresh database has no maths content until it is seeded once. The app then a
    set DATABASE_URL=<paste the external URL>        (PowerShell: $env:DATABASE_URL="<url>")
    python scripts/seed_math.py --data-dir "C:/path/to/folder/with/Problems.csv"
    ```
+   Keep `Interactions.csv` in the same folder: the ordering questions' correct order is
+   recovered from it (without it they stay excluded; nothing else changes).
 4. It prints the number of skills, usable questions (single-skill and mixed), whether images
    were checked, prerequisite links and resources. It's safe to run again: admin edits are kept.
 

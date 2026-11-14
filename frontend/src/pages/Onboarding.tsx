@@ -217,9 +217,11 @@ export function OnboardingPage() {
                 )}
               </div>
             )}
-            <p className="mt-6 text-sm text-ink-muted">
-              Next: {goal === "learn_topic" ? "a few questions in your topic" : "a short placement check (about 10 questions, no time limit)"}.
-            </p>
+            {goal && (
+              <p className="mt-6 text-sm text-ink-muted">
+                Next: {goal === "learn_topic" ? "a few questions in your topic" : "a short placement check (about 10 questions, no time limit)"}.
+              </p>
+            )}
           </section>
         )}
 

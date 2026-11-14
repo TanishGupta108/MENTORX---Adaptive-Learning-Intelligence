@@ -7,8 +7,10 @@ export type Mode = "foundation" | "guided" | "independent" | "advanced";
 export type Difficulty = "easy" | "medium" | "hard" | "unrated";
 export type GoalType = "assess_overall" | "improve_weak" | "learn_topic";
 export type GoalKind = "strengthen_skills" | "weekly_practice" | "master_skill";
-export type AnswerType = "numeric" | "multiple_choice" | "check_all" | "algebraic" | "numeric_expression" | "exact_fraction" | "exact_match";
+export type AnswerType = "numeric" | "multiple_choice" | "check_all" | "ordering" | "algebraic" | "numeric_expression" | "exact_fraction" | "exact_match";
 export const CHOICE_TYPES: AnswerType[] = ["multiple_choice", "check_all"];
+/** Answered by typing (not by picking or ordering options). */
+export const isTyped = (t: AnswerType) => !CHOICE_TYPES.includes(t) && t !== "ordering";
 
 export type ModelInfo = {
   available: boolean;
@@ -225,7 +227,8 @@ export type Resource = {
 export type CorrectAnswer =
   | { type: "numeric"; values: string[] }
   | { type: "text"; values: string[] }
-  | { type: "multiple_choice" | "check_all"; option_ids: string[]; options_html: string[] };
+  | { type: "multiple_choice" | "check_all"; option_ids: string[]; options_html: string[] }
+  | { type: "ordering"; option_ids: string[]; options_html: string[] }; // in the correct order
 
 export type Mistake = {
   interaction_id: number;

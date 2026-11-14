@@ -6,7 +6,7 @@ import { tutor } from "../api/tutor";
 import type { Mistake, Mode, SkillDetail } from "../api/tutor";
 import { useApi } from "../hooks/useApi";
 import { useProfile } from "../components/AppShell";
-import { Html } from "../components/QuestionView";
+import { Html, OrderedItems } from "../components/QuestionView";
 import { AiExplain } from "../components/AiTutor";
 import { MAP_NOTICE, STATIC_CREDITS } from "../components/Credits";
 import { Disclosure } from "../components/Disclosure";
@@ -61,10 +61,14 @@ function MistakeItem({ m }: { m: Mistake }) {
             {m.revealed
               ? "You asked to see the answer."
               : m.your_response.value ??
-                yourChoices.map((c) => {
-                  const h = optionHtml(m, c);
-                  return h ? <Html key={c} html={h} className="option-html inline" /> : <span key={c}>{c}</span>;
-                })}
+                (m.answer_type === "ordering" ? (
+                  <OrderedItems items={yourChoices.map((c) => optionHtml(m, c) ?? c)} />
+                ) : (
+                  yourChoices.map((c) => {
+                    const h = optionHtml(m, c);
+                    return h ? <Html key={c} html={h} className="option-html inline" /> : <span key={c}>{c}</span>;
+                  })
+                ))}
           </dd>
         </div>
         <div className="flex flex-wrap gap-x-2">
@@ -72,7 +76,9 @@ function MistakeItem({ m }: { m: Mistake }) {
           <dd className="text-strength">
             {ca.type === "numeric" || ca.type === "text"
               ? ca.values.join(" or ")
-              : ca.options_html.map((h, i) => <Html key={i} html={h} className="option-html mr-2 inline" />)}
+              : ca.type === "ordering"
+                ? <OrderedItems items={ca.options_html} />
+                : ca.options_html.map((h, i) => <Html key={i} html={h} className="option-html mr-2 inline" />)}
           </dd>
         </div>
       </dl>

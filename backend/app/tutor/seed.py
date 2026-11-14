@@ -12,6 +12,10 @@ Multi-skill questions (n_skills > 1) are usable, but only in Mixed practice: the
 correctness score is never counted as separate evidence for each skill.
 Images are served only if scripts/check_images.py confirmed they load (image_check.json in
 the data folder); WIRIS formula images are converted to MathML and need no check.
+
+Ordering questions have no key in Problems.csv; it is recovered from correct answers in
+Interactions.csv (same folder) by strict rules (app/tutor/ordering.py). Without that file they
+stay excluded.
 """
 
 from __future__ import annotations
@@ -28,7 +32,7 @@ from sqlalchemy import delete, select
 from sqlalchemy.orm import Session
 
 from app.db.models import Subject
-from app.tutor import answers
+from app.tutor import answers, ordering
 from app.tutor.html import count_blanks, has_unrenderable, sanitize, scan_images
 from app.tutor.models import Item, ItemSkill, Resource, Skill, SkillPrerequisite
 from app.tutor.subjects import V2_SUBJECTS
@@ -64,9 +68,20 @@ TYPE_MAP = {
     "Numeric Expression": "numeric_expression",
     "Exact Fraction": "exact_fraction",
     "Exact Match": "exact_match",
+    "Ordering": "ordering",  # key recovered from student answers (app/tutor/ordering.py)
 }
-# "Ordering" answers are lists whose items may themselves contain ", ", so the correct
-# order can't be split reliably; those questions stay excluded.
+# Later parts of a multi-part problem that can't be answered without an earlier part (their
+# numbers, figure or answer live only there). Found by searching usable questions for "these
+# numbers", "the previous question", ... and reading each match; the matches that carry their
+# own context or image (131520, 312048, 26348, 84657, 182483, 182704) stay.
+NEEDS_EARLIER_PART = {
+    356457: "asks for the distance between 'these points'; the points are in part 1",
+    48968: "approximates 'your answer to the previous question'",
+    230845: "refers to 'the measure of center that you chose' earlier",
+    518599: "'these numbers' are listed only in part 1",
+    518807: "'these numbers' are listed only in part 1",
+    99441: "says 'repeat the previous problem'",
+}
 MIN_RATED_ATTEMPTS = 10  # a question's difficulty needs at least this many training answers
 MIN_ITEMS_FOR_SKILL = 5  # a skill is offered only with enough usable single-skill questions
 MAX_SKILLS = 3  # the model reads at most 3 skills per question
@@ -78,6 +93,22 @@ def load_image_check(data_dir: Path) -> dict[str, bool] | None:
         return None
     results = json.loads(path.read_text())["results"]
     return {url: bool(r["ok"]) for url, r in results.items()}
+
+
+def load_ordering_answers(data_dir: Path, problem_ids: set[int]) -> dict[int, list[str]] | None:
+    """Typed answers that were marked correct, per ordering question (None: no
+    Interactions.csv in the folder). Read in chunks: the file is about 250 MB."""
+    path = data_dir / "Interactions.csv"
+    if not path.exists():
+        return None
+    out: dict[int, list[str]] = {pid: [] for pid in problem_ids}
+    cols = ["problem_id", "answer_text", "discrete_score"]
+    for chunk in pd.read_csv(path, usecols=cols, chunksize=500_000):
+        hit = chunk[chunk["problem_id"].isin(problem_ids) & (chunk["discrete_score"] == 1)]
+        for pid, text in zip(hit["problem_id"], hit["answer_text"], strict=True):
+            if pd.notna(text):
+                out[int(pid)].append(str(text))
+    return out
 
 
 def split_dropdown(raw: str) -> list[str]:
@@ -131,6 +162,7 @@ def build_items(
     skills: pd.DataFrame,
     stats: dict,
     image_ok: dict[str, bool] | None = None,
+    ordering_answers: dict[int, list[str]] | None = None,
 ) -> list[ItemRow]:
     by_problem = skills.groupby("problem_id")["skill_id"].apply(
         lambda s: sorted(set(int(x) for x in s))
@@ -149,7 +181,10 @@ def build_items(
         answer_type = str(p["Answer Types"]).strip()
         kind = TYPE_MAP.get(answer_type, "other")
         dropdown = answer_type == "Drop Down"
-        option_src = _text(p["Fill-in Options"] if dropdown else p["Multiple Choice Options"])
+        fill_in_options = dropdown or kind == "ordering"
+        option_src = _text(
+            p["Fill-in Options"] if fill_in_options else p["Multiple Choice Options"]
+        )
         options: list[dict] = []
         key: list[str] | dict | None = []
         urls, unresolvable = scan_images(body_raw + " " + option_src)
@@ -181,6 +216,20 @@ def build_items(
             options = [{"id": str(i), "html": sanitize(o, img_ok)} for i, o in enumerate(raw_opts)]
             raw_ans = [_text(p["Fill-in Answers"]).strip()]
             key = answers.choice_key(raw_opts, raw_ans) if len(raw_opts) >= 2 else None
+        elif kind == "ordering":
+            if ordering_answers is None:
+                key, reason = None, reason or "ordering_key_needs_interactions_csv"
+            else:
+                rec = ordering.recover(option_src, body_raw, ordering_answers.get(pid, []))
+                if rec.order is None or len(rec.order) < 2:
+                    key = None
+                    reason = reason or f"ordering_key_not_recovered: {rec.reason}"[:80]
+                else:
+                    shown = ordering.display_order(len(rec.options), rec.order, pid)
+                    options = [
+                        {"id": str(i), "html": sanitize(rec.options[i], img_ok)} for i in shown
+                    ]
+                    key = [str(i) for i in rec.order]
         elif kind in ("multiple_choice", "check_all"):
             raw_opts = answers.split_options(option_src) if option_src else []
             raw_ans = (
@@ -194,6 +243,8 @@ def build_items(
             key = None
         if reason is None and not key:
             reason = "missing_or_unparseable_answer_key"
+        if reason is None and pid in NEEDS_EARLIER_PART:
+            reason = "needs_earlier_part"
         st = stats.get(str(pid), {})
         rate, n = st.get("success_rate"), int(st.get("attempts", 0))
         rows.append(
@@ -265,7 +316,11 @@ def seed_math(
 
     # items and the full question-skill mapping (admin availability toggles are preserved)
     image_ok = load_image_check(data_dir)
-    rows = build_items(problems, skills_df, stats, image_ok)
+    ordering_ids = {
+        int(x) for x in problems.loc[problems["Answer Types"] == "Ordering", "problem_id"]
+    }
+    ordering_answers = load_ordering_answers(data_dir, ordering_ids)
+    rows = build_items(problems, skills_df, stats, image_ok, ordering_answers)
     current = {i.id: i for i in db.scalars(select(Item).where(Item.subject_id == subject.id))}
     math_items = select(Item.id).where(Item.subject_id == subject.id)
     db.execute(delete(ItemSkill).where(ItemSkill.item_id.in_(math_items)))
@@ -298,6 +353,11 @@ def seed_math(
             1 for r in rows if r.item["exclusion_reason"] is None and r.item["n_skills"] > 1
         ),
         "images_checked": image_ok is not None,
+        "ordering_usable": sum(
+            1
+            for r in rows
+            if r.item["answer_type"] == "ordering" and not r.item["exclusion_reason"]
+        ),
         "prerequisites": prereqs,
         "resources": resources,
     }

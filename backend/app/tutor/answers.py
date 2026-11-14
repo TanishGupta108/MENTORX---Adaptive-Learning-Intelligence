@@ -6,6 +6,7 @@ Supported answer types (everything else is excluded from serving):
   decimals, fractions ("3/4") or mixed numbers ("1 1/2"); values are compared exactly.
 - multiple_choice: one correct option (dataset "Drop Down" questions are served this way).
 - check_all: the selected set must equal the correct set exactly.
+- ordering: every item, in exactly the correct order (`choices` is the student's order).
 - algebraic: an expression or equation, compared by mathematical equivalence (mathexpr.py).
   When the question asks for a form ("factor", "expand", "fewer terms", ...) the answer must
   also have the key's form, so copying the original expression back isn't accepted.
@@ -279,6 +280,11 @@ def check(answer_type: str, key: list[str] | dict, response: dict, question_html
         if not isinstance(choices, list) or not choices:
             raise ValueError("Select at least one option.")
         return sorted({str(c) for c in choices}) == key
+    if answer_type == "ordering":
+        order = response.get("choices")
+        if not isinstance(order, list) or sorted(str(c) for c in order) != sorted(key):
+            raise ValueError("Put every item in order, then submit.")
+        return [str(c) for c in order] == list(key)
     raise ValueError("This question type isn't supported.")
 
 
@@ -292,6 +298,9 @@ def describe_key(answer_type: str, key: list[str] | dict, options: list[dict]) -
         return {"type": "text", "values": alts[:4]}
     if answer_type == "numeric":
         return {"type": "numeric", "values": shown_values([Fraction(k) for k in key])}
+    if answer_type == "ordering":  # the items in the correct order
+        html = {o["id"]: o["html"] for o in options}
+        return {"type": "ordering", "option_ids": list(key), "options_html": [html[k] for k in key]}
     return {
         "type": answer_type,
         "option_ids": key,

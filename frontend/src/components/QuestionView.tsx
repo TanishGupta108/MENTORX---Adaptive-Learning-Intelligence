@@ -6,8 +6,8 @@
  */
 import { useEffect, useRef, useState } from "react";
 import type { FormEvent } from "react";
-import { Check, CheckCircle2, Lightbulb, X, XCircle } from "lucide-react";
-import { CHOICE_TYPES } from "../api/tutor";
+import { ArrowDown, ArrowUp, Check, CheckCircle2, Lightbulb, X, XCircle } from "lucide-react";
+import { isTyped } from "../api/tutor";
 import type { AnswerBody, CorrectAnswer, Question } from "../api/tutor";
 import { MapQuestion } from "./MapQuestion";
 import { Button, cx } from "./ui";
@@ -24,6 +24,20 @@ const DIFF_STYLE: Record<string, string> = {
   unrated: "text-ink-muted bg-surface-3",
   review: "text-accent bg-accent/10",
 };
+
+/** Items shown in a given order, numbered (ordering answers). */
+export function OrderedItems({ items, className }: { items: string[]; className?: string }) {
+  return (
+    <ol className={cx("inline-flex flex-wrap items-center gap-x-1.5 gap-y-1 align-middle", className)}>
+      {items.map((h, i) => (
+        <li key={i} className="inline-flex items-center gap-1">
+          <span className="text-xs text-ink-faint">{i + 1}.</span>
+          <Html html={h} className="option-html inline rounded bg-surface-3 px-2 py-0.5 text-ink" />
+        </li>
+      ))}
+    </ol>
+  );
+}
 
 export function DifficultyTag({ level }: { level: string }) {
   return <span className={cx("rounded-md px-2 py-0.5 text-xs font-medium capitalize", DIFF_STYLE[level] ?? DIFF_STYLE.unrated)}>{level}</span>;
@@ -42,24 +56,45 @@ export function QuestionView({ question, onSubmit, submitting, locked, feedback,
   const [value, setValue] = useState("");
   const [choice, setChoice] = useState<string | null>(null);
   const [choices, setChoices] = useState<string[]>([]);
+  const [order, setOrder] = useState<string[]>(() => question.options.map((o) => o.id));
   const inputRef = useRef<HTMLInputElement>(null);
 
-  const typed = !CHOICE_TYPES.includes(question.answer_type);
+  const typed = isTyped(question.answer_type);
+  const ordering = question.answer_type === "ordering";
 
   useEffect(() => {
     setValue("");
     setChoice(null);
     setChoices([]);
+    setOrder(question.options.map((o) => o.id));
     if (typed) inputRef.current?.focus();
+    // only a new question resets the answer (not a re-render of the same one)
   }, [question.item_id, typed]);
 
-  const ready = typed ? value.trim().length > 0 : question.answer_type === "multiple_choice" ? choice !== null : choices.length > 0;
+  const ready = typed
+    ? value.trim().length > 0
+    : ordering
+      ? order.length > 1
+      : question.answer_type === "multiple_choice"
+        ? choice !== null
+        : choices.length > 0;
+
+  function move(index: number, by: -1 | 1) {
+    setOrder((o) => {
+      const j = index + by;
+      if (j < 0 || j >= o.length) return o;
+      const next = o.filter((_, k) => k !== index);
+      next.splice(j, 0, o[index]!);
+      return next;
+    });
+  }
 
   function submit(e: FormEvent) {
     e.preventDefault();
     if (!ready || locked || submitting) return;
     const body: AnswerBody = { item_id: question.item_id };
     if (typed) body.value = value.trim();
+    else if (ordering) body.choices = order;
     else if (question.answer_type === "multiple_choice") body.choice = choice!;
     else body.choices = choices;
     onSubmit(body);
@@ -108,13 +143,55 @@ export function QuestionView({ question, onSubmit, submitting, locked, feedback,
               feedback ? (feedback.correct ? "border-strength" : "border-weakness") : "border-line-strong focus:border-brand",
             )}
           />
+          {question.input_hint && question.answer_type !== "algebraic" && (
+            // the placeholder is cut off on narrow fields and disappears while typing
+            <p className="mt-1.5 text-xs text-ink-faint">{question.input_hint}</p>
+          )}
           {question.answer_type === "algebraic" && (
             <p className="mt-1.5 text-xs text-ink-faint">Type powers as x^2, roots as sqrt(5), π as pi. Any equivalent answer counts unless the question asks for a particular form.</p>
           )}
         </div>
       )}
 
-      {!typed && (
+      {ordering && (
+        <fieldset>
+          <legend className="mb-2 text-sm font-medium text-ink-muted">Put the items in order with the arrows (top = first)</legend>
+          <ol className="space-y-2.5">
+            {order.map((id, i) => {
+              const o = question.options.find((x) => x.id === id);
+              const right = feedback ? correctIds[i] === id : null;
+              return (
+                <li
+                  key={id}
+                  className={cx(
+                    "flex min-h-12 items-center gap-3 rounded-xl border px-3 py-2",
+                    right === true && "border-strength bg-strength/8",
+                    right === false && "border-weakness bg-weakness/8",
+                    right === null && "border-line",
+                  )}
+                >
+                  <span className="grid size-7 shrink-0 place-items-center rounded-full border border-line-strong text-xs font-semibold text-ink-muted" aria-hidden>
+                    {i + 1}
+                  </span>
+                  <Html html={o?.html ?? ""} className="option-html flex-1" />
+                  {!locked && (
+                    <span className="flex shrink-0 gap-1">
+                      <button type="button" className="grid size-9 place-items-center rounded-lg border border-line hover:bg-surface-2 disabled:opacity-40" onClick={() => move(i, -1)} disabled={i === 0} aria-label={`Move item ${i + 1} up`}>
+                        <ArrowUp className="size-4" />
+                      </button>
+                      <button type="button" className="grid size-9 place-items-center rounded-lg border border-line hover:bg-surface-2 disabled:opacity-40" onClick={() => move(i, 1)} disabled={i === order.length - 1} aria-label={`Move item ${i + 1} down`}>
+                        <ArrowDown className="size-4" />
+                      </button>
+                    </span>
+                  )}
+                </li>
+              );
+            })}
+          </ol>
+        </fieldset>
+      )}
+
+      {!typed && !ordering && (
         <fieldset className={cx(letterOptions ? "grid grid-cols-2 gap-2.5 sm:grid-cols-4" : "space-y-2.5")}>
           <legend className="mb-2 text-sm font-medium text-ink-muted">
             {question.answer_type === "check_all" ? "Select all that apply" : letterOptions ? "Choose the letter on the map" : "Choose one answer"}
@@ -199,6 +276,8 @@ export function FeedbackPanel({ feedback }: { feedback: { correct: boolean; corr
             Correct answer:{" "}
             {ca.type === "numeric" || ca.type === "text" ? (
               <span className="font-mono text-ink">{ca.values.join(" or ")}</span>
+            ) : ca.type === "ordering" ? (
+              <OrderedItems items={ca.options_html} />
             ) : (
               <span className="inline-flex flex-wrap gap-2 align-middle">
                 {ca.options_html.map((h, i) => (
@@ -213,6 +292,11 @@ export function FeedbackPanel({ feedback }: { feedback: { correct: boolean; corr
   );
 }
 
+/** Hint text from Markdown notes: no bold markers, list dashes as bullets (line breaks kept). */
+export function plainHint(text: string) {
+  return text.replace(/\*\*/g, "").replace(/^\s*[-*]\s+/gm, "• ");
+}
+
 export function HintBox({ text, source, label, note }: { text: string; source: string; label?: string; note?: string }) {
   return (
     <div className="flex gap-3 rounded-2xl border border-accent/30 bg-accent/8 p-4 text-sm animate-rise">
@@ -220,7 +304,7 @@ export function HintBox({ text, source, label, note }: { text: string; source: s
       <div>
         <p className="mb-1 text-xs font-semibold uppercase tracking-wider text-accent">Hint · {source}</p>
         {note && <p className="mb-1.5 text-xs text-developing">{note}</p>}
-        <p className="leading-6 text-ink/90">{text.replace(/\*\*/g, "")}</p>
+        <p className="whitespace-pre-line leading-6 text-ink/90">{plainHint(text)}</p>
         {label && <p className="mt-2 text-[11px] text-ink-faint">{label}</p>}
       </div>
     </div>

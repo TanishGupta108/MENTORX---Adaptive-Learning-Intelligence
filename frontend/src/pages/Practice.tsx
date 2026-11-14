@@ -8,7 +8,7 @@ import { AI_THINKING, AiErrorNote, AiExplain, AiLabel, toAiError, useAiEnabled }
 import type { AiError } from "../components/AiTutor";
 import { useProfile } from "../components/AppShell";
 import { Disclosure } from "../components/Disclosure";
-import { DifficultyTag, HintBox, QuestionView } from "../components/QuestionView";
+import { DifficultyTag, HintBox, plainHint, QuestionView } from "../components/QuestionView";
 import { launchFor, useLauncher } from "../components/StartAction";
 import { WhyButton } from "../components/WhyButton";
 import { Button, Card, cx, ErrorState, PageLoader, pct, Ring, Spinner } from "../components/ui";
@@ -261,7 +261,7 @@ export function PracticePage() {
                   <p className="mb-1 flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-accent">
                     <Sparkles className="size-3.5" aria-hidden /> AI tutor
                   </p>
-                  <p className="leading-6 text-ink/90">{aiHint.text.replace(/\*\*/g, "")}</p>
+                  <p className="whitespace-pre-line leading-6 text-ink/90">{plainHint(aiHint.text)}</p>
                   {aiHint.label && <AiLabel text={aiHint.label} />}
                 </div>
               ))}

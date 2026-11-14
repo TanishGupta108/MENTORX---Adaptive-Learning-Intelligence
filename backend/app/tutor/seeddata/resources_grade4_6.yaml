@@ -755,6 +755,42 @@ resources:
 
       **Answer:** −5°C, −1°C, 0°C, 3°C.
 
+  # ------------------------------------------------------------ 6.NS.C.7b
+  - key: notes-order-statements
+    skill: 6.NS.C.7b
+    kind: notes
+    title: "Order statements in real-world contexts"
+    minutes: 4
+    content: |
+      ### Key idea
+      An inequality like −3 > −8 is a statement about **position on the number line**: −3 is to the right of −8. In a real situation it also has a meaning: −3°C is **warmer** than −8°C.
+
+      ### Steps
+      1. Decide what the numbers measure (temperature, money, height above sea level, ...) and what 0 means.
+      2. Place the numbers on a number line: further right is greater.
+      3. Say what "greater" means in the situation: warmer, more money, higher up.
+
+      ### In real life
+      - A balance of −$12 is less than a balance of −$4: owing $12 leaves you with less money than owing $4.
+      - An elevation of −20 m is lower than −5 m: it is further below sea level.
+
+      ### Watch out
+      - With negatives, the number that looks "bigger" (−12) is the **smaller** one.
+      - Read what the question asks for: "least to greatest" starts with the number furthest left.
+  - key: example-order-statements
+    skill: 6.NS.C.7b
+    kind: worked_example
+    title: "Worked example: ordering bank balances"
+    minutes: 3
+    content: |
+      **Problem.** Four friends' bank balances are −$15, $4, −$2.50 and $0. Order them from least to greatest, and explain what −15 < −2.50 means.
+
+      1. Place them on a number line: −15 is furthest left, then −2.50, then 0, then 4.
+      2. Least to greatest is left to right.
+      3. −15 < −2.50 means the friend who owes $15 has less money than the friend who owes $2.50.
+
+      **Answer:** −$15, −$2.50, $0, $4.
+
   # ------------------------------------------------------------ 6.NS.C.7c
   - key: notes-absolute-value
     skill: 6.NS.C.7c

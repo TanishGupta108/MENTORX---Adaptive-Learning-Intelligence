@@ -51,7 +51,7 @@ answers).
 ## Answer checking (`answers.py`, `mathexpr.py`)
 
 Types: numeric; multiple choice (and drop-down; Geography map questions too); check-all;
-algebraic (equivalence, plus the key's form when the question says factor, expand, ...); numeric
+ordering; algebraic (equivalence, plus the key's form when the question says factor, expand, ...); numeric
 expression; exact fraction (the written form); exact match. Typed input passes a strict token
 allowlist before SymPy sees it. Spreadsheet damage in the export is undone ("6-May" was 5/6).
 
@@ -71,6 +71,15 @@ allowlist before SymPy sees it. Spreadsheet damage in the export is undone ("6-M
 6. Percent: when the question mentions % or "percent", "22%" means 22; otherwise 50% means 0.5.
 7. Harmless decoration is removed first: "$", "x =", a unit after the number (a word right after
    the blank in the question, or a common unit), "1 000", "- 3", "(5)".
+
+**Ordering questions** (`ordering.py`): FoundationalASSIST stores no key for them (for all 32 the
+"answer" column repeats the options in no particular order). The order is recovered at seed time
+from `Interactions.csv`: at least 20 answers marked correct, at least 60% of them giving one same
+order, every item matched to exactly one option (by text, or by exact value for numbers written
+as formulas), never from letter answers ("C. , A. , B."), and for number lists the order must also
+equal the sort the question asks for. 13 of 32 pass (2026-11-14); the rest stay excluded with
+the reason (`ordering_key_not_recovered: ...`). Students reorder items with up/down buttons;
+only the exact order is right; items are never shown already in order (or reversed).
 
 The correct answer is shown exactly first, with a rounded hint: `11/3 (about 3.67)`.
 `scripts/regrade.py` re-checks old answers with these rules (wrong → right only, audited with
@@ -160,8 +169,8 @@ The correct answer is shown exactly first, with a rounded hint: `11/3 (about 3.6
 ## Deferred (not in v3)
 
 Worked-example fading, self-explanation prompts, confidence ratings, per-student target success
-tuning, free click-anywhere map answers, ordering questions, World/Asia/India maps, model-state
-caching across requests, moving the AI call off the database session, a light theme, DBE-KT22.
+tuning, free click-anywhere map answers, the 19 ordering questions whose order can't be recovered,
+World/Asia/India maps, model-state caching across requests, a light theme, DBE-KT22.
 
 ## What is original, mocked or limited (honest list)
 
@@ -175,5 +184,7 @@ caching across requests, moving the AI call off the database session, a light th
 - **Images** load from the dataset's own servers (`check_images.py` + a reseed remove broken ones).
 - **Thresholds** (mastery, stuck, pace) are first choices from the learning-science literature, not
   tuned on our students yet; tune them after a pilot.
-- **Database:** PostgreSQL. Some dataset questions refer to earlier parts of their problem set;
-  admins can switch any question off.
+- **Database:** PostgreSQL. Some dataset questions refer to earlier parts of their problem set.
+  Six that can't be answered alone are excluded (`seed.NEEDS_EARLIER_PART`, reason
+  `needs_earlier_part`), found by a keyword search plus reading each match; the search can't find
+  every case, so admins can still switch any question off.

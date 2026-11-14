@@ -15,7 +15,7 @@ The detailed design and the honest list of what is limited are in `docs/modules/
 - Live smoke PASSED (v3) incl. Geography. One earlier run timed out (>60 s) on one request just
   after seeding, probably the first Geography model load on the free Render instance; it left one
   smoke-*@example.com account behind.
-- Checks: backend 290 passed, frontend 43 passed, typecheck and build clean.
+- Checks (2026-11-14): backend 305 passed, frontend 45 passed, typecheck and build clean.
 - 2026-11-14 review fixes: AI calls release their DB connection before calling the model
   (`ai._generate`); `PATCH /profile` uses onboarding's checks (`profile.check_update`);
   site-wide sign-up cap `REGISTRATIONS_GLOBAL_PER_HOUR`.
@@ -35,8 +35,14 @@ The detailed design and the honest list of what is limited are in `docs/modules/
 
 ## Open items (next work)
 1. Teacher review of the AI-assisted notes (`backend/app/tutor/seeddata/resources_grade*.yaml`).
-2. Ordering questions (32) are still excluded: options contain ", ", so they can't be split safely.
-3. Check the UI in a browser: diagnosis trace, AI hint/explain, Mixed practice, Admin → Model monitor.
+2. Reseed production Maths (needs the user's Render DB URL in `backend/.env.prod`): brings the 13
+   ordering questions and the 6 `needs_earlier_part` exclusions live. Migration `d7a2f9c4e1b3`
+   runs on deploy by itself.
+3. Done 2026-11-14 (headless Chrome via playwright-core in the scratchpad, local servers):
+   onboarding, placement check, diagnosis trace + predictions, skill notes, practice incl. ordering,
+   My mistakes, real AI explain + AI hint, Mixed practice, Geography map check, Progress, Admin
+   model monitor all worked. Fixed: multi-line skill hints, cut-off numeric input hint, onboarding
+   "Next:" text shown before a goal was chosen.
 4. Pilot with real students, then tune the thresholds in `backend/app/core/config.py`.
 5. Optional: add the original Kaggle `dkt_best.pth` (194 skills) for comparison; the current
    DKT-Q (AUC 0.812) is better.
@@ -45,7 +51,7 @@ The detailed design and the honest list of what is limited are in `docs/modules/
 ## Layout
 - `backend/app/tutor/`: the tutor (v2 Maths, v3 multi-subject).
   - Subjects (codes, credits, per-subject options): `subjects.py`; student's local day: `localtime.py`.
-  - Answer checking: `answers.py`, `mathexpr.py` (safe SymPy).
+  - Answer checking: `answers.py`, `mathexpr.py` (safe SymPy). Ordering keys: `ordering.py`.
   - Question HTML, images, WIRIS → MathML: `html.py`.
   - Model serving: `kt.py`, with NumPy inference in `app/ml/dkt.py`.
   - Adaptive diagnostic and reassessment: `assess.py`.
@@ -75,9 +81,10 @@ In Git Bash, Node needs: `export PATH="$(cygpath "$LOCALAPPDATA")/Programs/node-
 - Checks: `cd backend && .venv/Scripts/ruff check . && .venv/Scripts/ruff format --check . && .venv/Scripts/python -m pytest -q`
   and `cd frontend && npm run typecheck && npx vitest run && npm run build`.
 - Reseed: `python scripts/seed_math.py --data-dir "C:/Users/Tanish Gupta/Downloads"`.
-  The CSVs and `image_check.json` live there. Never commit the dataset.
+  The CSVs (incl. `Interactions.csv`, needed for ordering keys) and `image_check.json` live there.
+  Never commit the dataset or any recovered keys (Maths question ids are public dataset ids).
 - Image check: `python scripts/check_images.py --data-dir <same folder>`.
-- Migrations: `alembic upgrade head`. The latest is `c5e8a1f4b2d7`.
+- Migrations: `alembic upgrade head`. The latest is `d7a2f9c4e1b3` (ordering answer type).
 - Geography reseed: `python scripts/seed_geography.py --data-dir "C:/Users/Tanish Gupta/Downloads/mentorx-new-subject/slepemapy-2015-05-21"`.
 
 ## Rules that must hold

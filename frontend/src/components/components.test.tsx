@@ -155,3 +155,44 @@ describe("AI status", () => {
     expect(screen.queryByRole("button", { name: /explain with ai/i })).not.toBeInTheDocument();
   });
 });
+
+describe("ordering questions", () => {
+  const orderingQuestion = {
+    item_id: 5429,
+    skill: { id: 151, code: "6.NS.C.7a", name: "Order rational numbers" },
+    body_html: "<p>Put these numbers in order, from least to greatest.</p>",
+    answer_type: "ordering" as const,
+    options: [
+      { id: "0", html: "<p>-1</p>" },
+      { id: "1", html: "<p>-4.2</p>" },
+      { id: "2", html: "<p>3.5</p>" },
+    ],
+    difficulty: "medium" as const,
+    position: 1,
+    total: 5,
+  };
+
+  it("reorders items with the arrows and submits them in the new order", async () => {
+    const onSubmit = vi.fn();
+    render(<QuestionView question={orderingQuestion} onSubmit={onSubmit} submitting={false} locked={false} />);
+    const items = () => screen.getAllByRole("listitem").map((li) => li.textContent);
+    expect(items()[0]).toContain("-1");
+    await userEvent.click(screen.getByRole("button", { name: "Move item 2 up" }));
+    expect(items()[0]).toContain("-4.2");
+    expect(screen.getByRole("button", { name: "Move item 1 up" })).toBeDisabled();
+    await userEvent.click(screen.getByRole("button", { name: "Submit answer" }));
+    expect(onSubmit).toHaveBeenCalledWith({ item_id: 5429, choices: ["1", "0", "2"] });
+  });
+
+  it("shows the correct order after a wrong answer, numbered", () => {
+    const feedback = {
+      correct: false,
+      message: "Not quite.",
+      correct_answer: { type: "ordering" as const, option_ids: ["1", "0", "2"], options_html: ["<p>-4.2</p>", "<p>-1</p>", "<p>3.5</p>"] },
+    };
+    render(<QuestionView question={orderingQuestion} onSubmit={vi.fn()} submitting={false} locked feedback={feedback} />);
+    expect(screen.queryByRole("button", { name: /Move item/ })).toBeNull();
+    const status = screen.getByRole("status");
+    expect(status.textContent).toMatch(/1\.\s*-4\.2\s*2\.\s*-1\s*3\.\s*3\.5/);
+  });
+});
