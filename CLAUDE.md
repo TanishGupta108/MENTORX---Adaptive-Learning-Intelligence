@@ -19,6 +19,9 @@ The detailed design and the honest list of what is limited are in `docs/modules/
 - 2026-11-14 review fixes: AI calls release their DB connection before calling the model
   (`ai._generate`); `PATCH /profile` uses onboarding's checks (`profile.check_update`);
   site-wide sign-up cap `REGISTRATIONS_GLOBAL_PER_HOUR`.
+- Commit 047bc65 (2026-11-14) carries the wrong title ("fix: issues from the project review",
+  a copy of 4cf14b5). It actually adds ordering questions, the needs_earlier_part exclusions and
+  the UI-check fixes. Not rewritten, to avoid a force push on main.
 - Production scripts from the laptop: put the Render External Database URL in `backend/.env.prod`
   (git-ignored) and set it as DATABASE_URL for the script; never print it.
 
@@ -35,9 +38,8 @@ The detailed design and the honest list of what is limited are in `docs/modules/
 
 ## Open items (next work)
 1. Teacher review of the AI-assisted notes (`backend/app/tutor/seeddata/resources_grade*.yaml`).
-2. Reseed production Maths (needs the user's Render DB URL in `backend/.env.prod`): brings the 13
-   ordering questions and the 6 `needs_earlier_part` exclusions live. Migration `d7a2f9c4e1b3`
-   runs on deploy by itself.
+2. Done 2026-11-14: production Maths reseeded (13 ordering questions usable, 6 needs_earlier_part
+   exclusions, 132 available skills, 2,950 single-skill questions); live smoke PASSED (v3).
 3. Done 2026-11-14 (headless Chrome via playwright-core in the scratchpad, local servers):
    onboarding, placement check, diagnosis trace + predictions, skill notes, practice incl. ordering,
    My mistakes, real AI explain + AI hint, Mixed practice, Geography map check, Progress, Admin
