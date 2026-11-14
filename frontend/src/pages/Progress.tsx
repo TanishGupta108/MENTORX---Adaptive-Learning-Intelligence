@@ -77,16 +77,16 @@ export function ProgressPage() {
 
       <Card>
         <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
-          <h2 className="font-semibold">Skills you've worked on</h2>
+          <h2 className="font-semibold">Skills you’ve worked on</h2>
           <label className="flex min-h-11 cursor-pointer items-center gap-2 text-sm text-ink-muted sm:min-h-0">
-            <input type="checkbox" className="size-4 accent-[#8b8cff]" checked={showPred} onChange={(e) => setShowPred(e.target.checked)} />
+            <input type="checkbox" className="size-4 accent-brand" checked={showPred} onChange={(e) => setShowPred(e.target.checked)} />
             Show predictions
           </label>
         </div>
         <div className="-mx-5 overflow-x-auto px-5">
           <table className="w-full min-w-[480px] text-sm">
             <thead>
-              <tr className="border-b border-line text-left text-xs uppercase tracking-wider text-ink-faint">
+              <tr className="border-b border-line text-left text-sm text-ink-muted">
                 <th className="py-2 pr-3 font-medium">Skill</th>
                 <th className="py-2 pr-3 font-medium">Status</th>
                 <th className="py-2 pr-3 text-right font-medium">Correct</th>
@@ -117,17 +117,17 @@ export function ProgressPage() {
 
       {history.length > 0 && (
         <Card>
-          <h2 className="mb-3 font-semibold">History</h2>
-          <ul className="space-y-1.5 text-sm">
+          <h2 className="mb-2 text-[19px] font-semibold tracking-tight">History</h2>
+          <ul className="text-sm">
             {shown.map((x) => (
-              <li key={x.key} className="flex items-center gap-3 rounded-xl bg-surface-2/60 px-3 py-2.5">
+              <li key={x.key} className="flex items-center gap-3 border-b border-line py-3 last:border-b-0">
                 <span className="min-w-0 flex-1">
                   <span className="block truncate font-medium">{x.label}</span>
                   <span className="block text-xs text-ink-faint">
-                    {new Date(x.at).toLocaleDateString()} · {x.n}
+                    {new Date(x.at).toLocaleDateString()}, {x.n}
                   </span>
                 </span>
-                <span className="font-semibold">{pct(x.acc)}</span>
+                <span className="font-semibold tabular-nums">{pct(x.acc)}</span>
               </li>
             ))}
           </ul>

@@ -114,7 +114,7 @@ export function OnboardingPage() {
         <Logo />
         <div className="flex items-center gap-2" role="progressbar" aria-valuemin={1} aria-valuemax={steps.length} aria-valuenow={stepIndex + 1} aria-label={`Step ${stepIndex + 1} of ${steps.length}`}>
           {steps.map((s, i) => (
-            <span key={s} className={cx("h-1.5 rounded-full transition-all", i <= stepIndex ? "w-8 bg-brand" : "w-4 bg-line-strong")} />
+            <span key={s} className={cx("h-1.5 w-8 rounded-full transition-colors duration-[220ms]", i <= stepIndex ? "bg-brand" : "bg-line-strong")} />
           ))}
         </div>
       </div>

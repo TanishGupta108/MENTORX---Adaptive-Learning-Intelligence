@@ -38,7 +38,7 @@ export function SubjectSwitcher({ subjects, current, onSwitched, className }: { 
         value={value}
         disabled={busy}
         onChange={(e) => void change(e.target.value)}
-        className="h-11 max-w-[11rem] rounded-xl border border-line-strong bg-surface-2 px-3 text-sm font-medium text-ink focus:border-brand focus:outline-none sm:h-10"
+        className="h-11 max-w-[11rem] rounded-[var(--radius-control)] border border-line-strong bg-surface-2 px-3 text-sm font-medium text-ink disabled:cursor-not-allowed disabled:opacity-55 sm:h-10"
       >
         {subjects.map((s) => (
           <option key={s.code} value={s.code}>
@@ -47,7 +47,7 @@ export function SubjectSwitcher({ subjects, current, onSwitched, className }: { 
         ))}
       </select>
       {error && (
-        <p role="alert" className="absolute right-0 top-full mt-1 w-56 rounded-lg bg-surface-2 p-2 text-xs text-developing shadow-lg">
+        <p role="alert" className="absolute right-0 top-full mt-1 w-56 rounded-lg border border-line-strong bg-surface-2 p-2 text-xs text-developing">
           {error}
         </p>
       )}

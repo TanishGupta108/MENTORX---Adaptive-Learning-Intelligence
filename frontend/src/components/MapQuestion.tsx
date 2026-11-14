@@ -102,7 +102,7 @@ export function MapQuestion({ media, selected = null, onSelect, disabled, correc
   if (error) {
     body = (
       <div className="flex aspect-[4/3] flex-col items-center justify-center gap-3 rounded-2xl border border-line bg-surface-2 p-6 text-center text-sm text-ink-muted" role="alert">
-        Couldn't load the map.
+        Couldn’t load the map.
         <Button variant="secondary" size="sm" onClick={retry}>
           Try again
         </Button>

@@ -65,24 +65,23 @@ const NAV = [
 ];
 const ADMIN = { to: "/admin", label: "Admin", icon: Shield };
 
-function SideNav({ admin }: { admin: boolean }) {
+/** The top bar's destinations: text links, the current one marked by ink and a brand rule. */
+function TopNav({ admin }: { admin: boolean }) {
   const items = admin ? [...NAV, ADMIN] : NAV;
   return (
-    <nav className="space-y-1" aria-label="Main">
-      {items.map(({ to, label, icon: Icon }) => (
+    <nav className="hidden h-full items-stretch gap-1 lg:flex" aria-label="Main">
+      {items.map(({ to, label }) => (
         <NavLink
           key={to}
           to={to}
           className={({ isActive }) =>
-            cx("flex min-h-11 items-center gap-3 rounded-xl px-3 text-sm font-medium transition-colors", isActive ? "bg-brand-soft text-ink" : "text-ink-muted hover:bg-surface-2 hover:text-ink")
+            cx(
+              "flex items-center border-b-2 px-3 text-sm font-medium transition-colors duration-[120ms]",
+              isActive ? "border-brand text-ink" : "border-transparent text-ink-muted hover:text-ink",
+            )
           }
         >
-          {({ isActive }) => (
-            <>
-              <Icon className={cx("size-[18px]", isActive && "text-brand")} aria-hidden />
-              {label}
-            </>
-          )}
+          {label}
         </NavLink>
       ))}
     </nav>
@@ -92,11 +91,11 @@ function SideNav({ admin }: { admin: boolean }) {
 function BottomNav({ admin }: { admin: boolean }) {
   const items = admin ? [...NAV, ADMIN] : NAV;
   return (
-    <nav aria-label="Main (mobile)" className="fixed inset-x-0 bottom-0 z-30 border-t border-line bg-canvas/95 pb-[env(safe-area-inset-bottom)] backdrop-blur lg:hidden">
+    <nav aria-label="Main (mobile)" className="fixed inset-x-0 bottom-0 z-30 border-t border-line bg-canvas pb-[env(safe-area-inset-bottom)] lg:hidden">
       <ul className="mx-auto flex max-w-md">
         {items.map(({ to, label, icon: Icon }) => (
           <li key={to} className="flex-1">
-            <NavLink to={to} className={({ isActive }) => cx("flex min-h-14 flex-col items-center justify-center gap-0.5 text-[11px] font-medium", isActive ? "text-brand" : "text-ink-muted hover:text-ink")}>
+            <NavLink to={to} className={({ isActive }) => cx("flex min-h-14 flex-col items-center justify-center gap-0.5 text-xs font-medium", isActive ? "text-ink" : "text-ink-muted hover:text-ink")}>
               <Icon className="size-5" aria-hidden />
               {label}
             </NavLink>
@@ -141,7 +140,7 @@ function AvatarMenu({ profile }: { profile: Profile }) {
     navigate("/", { replace: true });
   }
 
-  const item = "flex min-h-11 w-full items-center gap-2.5 rounded-lg px-3 text-left text-sm hover:bg-surface-3";
+  const item = "flex min-h-11 w-full items-center gap-2.5 rounded-lg px-3 text-left text-sm hover:bg-surface-3 active:bg-line";
   return (
     <div className="relative" ref={ref}>
       <button
@@ -150,12 +149,12 @@ function AvatarMenu({ profile }: { profile: Profile }) {
         aria-haspopup="menu"
         aria-expanded={open}
         aria-label="Account menu"
-        className="grid size-11 place-items-center rounded-full border border-line-strong bg-surface-3 text-sm font-semibold hover:border-brand sm:size-10"
+        className="grid size-11 place-items-center rounded-full border border-line-strong bg-surface-2 text-sm font-semibold transition-colors duration-[120ms] hover:border-ink-faint active:bg-surface-3 sm:size-10"
       >
         {initials || <UserRound className="size-4" />}
       </button>
       {open && (
-        <div role="menu" className="absolute right-0 top-full z-40 mt-2 w-60 rounded-2xl border border-line-strong bg-surface-2 p-1.5 shadow-2xl animate-rise">
+        <div role="menu" className="absolute right-0 top-full z-40 mt-2 w-60 rounded-[var(--radius-card)] border border-line-strong bg-surface-2 p-1.5">
           <div className="px-3 py-2">
             <p className="truncate text-sm font-medium">{profile.full_name}</p>
             <p className="truncate text-xs text-ink-faint">{profile.email}</p>
@@ -192,31 +191,23 @@ export function AppShell() {
 
   return (
     <SubjectsContext.Provider value={{ subjects: subjects.data, reload: subjects.reload }}>
-      <div className="min-h-screen lg:grid lg:grid-cols-[232px_1fr]">
-        <aside className="sticky top-0 hidden h-screen border-r border-line bg-surface/60 lg:block">
-          <div className="flex h-full flex-col gap-8 p-4">
-            <Link to="/home" className="px-2 pt-1" aria-label="MENTORX home">
-              <Logo />
-            </Link>
-            <SideNav admin={profile.is_admin} />
-          </div>
-        </aside>
-
-        <div className="min-w-0">
-          <header className="sticky top-0 z-30 border-b border-line bg-canvas/90 backdrop-blur">
-            <div className="mx-auto flex h-16 max-w-[960px] items-center justify-between gap-3 px-4 sm:px-6">
-              <Link to="/home" className="lg:invisible" aria-label="MENTORX home">
+      <div className="min-h-screen">
+        <header className="sticky top-0 z-30 border-b border-line bg-canvas">
+          <div className="mx-auto flex h-16 max-w-[1104px] items-stretch justify-between gap-4 px-4 sm:px-8">
+            <div className="flex items-stretch gap-8">
+              <Link to="/home" className="flex items-center" aria-label="MENTORX home">
                 <Logo />
               </Link>
-              {topRight}
+              <TopNav admin={profile.is_admin} />
             </div>
-          </header>
-          <main className={cx("mx-auto w-full px-4 pb-28 pt-6 sm:px-6 lg:pb-12 lg:pt-8", focused ? "max-w-[720px]" : "max-w-[960px]")}>
-            <Suspense fallback={<PageLoader />}>
-              <Outlet />
-            </Suspense>
-          </main>
-        </div>
+            <div className="flex items-center">{topRight}</div>
+          </div>
+        </header>
+        <main className={cx("mx-auto w-full px-4 pb-28 pt-8 sm:px-8 lg:pb-16 lg:pt-10", focused ? "max-w-[784px]" : "max-w-[1104px]")}>
+          <Suspense fallback={<PageLoader />}>
+            <Outlet />
+          </Suspense>
+        </main>
         <BottomNav admin={profile.is_admin} />
       </div>
     </SubjectsContext.Provider>

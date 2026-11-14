@@ -44,7 +44,7 @@ export function Markdown({ source }: { source: string }) {
           if (h) {
             flush();
             out.push(
-              <h4 key={`h${bi}-${li}`} className="pt-1 text-sm font-semibold uppercase tracking-wider text-brand">
+              <h4 key={`h${bi}-${li}`} className="pt-1 text-[15px] font-semibold text-ink">
                 {h[1]}
               </h4>,
             );

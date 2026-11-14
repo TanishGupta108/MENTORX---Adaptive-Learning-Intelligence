@@ -44,13 +44,13 @@ function Summary({ s, kind, skillId }: { s: PracticeSummary; kind: PracticeKind;
   return (
     <Card className="mx-auto max-w-xl p-8 text-center">
       <div className="flex justify-center">
-        <Ring value={s.accuracy} size={110} stroke={9} label={<span className="text-xl">{pct(s.accuracy)}</span>} color={s.accuracy >= 0.7 ? "#34d399" : s.accuracy >= 0.4 ? "#fbbf24" : "#fb7185"} />
+        <Ring value={s.accuracy} size={110} stroke={9} label={<span className="text-xl">{pct(s.accuracy)}</span>} color={s.accuracy >= 0.7 ? "var(--color-strength)" : s.accuracy >= 0.4 ? "var(--color-developing)" : "var(--color-weakness)"} />
       </div>
-      <h1 className="mt-5 text-2xl font-semibold">{TITLES[kind]}</h1>
+      <h1 className="mt-6 text-[28px] font-semibold leading-tight tracking-tight">{TITLES[kind]}</h1>
       <p className="mt-1 text-ink-muted">
         You got {s.correct} of {s.answered} right.
       </p>
-      <div className="mt-6 rounded-2xl border border-line bg-surface-2 p-4 text-left">
+      <div className="mt-8 border-t border-line pt-5 text-left">
         <p className="font-medium">{s.next.label}</p>
         <p className="mt-1 text-sm text-ink-muted">{s.next.why}</p>
       </div>
@@ -257,11 +257,11 @@ export function PracticePage() {
                   </Button>
                 </div>
               ) : (
-                <div className="rounded-2xl border border-accent/30 bg-accent/8 p-4 text-sm animate-rise" aria-live="polite">
-                  <p className="mb-1 flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-accent">
+                <div className="rounded-xl bg-surface-2 p-4 text-sm animate-rise" aria-live="polite">
+                  <p className="mb-1 flex items-center gap-2 text-sm font-medium text-ink-muted">
                     <Sparkles className="size-3.5" aria-hidden /> AI tutor
                   </p>
-                  <p className="whitespace-pre-line leading-6 text-ink/90">{plainHint(aiHint.text)}</p>
+                  <p className="whitespace-pre-line leading-6 text-ink">{plainHint(aiHint.text)}</p>
                   {aiHint.label && <AiLabel text={aiHint.label} />}
                 </div>
               ))}
@@ -284,7 +284,7 @@ export function PracticePage() {
         {fb && (
           <div className="mt-6 space-y-4">
             {fb.early_stop && (
-              <p className="rounded-2xl border border-brand/30 bg-brand-soft p-4 text-[15px]" role="status">
+              <p className="rounded-xl bg-surface-2 p-4" role="status">
                 {fb.early_stop.message}
               </p>
             )}

@@ -111,6 +111,15 @@ Until it runs, Geography is invisible and the app is Maths only. Seeding Maths a
 Geography (and vice versa). The Geography model files are in `backend/model_artifacts/geography/`
 (`KT_SUBJECTS`).
 
+## Refreshing stored statuses after a diagnosis rule change
+
+Statuses are stored per student and recomputed when they answer. After a rule change (the
+2026-11-14 one: from 5 answers on, the student's answers decide alone), refresh everyone once:
+```
+python scripts/refresh_states.py --dry-run     # counts what would change, changes nothing
+python scripts/refresh_states.py               # applies it (safe to run again)
+```
+
 ## Regrading old answers after the v3 answer-checking change
 
 v3 accepts correctly rounded decimals, recovered fractions, units, "$" and so on (see

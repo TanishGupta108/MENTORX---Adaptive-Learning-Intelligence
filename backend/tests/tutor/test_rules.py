@@ -143,3 +143,27 @@ def test_numpy_model_loads_and_is_parity_checked():
         assert 0 < p_bad + 0.2 < p_good < 1, "a correct history must predict clearly higher success"
     assert model.state([]) is None
     assert np.isfinite(model.predict_questions(good, [(meta["question_ids"][0], [130])])).all()
+
+
+def test_refresh_everyone_applies_a_rule_change(client, math_keys, learner, db, monkeypatch):
+    """A stored status follows today's rule after refresh_everyone, and a dry run changes nothing."""
+    from sqlalchemy import select as _select
+
+    from app.core.config import get_settings
+    from app.tutor import state as _state
+    from app.tutor.models import SkillState
+
+    st = db.scalars(_select(SkillState)).first()
+    assert st is not None
+    st.attempts, st.correct, st.recent, st.status = 5, 0, [0, 0, 0, 0, 0], "developing"
+    db.commit()
+    dry = _state.refresh_everyone(db, dry_run=True)
+    assert dry["students"] == 1
+    db.expire_all()
+    assert db.get(SkillState, (st.user_id, st.skill_id)).status == "developing"
+    monkeypatch.setattr(get_settings(), "answers_decide_after", 5)
+    out = _state.refresh_everyone(db)
+    assert out["enrolments"] >= 1
+    db.expire_all()
+    # refresh rebuilds from the real answer log (this learner has none on the skill)
+    assert db.get(SkillState, (st.user_id, st.skill_id)).status == "needs_assessment"

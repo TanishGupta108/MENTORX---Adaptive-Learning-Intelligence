@@ -1,57 +1,83 @@
+/* Hallmark · shape: app screen · genre: editorial · theme: brand · redesign: full · scope: app
+ * paper: oklch(17.2% 0.032 269) · accent: oklch(69.1% 0.166 281) · display: Bricolage Grotesque Variable (headings only) · body: the system stack · nav: top bar, bottom tabs under 60rem · signature: the skill ledger, every status from the student's own answers
+ * axes: navy/grotesque/periwinkle · posture: Restrained · contrast: pass · locked: design.md · v2.0.0 */
+/* Hallmark · pre-emit critique: P4 H4 E4 S4 R5 V3 · weakest: V, app screens share one system on purpose (design.md); variety lives in each screen's lead object */
 @import "tailwindcss";
 
 /*
- * MENTORX design tokens. One dark navy theme with violet/blue accents.
+ * MENTORX design tokens (design.md). One calm navy theme with a single periwinkle signal.
  * Components use these through Tailwind classes such as bg-surface, text-ink, border-line.
  * Status colours are fixed per diagnosis so a skill always looks the same everywhere.
  */
 @theme {
-  --color-canvas: #0a0f1e;
-  --color-surface: #11182b;
-  --color-surface-2: #172036;
-  --color-surface-3: #1e2943;
-  --color-line: #253150;
-  --color-line-strong: #33416a;
-  --color-ink: #e8ebf5;
-  --color-ink-muted: #9aa5c4;
-  --color-ink-faint: #6b7697;
-  --color-brand: #8b8cff;
-  --color-brand-strong: #6d6ef7;
-  --color-brand-soft: #8b8cff26;
-  --color-accent: #5aa9ff;
-  --color-brand-ink: #0a0f1e;
+  --color-canvas: oklch(17.2% 0.032 269);
+  --color-surface: oklch(21.3% 0.039 268);
+  --color-surface-2: oklch(24.7% 0.044 266);
+  --color-surface-3: oklch(28.5% 0.05 267);
+  --color-line: oklch(31.8% 0.058 267);
+  --color-line-strong: oklch(38.3% 0.073 269);
+  --color-ink: oklch(94.1% 0.014 273);
+  --color-ink-muted: oklch(78% 0.04 270);
+  --color-ink-faint: oklch(66% 0.045 270);
+  --color-brand: oklch(69.1% 0.166 281);
+  --color-brand-hover: oklch(74% 0.15 281);
+  --color-brand-press: oklch(64% 0.17 281);
+  --color-brand-strong: oklch(60% 0.18 281);
+  --color-brand-soft: oklch(69.1% 0.166 281 / 0.16);
+  --color-brand-ink: oklch(17.2% 0.032 269);
+  /* one signal hue: the old blue accent now resolves to the brand */
+  --color-accent: oklch(69.1% 0.166 281);
+  --color-focus: oklch(72% 0.19 281);
+  --color-figure-paper: oklch(98% 0.005 269);
 
-  --color-strength: #34d399;
-  --color-developing: #fbbf24;
-  --color-weakness: #fb7185;
-  --color-unassessed: #94a3b8;
-  --color-success: #34d399;
-  --color-danger: #fb7185;
-  --color-warning: #fbbf24;
+  --color-strength: oklch(77.3% 0.153 163);
+  --color-developing: oklch(83.7% 0.164 84);
+  --color-weakness: oklch(71.9% 0.169 13);
+  --color-unassessed: oklch(71.1% 0.035 257);
+  --color-success: oklch(77.3% 0.153 163);
+  --color-danger: oklch(71.9% 0.169 13);
+  --color-warning: oklch(83.7% 0.164 84);
 
-  --font-sans: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-  --radius-card: 1rem;
+  --font-display: "Bricolage Grotesque Variable", ui-sans-serif, system-ui, sans-serif;
+  --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --radius-card: 16px;
+  --radius-control: 12px;
 }
 
 html {
   -webkit-text-size-adjust: 100%;
   color-scheme: dark;
+  scrollbar-color: var(--color-line-strong) var(--color-canvas);
+}
+
+html,
+body {
+  overflow-x: clip;
 }
 
 body {
   background: var(--color-canvas);
   color: var(--color-ink);
   font-family: var(--font-sans);
-  font-feature-settings: "cv11", "ss01";
   -webkit-font-smoothing: antialiased;
+  caret-color: var(--color-brand);
+}
+
+h1,
+h2 {
+  font-family: var(--font-display);
+  font-synthesis: none;
+  overflow-wrap: break-word;
+  min-width: 0;
+  text-wrap: balance;
 }
 
 ::selection {
-  background: #8b8cff55;
+  background: var(--color-brand-soft);
 }
 
 :focus-visible {
-  outline: 2px solid var(--color-brand);
+  outline: 2px solid var(--color-focus);
   outline-offset: 2px;
 }
 
@@ -90,7 +116,7 @@ body {
   height: auto;
   margin: 0.5rem 0;
   border-radius: 0.5rem;
-  background: #fff;
+  background: var(--color-figure-paper);
   padding: 0.25rem;
   vertical-align: middle;
 }

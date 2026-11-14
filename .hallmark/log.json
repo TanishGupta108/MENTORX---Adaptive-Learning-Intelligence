@@ -2,6 +2,32 @@
  {
   "mode": "redesign",
   "depth": "full",
+  "scope": "app",
+  "shape": "app screen",
+  "theme": "brand",
+  "axes": "navy/grotesque/periwinkle",
+  "hero": "none",
+  "nav": "top bar, bottom tabs under 60rem",
+  "footer": "none",
+  "imagery": "none",
+  "photos": [],
+  "entry": "none",
+  "fingerprint": "topbar/today-lead/ledger/figure-row/hairline-rows",
+  "sections": [
+   "home: today lead + day ring",
+   "diagnosis: figure row + skill ledger",
+   "skills: grouped ledger",
+   "progress: figures, chart, table",
+   "practice: focused column"
+  ],
+  "signature": "the skill ledger, every status from the student own answers",
+  "waived": [],
+  "prompt": "MENTORX full frontend redesign for grade 4 to 8 students, calm and focused",
+  "date": "2026-11-14"
+ },
+ {
+  "mode": "redesign",
+  "depth": "full",
   "scope": "page",
   "shape": "05 Workbench",
   "theme": "brand",

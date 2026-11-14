@@ -10,9 +10,9 @@ import { adminApi } from "../api/tutor";
 import type { Metrics } from "../api/tutor";
 import { useApi } from "../hooks/useApi";
 import { Markdown } from "./Markdown";
-import { Button, Card, CardTitle, cx, ErrorState, pct, Spinner, Stat, timeAgo } from "./ui";
+import { Button, Card, CardTitle, cx, ErrorState, pct, Spinner, Stat, timeAgo, token } from "./ui";
 
-const AXIS = { stroke: "#6b7697", fontSize: 12, tickLine: false, axisLine: false } as const;
+const AXIS = { stroke: token("ink-faint"), fontSize: 12, tickLine: false, axisLine: false } as const;
 
 function num(x: number | null | undefined, d = 3) {
   return x === null || x === undefined ? "—" : x.toFixed(d);
@@ -57,7 +57,7 @@ export function ModelMonitor({ subject }: { subject?: string }) {
         <CardTitle title="By context" subtitle="Label = the model's own target: correct first time, no hint, answer not shown." />
         <div className="overflow-x-auto">
           <table className="w-full min-w-[640px] text-sm">
-            <thead className="text-xs uppercase tracking-wider text-ink-faint">
+            <thead className="text-sm text-ink-muted">
               <tr>
                 <th className="py-2 pr-3 text-left">Where</th>
                 <th className="py-2 pr-3 text-right">n</th>
@@ -86,16 +86,16 @@ export function ModelMonitor({ subject }: { subject?: string }) {
         {cal.length ? (
           <ResponsiveContainer width="100%" height={280}>
             <ComposedChart data={cal} margin={{ top: 8, right: 16, bottom: 8, left: -12 }}>
-              <CartesianGrid stroke="#253150" strokeDasharray="3 4" />
+              <CartesianGrid stroke={token("line")} strokeDasharray="3 4" />
               <XAxis type="number" dataKey="x" domain={[0, 100]} unit="%" {...AXIS} name="Predicted" />
               <YAxis type="number" domain={[0, 100]} unit="%" {...AXIS} />
               <Tooltip
-                contentStyle={{ background: "#172036", border: "1px solid #33416a", borderRadius: 12, color: "#e8ebf5", fontSize: 13 }}
+                contentStyle={{ background: "var(--color-surface-2)", border: "1px solid var(--color-line-strong)", borderRadius: 12, color: "var(--color-ink)", fontSize: 13 }}
                 formatter={(v, name) => [name === "n" ? v : `${v}%`, name]}
               />
-              <Legend wrapperStyle={{ fontSize: 12, color: "#9aa5c4" }} />
-              <Line data={[{ x: 0, ideal: 0 }, { x: 100, ideal: 100 }]} dataKey="ideal" name="Perfect calibration" stroke="#6b7697" strokeDasharray="5 5" dot={false} />
-              <Scatter dataKey="observed" name="Observed success" fill="#34d399" />
+              <Legend wrapperStyle={{ fontSize: 12, color: "var(--color-ink-muted)" }} />
+              <Line data={[{ x: 0, ideal: 0 }, { x: 100, ideal: 100 }]} dataKey="ideal" name="Perfect calibration" stroke={token("ink-faint")} strokeDasharray="5 5" dot={false} />
+              <Scatter dataKey="observed" name="Observed success" fill={token("strength")} />
             </ComposedChart>
           </ResponsiveContainer>
         ) : (
@@ -117,12 +117,12 @@ export function AiTexts() {
       {rows.length === 0 ? (
         <p className="text-sm text-ink-muted">No AI texts yet.</p>
       ) : (
-        <ul className="space-y-3">
+        <ul>
           {rows.map((t) => (
-            <li key={t.id} className={cx("rounded-xl border border-line p-3", t.status === "hidden" && "opacity-60")}>
+            <li key={t.id} className={cx("border-b border-line py-3 last:border-b-0", t.status === "hidden" && "opacity-60")}>
               <div className="flex flex-wrap items-center justify-between gap-2 text-xs text-ink-faint">
                 <span>
-                  <span className="font-semibold uppercase tracking-wider text-accent">{t.kind}</span> · question {t.item_id} · {t.answer_sig} · {t.model} · {timeAgo(t.created_at)}
+                  <span className="font-semibold text-ink">{t.kind}</span>, question {t.item_id}, {t.answer_sig}, {t.model}, {timeAgo(t.created_at)}
                 </span>
                 <Button
                   size="sm"

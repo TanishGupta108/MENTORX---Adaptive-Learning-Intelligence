@@ -9,7 +9,7 @@ import { useApi } from "../hooks/useApi";
 import { useProfile } from "../components/AppShell";
 import { StartButton } from "../components/StartAction";
 import { WhyButton } from "../components/WhyButton";
-import { Button, Card, EmptyState, ErrorState, PageLoader, Ring } from "../components/ui";
+import { Button, EmptyState, ErrorState, PageLoader, Ring } from "../components/ui";
 
 function greeting() {
   const h = new Date().getHours();
@@ -22,9 +22,9 @@ function plural(n: number, one: string, many: string) {
 
 function Banner({ icon, children, actions }: { icon: ReactNode; children: ReactNode; actions?: ReactNode }) {
   return (
-    <div className="flex flex-col gap-3 rounded-2xl border border-line-strong bg-surface-2/70 p-4 sm:flex-row sm:items-center sm:justify-between animate-rise" role="status">
-      <p className="flex items-start gap-3 text-[15px]">
-        <span className="mt-0.5 text-accent">{icon}</span>
+    <div className="flex flex-col gap-3 rounded-[var(--radius-card)] border border-line-strong p-4 sm:flex-row sm:items-center sm:justify-between" role="status">
+      <p className="flex items-start gap-3">
+        <span className="mt-0.5 text-ink-muted">{icon}</span>
         <span>{children}</span>
       </p>
       {actions && <div className="flex shrink-0 flex-wrap gap-2">{actions}</div>}
@@ -99,44 +99,50 @@ function TopBanner({ home, onChange }: { home: Home; onChange: () => void }) {
 
 function TodayCard({ next }: { next: NextAction }) {
   return (
-    <Card className="relative overflow-hidden border-brand/35 p-6 sm:p-7">
-      <div className="pointer-events-none absolute -right-24 -top-24 size-72 rounded-full bg-brand/12 blur-3xl" aria-hidden />
-      <div className="relative">
-        <p className="text-xs font-semibold uppercase tracking-[0.14em] text-brand">Today</p>
-        <h2 className="mt-2 text-xl font-semibold tracking-tight sm:text-2xl">{next.title}</h2>
-        {next.progress_hint && <p className="mt-1.5 text-[15px] text-ink-muted">{next.progress_hint}</p>}
-        <div className="mt-6 flex flex-wrap items-start justify-between gap-3">
-          <StartButton action={next} size="lg">
-            Start
-          </StartButton>
-          <WhyButton align="end" className="max-w-sm">
-            {next.reason}
-          </WhyButton>
-        </div>
+    <section aria-labelledby="today" className="rounded-[var(--radius-card)] bg-surface p-6 sm:p-8">
+      <p className="text-sm text-ink-muted">For today</p>
+      <h2 id="today" className="mt-1 max-w-[24ch] text-[28px] font-semibold leading-tight tracking-tight sm:text-[34px]">
+        {next.title}
+      </h2>
+      {next.progress_hint && <p className="mt-2 text-ink-muted">{next.progress_hint}</p>}
+      <div className="mt-8 flex flex-wrap items-start justify-between gap-3">
+        <StartButton action={next} size="lg">
+          Start
+        </StartButton>
+        <WhyButton align="end" className="max-w-sm">
+          {next.reason}
+        </WhyButton>
       </div>
-    </Card>
+    </section>
   );
 }
 
+/** The day at a glance, beside the lead: the daily goal as a ring, the streak under it. */
 function StreakStrip({ s }: { s: Streak }) {
   const goal = Math.max(1, s.daily_goal);
   return (
-    <div className="flex items-center justify-between gap-4 rounded-2xl border border-line bg-surface px-4 py-3">
-      <p className="flex items-center gap-2 text-[15px]">
-        <Flame className={s.current > 0 ? "size-5 text-weakness" : "size-5 text-ink-faint"} aria-hidden />
-        <span className="font-medium">{s.current === 1 ? "1-day streak" : `${s.current}-day streak`}</span>
-      </p>
-      <div className="flex items-center gap-3">
-        <span className="text-sm text-ink-muted">{s.goal_met ? "Daily goal reached" : "Today"}</span>
-        <Ring value={Math.min(s.today, goal) / goal} size={44} stroke={5} color={s.goal_met ? "#34d399" : "#8b8cff"} label={<span className="text-[11px]">{`${s.today}/${s.daily_goal}`}</span>} />
+    <aside aria-label="Your day" className="flex items-center gap-5 rounded-[var(--radius-card)] border border-line p-5 lg:flex-col lg:items-start lg:p-6">
+      <Ring
+        value={Math.min(s.today, goal) / goal}
+        size={88}
+        stroke={7}
+        color={s.goal_met ? "var(--color-strength)" : "var(--color-brand)"}
+        label={<span className="text-base tabular-nums">{`${s.today}/${s.daily_goal}`}</span>}
+      />
+      <div className="space-y-1">
+        <p className="text-sm text-ink-muted">{s.goal_met ? "Daily goal reached" : "Questions today"}</p>
+        <p className="flex items-center gap-2 font-medium">
+          <Flame className={s.current > 0 ? "size-4 text-ink" : "size-4 text-ink-faint"} aria-hidden />
+          {s.current === 1 ? "1-day streak" : `${s.current}-day streak`}
+        </p>
       </div>
-    </div>
+    </aside>
   );
 }
 
 function UpNextRow({ a }: { a: NextAction }) {
   return (
-    <li className="rounded-xl border border-line bg-surface px-4 py-3">
+    <li className="border-t border-line py-4 last:border-b">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="min-w-0">
           <p className="font-medium">{a.title}</p>
@@ -157,9 +163,9 @@ export function HomePage() {
   const home = h.data!;
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-10">
       <header>
-        <h1 className="text-2xl font-semibold tracking-tight sm:text-[28px]">
+        <h1 className="text-[28px] font-semibold leading-tight tracking-tight sm:text-[32px]">
           {greeting()}, {home.name}
         </h1>
         <p className="mt-1 text-ink-muted">{home.subject.name}</p>
@@ -167,20 +173,21 @@ export function HomePage() {
 
       <TopBanner home={home} onChange={h.reload} />
 
-      {home.next ? (
-        <TodayCard next={home.next} />
-      ) : (
-        <EmptyState title="Nothing to practise here yet">This subject has no questions available right now. Try another subject or come back later.</EmptyState>
-      )}
-
-      <StreakStrip s={home.streak} />
+      <div className="grid items-start gap-4 lg:grid-cols-[minmax(0,1fr)_240px]">
+        {home.next ? (
+          <TodayCard next={home.next} />
+        ) : (
+          <EmptyState title="Nothing to practise here yet">This subject has no questions available right now. Try another subject or come back later.</EmptyState>
+        )}
+        <StreakStrip s={home.streak} />
+      </div>
 
       {home.up_next.length > 0 && (
         <section aria-labelledby="up-next">
-          <h2 id="up-next" className="mb-3 text-sm font-semibold uppercase tracking-wider text-ink-faint">
+          <h2 id="up-next" className="mb-2 text-[19px] font-semibold tracking-tight">
             Up next
           </h2>
-          <ul className="space-y-2">
+          <ul>
             {home.up_next.slice(0, 2).map((a, i) => (
               <UpNextRow key={`${a.kind}-${a.skill?.id ?? i}`} a={a} />
             ))}
@@ -188,19 +195,25 @@ export function HomePage() {
         </section>
       )}
 
-      {home.mixed.available && (
-        <div className="flex flex-wrap items-center gap-3">
-          <StartButton action={{ endpoint: "mixed" }} variant="secondary">
-            Mixed practice
-          </StartButton>
-          <span className="text-sm text-ink-muted">Problems that combine several skills.</span>
+      {(home.mixed.available || (!home.diagnostic_completed && home.next?.kind !== "diagnostic")) && (
+        <div className="flex flex-wrap items-center justify-between gap-4">
+          {home.mixed.available && (
+            <div className="flex flex-wrap items-center gap-3">
+              <StartButton action={{ endpoint: "mixed" }} variant="secondary">
+                Mixed practice
+              </StartButton>
+              <span className="text-sm text-ink-muted">Problems that combine several skills.</span>
+            </div>
+          )}
+          {!home.diagnostic_completed && home.next?.kind !== "diagnostic" && (
+            <p className="text-sm text-ink-muted">
+              Want a full picture?{" "}
+              <Link to="/assess/start?kind=diagnostic" className="text-ink underline decoration-line-strong underline-offset-4 hover:decoration-brand">
+                Take the placement check
+              </Link>
+            </p>
+          )}
         </div>
-      )}
-
-      {!home.diagnostic_completed && home.next?.kind !== "diagnostic" && (
-        <p className="text-sm text-ink-muted">
-          Want a full picture? <Link to="/assess/start?kind=diagnostic" className="text-brand hover:underline">Take the placement check</Link>
-        </p>
       )}
     </div>
   );

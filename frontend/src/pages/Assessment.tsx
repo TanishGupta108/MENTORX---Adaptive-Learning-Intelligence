@@ -160,7 +160,7 @@ export function AssessmentRunPage() {
         <div className="mb-2 flex items-center justify-between text-sm">
           <span className="font-medium">
             {TITLES[meta.data.kind]}
-            {meta.data.skill && <span className="text-ink-muted"> · {meta.data.skill.name}</span>}
+            {meta.data.skill && <span className="text-ink-muted">: {meta.data.skill.name}</span>}
           </span>
           <span className="text-ink-muted">
             Question {question.position} of {total}
@@ -208,8 +208,8 @@ export function AssessmentRunPage() {
 
 function Compare({ label, before, after, note }: { label: string; before: number | null | undefined; after: number | null | undefined; note: string }) {
   return (
-    <div className="rounded-2xl border border-line bg-surface-2 p-4">
-      <p className="text-xs font-semibold uppercase tracking-wider text-ink-faint">{label}</p>
+    <div className="border-t border-line pt-4">
+      <p className="text-sm font-medium text-ink-muted">{label}</p>
       <div className="mt-2 flex items-baseline gap-3">
         <span className="text-2xl font-semibold text-ink-muted">{pct(before)}</span>
         <ArrowRight className="size-4 text-ink-faint" />
@@ -239,7 +239,7 @@ export function ReassessmentResultPage() {
         <span className={`grid size-12 place-items-center rounded-2xl ${outcome === "not_improved" ? "bg-developing/15 text-developing" : "bg-strength/15 text-strength"}`}>
           {outcome === "not_improved" ? <RefreshCw className="size-6" /> : <TrendingUp className="size-6" />}
         </span>
-        <p className="mt-5 text-sm text-ink-muted">Reassessment · {skill.name}</p>
+        <p className="mt-5 text-sm text-ink-muted">Reassessment of {skill.name}</p>
         <h1 className="mt-1 text-2xl font-semibold tracking-tight">{headline}</h1>
         <p className="mt-2 text-ink-muted">
           You answered {r.correct} of {r.answered} fresh questions correctly.
@@ -270,7 +270,7 @@ export function ReassessmentResultPage() {
             <li className="flex gap-3"><Sparkles className="size-4 shrink-0 text-brand" /> Home now suggests what to learn next.</li>
           </ul>
         ) : outcome === "progressing" ? (
-          <p className="text-sm text-ink-muted">You've made real gains. A little more practice at your current level should get you over the line. Then try another reassessment.</p>
+          <p className="text-sm text-ink-muted">You’ve made real gains. A little more practice at your current level should get you over the line. Then try another reassessment.</p>
         ) : (
           <ul className="space-y-3 text-sm">
             <li className="flex gap-3"><Clock className="size-4 shrink-0 text-developing" /> Look at your recent mistakes in this skill, and the building blocks it depends on.</li>
@@ -284,7 +284,7 @@ export function ReassessmentResultPage() {
         </div>
       </Card>
       <p className="text-center text-xs text-ink-faint">
-        <Link to="/progress" className="hover:text-ink">See all your results in Progress →</Link>
+        <Link to="/progress" className="hover:text-ink">See all your results in Progress</Link>
       </p>
     </div>
   );

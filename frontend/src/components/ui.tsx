@@ -1,8 +1,15 @@
-/** MENTORX design-system primitives. Every screen is built from these. */
+/** MENTORX design-system primitives (design.md). Every screen is built from these.
+ * Calm and still: one periwinkle signal, hairlines before cards, motion only for state. */
 import type { ButtonHTMLAttributes, ReactNode } from "react";
 import { Link } from "react-router";
 import { AlertTriangle, Loader2 } from "lucide-react";
 import type { Evidence, Mode, Status } from "../api/tutor";
+
+/** A design token's live colour (charts: SVG attributes can't read CSS variables). */
+export function token(name: string, fallback = "currentColor") {
+  if (typeof window === "undefined") return fallback;
+  return getComputedStyle(document.documentElement).getPropertyValue(`--color-${name}`).trim() || fallback;
+}
 
 export function cx(...parts: (string | false | null | undefined)[]) {
   return parts.filter(Boolean).join(" ");
@@ -16,13 +23,14 @@ export function pct(x: number | null | undefined, digits = 0) {
 
 type Variant = "primary" | "secondary" | "ghost" | "danger" | "soft";
 const variants: Record<Variant, string> = {
-  primary: "bg-brand text-brand-ink hover:bg-[#a3a4ff] shadow-[0_6px_20px_-8px_#8b8cff]",
-  secondary: "border border-line-strong bg-surface-2 text-ink hover:bg-surface-3",
-  ghost: "text-ink-muted hover:bg-surface-2 hover:text-ink",
-  danger: "bg-danger/15 text-danger hover:bg-danger/25",
-  soft: "bg-brand-soft text-brand hover:bg-brand/25",
+  primary: "bg-brand text-brand-ink hover:bg-brand-hover active:bg-brand-press",
+  secondary: "border border-line-strong text-ink hover:bg-surface-2 active:bg-surface-3",
+  ghost: "text-ink-muted hover:bg-surface-2 hover:text-ink active:bg-surface-3",
+  danger: "border border-danger/50 text-danger hover:bg-danger/10 active:bg-danger/15",
+  soft: "bg-brand-soft text-ink hover:bg-brand/25 active:bg-brand/30",
 };
-const sizes = { sm: "h-11 px-3 text-sm sm:h-9", md: "h-11 px-4 text-sm", lg: "h-12 px-6 text-base" };
+// app controls: 40px on a fine pointer, 44px on touch; lg is the focused-flow action
+const sizes = { sm: "h-11 px-3 text-sm sm:h-9", md: "h-11 px-4 text-sm sm:h-10", lg: "h-12 px-6 text-base" };
 
 type BtnProps = ButtonHTMLAttributes<HTMLButtonElement> & {
   variant?: Variant;
@@ -34,7 +42,7 @@ type BtnProps = ButtonHTMLAttributes<HTMLButtonElement> & {
 
 export function Button({ variant = "primary", size = "md", loading, icon, to, className, children, disabled, ...rest }: BtnProps) {
   const cls = cx(
-    "inline-flex items-center justify-center gap-2 rounded-xl font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-50",
+    "inline-flex shrink-0 items-center justify-center gap-2 whitespace-nowrap rounded-[var(--radius-control)] font-medium transition-colors duration-[120ms] disabled:cursor-not-allowed disabled:opacity-55 aria-disabled:cursor-not-allowed aria-disabled:opacity-55",
     variants[variant],
     sizes[size],
     className,
@@ -62,7 +70,7 @@ export function Button({ variant = "primary", size = "md", loading, icon, to, cl
 // ---------------------------------------------------------------- surfaces
 
 export function Card({ className, children, as: As = "section" }: { className?: string; children: ReactNode; as?: "section" | "div" | "article" }) {
-  return <As className={cx("rounded-[var(--radius-card)] border border-line bg-surface p-5 animate-rise", className)}>{children}</As>;
+  return <As className={cx("rounded-[var(--radius-card)] border border-line bg-surface p-5 sm:p-6", className)}>{children}</As>;
 }
 
 export function CardTitle({ icon, title, action, subtitle }: { icon?: ReactNode; title: string; action?: ReactNode; subtitle?: string }) {
@@ -71,7 +79,7 @@ export function CardTitle({ icon, title, action, subtitle }: { icon?: ReactNode;
       <div className="flex items-start gap-2.5">
         {icon && <span className="mt-0.5 text-brand">{icon}</span>}
         <div>
-          <h2 className="text-[15px] font-semibold tracking-tight">{title}</h2>
+          <h2 className="text-[19px] font-semibold tracking-tight">{title}</h2>
           {subtitle && <p className="mt-0.5 text-sm text-ink-muted">{subtitle}</p>}
         </div>
       </div>
@@ -80,13 +88,12 @@ export function CardTitle({ icon, title, action, subtitle }: { icon?: ReactNode;
   );
 }
 
-export function PageHeader({ eyebrow, title, subtitle, actions }: { eyebrow?: string; title: string; subtitle?: ReactNode; actions?: ReactNode }) {
+export function PageHeader({ title, subtitle, actions }: { title: string; subtitle?: ReactNode; actions?: ReactNode }) {
   return (
-    <header className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-      <div>
-        {eyebrow && <p className="mb-1 text-xs font-semibold uppercase tracking-[0.14em] text-brand">{eyebrow}</p>}
-        <h1 className="text-2xl font-semibold tracking-tight sm:text-[28px]">{title}</h1>
-        {subtitle && <div className="mt-1.5 max-w-2xl text-ink-muted">{subtitle}</div>}
+    <header className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+      <div className="min-w-0">
+        <h1 className="text-[28px] font-semibold leading-tight tracking-tight sm:text-[32px]">{title}</h1>
+        {subtitle && <div className="mt-2 max-w-2xl text-ink-muted">{subtitle}</div>}
       </div>
       {actions && <div className="flex flex-wrap gap-2">{actions}</div>}
     </header>
@@ -96,27 +103,26 @@ export function PageHeader({ eyebrow, title, subtitle, actions }: { eyebrow?: st
 // ---------------------------------------------------------------- status language
 
 export const STATUS_META: Record<Status, { label: string; dot: string; text: string; bg: string; hex: string }> = {
-  likely_strength: { label: "Strong", dot: "bg-strength", text: "text-strength", bg: "bg-strength/12", hex: "#34d399" },
-  developing: { label: "Getting there", dot: "bg-developing", text: "text-developing", bg: "bg-developing/12", hex: "#fbbf24" },
-  potential_weakness: { label: "Needs practice", dot: "bg-weakness", text: "text-weakness", bg: "bg-weakness/12", hex: "#fb7185" },
-  needs_assessment: { label: "Not tried yet", dot: "bg-unassessed", text: "text-unassessed", bg: "bg-unassessed/12", hex: "#94a3b8" },
+  likely_strength: { label: "Strong", dot: "bg-strength", text: "text-strength", bg: "bg-strength/12", hex: "var(--color-strength)" },
+  developing: { label: "Getting there", dot: "bg-developing", text: "text-developing", bg: "bg-developing/12", hex: "var(--color-developing)" },
+  potential_weakness: { label: "Needs practice", dot: "bg-weakness", text: "text-weakness", bg: "bg-weakness/12", hex: "var(--color-weakness)" },
+  needs_assessment: { label: "Not tried yet", dot: "bg-unassessed", text: "text-unassessed", bg: "bg-unassessed/12", hex: "var(--color-unassessed)" },
 };
 
 export function StatusBadge({ status, className }: { status: Status; className?: string }) {
   const m = STATUS_META[status];
   return (
-    <span className={cx("inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium", m.bg, m.text, className)}>
-      <span className={cx("size-1.5 rounded-full", m.dot)} />
+    <span className={cx("inline-flex shrink-0 items-center whitespace-nowrap rounded-full px-2.5 py-1 text-xs font-medium", m.bg, m.text, className)}>
       {m.label}
     </span>
   );
 }
 
 const MODE_META: Record<Mode, { label: string; cls: string }> = {
-  foundation: { label: "Step by step", cls: "bg-[#5aa9ff1f] text-accent" },
-  guided: { label: "Guided", cls: "bg-brand-soft text-brand" },
-  independent: { label: "On my own", cls: "bg-[#34d3991f] text-strength" },
-  advanced: { label: "Challenge", cls: "bg-[#f472b61f] text-[#f472b6]" },
+  foundation: { label: "Step by step", cls: "border border-line-strong text-ink-muted" },
+  guided: { label: "Guided", cls: "border border-line-strong text-ink-muted" },
+  independent: { label: "On my own", cls: "border border-line-strong text-ink-muted" },
+  advanced: { label: "Challenge", cls: "border border-line-strong text-ink-muted" },
 };
 
 export const MODE_LABEL: Record<Mode, string> = {
@@ -147,7 +153,7 @@ export function EvidenceMeter({ evidence, attempts }: { evidence: Evidence; atte
         ))}
       </span>
       {e.label}
-      {attempts !== undefined && attempts > 0 && <span className="text-ink-faint">· {attempts} answers</span>}
+      {attempts !== undefined && attempts > 0 && <span className="text-ink-faint">({attempts} answers)</span>}
     </span>
   );
 }
@@ -159,7 +165,7 @@ export function ModelEstimate({ p, className }: { p: number | null; className?: 
   }
   return (
     <span className={cx("inline-flex items-center gap-1.5 text-xs text-ink-muted", className)} title="A model's predicted chance of getting a typical question in this skill right first time. A prediction, not a result.">
-      <span className="rounded bg-surface-3 px-1.5 py-0.5 text-[11px] font-medium text-accent">Prediction</span>
+      <span className="rounded border border-line-strong px-1.5 py-0.5 text-xs font-medium text-ink">Prediction</span>
       {pct(p)} chance of a right answer
     </span>
   );
@@ -172,19 +178,19 @@ export function ProgressBar({ value, max = 1, className, tone = "brand" }: { val
   const color = { brand: "bg-brand", strength: "bg-strength", developing: "bg-developing", weakness: "bg-weakness" }[tone];
   return (
     <div className={cx("h-2 w-full overflow-hidden rounded-full bg-surface-3", className)} role="progressbar" aria-valuenow={Math.round(w)} aria-valuemin={0} aria-valuemax={100}>
-      <div className={cx("h-full rounded-full transition-[width] duration-500", color)} style={{ width: `${w}%` }} />
+      <div className={cx("h-full w-full origin-left rounded-full transition-transform duration-500", color)} style={{ transform: `scaleX(${w / 100})` }} />
     </div>
   );
 }
 
-export function Ring({ value, size = 64, stroke = 6, label, color = "#8b8cff" }: { value: number; size?: number; stroke?: number; label?: ReactNode; color?: string }) {
+export function Ring({ value, size = 64, stroke = 6, label, color = "var(--color-brand)" }: { value: number; size?: number; stroke?: number; label?: ReactNode; color?: string }) {
   const r = (size - stroke) / 2;
   const c = 2 * Math.PI * r;
   const v = Math.max(0, Math.min(1, value));
   return (
     <div className="relative inline-grid place-items-center" style={{ width: size, height: size }}>
       <svg width={size} height={size} className="-rotate-90" aria-hidden>
-        <circle cx={size / 2} cy={size / 2} r={r} stroke="#253150" strokeWidth={stroke} fill="none" />
+        <circle cx={size / 2} cy={size / 2} r={r} stroke="var(--color-line)" strokeWidth={stroke} fill="none" />
         <circle cx={size / 2} cy={size / 2} r={r} stroke={color} strokeWidth={stroke} fill="none" strokeLinecap="round" strokeDasharray={c} strokeDashoffset={c * (1 - v)} className="transition-[stroke-dashoffset] duration-700" />
       </svg>
       <span className="absolute text-sm font-semibold">{label}</span>
@@ -194,12 +200,12 @@ export function Ring({ value, size = 64, stroke = 6, label, color = "#8b8cff" }:
 
 export function Stat({ label, value, hint, icon }: { label: string; value: ReactNode; hint?: ReactNode; icon?: ReactNode }) {
   return (
-    <div className="rounded-2xl border border-line bg-surface p-4 animate-rise">
-      <div className="flex items-center justify-between text-ink-muted">
-        <span className="text-xs font-medium uppercase tracking-wider">{label}</span>
+    <div className="min-w-0 border-t border-line pt-4">
+      <div className="flex items-center justify-between gap-2 text-ink-muted">
+        <span className="text-sm">{label}</span>
         {icon}
       </div>
-      <div className="mt-2 text-2xl font-semibold tracking-tight">{value}</div>
+      <div className="mt-1 text-[28px] font-semibold tabular-nums tracking-tight">{value}</div>
       {hint && <div className="mt-1 text-xs text-ink-faint">{hint}</div>}
     </div>
   );
@@ -222,7 +228,7 @@ export function PageLoader({ label }: { label?: string }) {
       <Spinner label={label} />
       <div className="grid gap-4 md:grid-cols-3">
         {[0, 1, 2].map((i) => (
-          <div key={i} className="h-28 animate-pulse rounded-2xl bg-surface" />
+          <div key={i} className="h-28 animate-pulse rounded-[var(--radius-card)] bg-surface" />
         ))}
       </div>
     </div>
@@ -231,9 +237,9 @@ export function PageLoader({ label }: { label?: string }) {
 
 export function ErrorState({ error, onRetry }: { error: Error; onRetry?: () => void }) {
   return (
-    <div className="flex flex-col items-start gap-3 rounded-2xl border border-danger/30 bg-danger/8 p-5" role="alert">
+    <div className="flex flex-col items-start gap-3 rounded-[var(--radius-card)] border border-danger/40 p-5" role="alert">
       <div className="flex items-center gap-2 font-medium text-danger">
-        <AlertTriangle className="size-4" /> Couldn't load this
+        <AlertTriangle className="size-4" /> Couldn’t load this
       </div>
       <p className="text-sm text-ink-muted">{error.message}</p>
       {onRetry && (
@@ -247,7 +253,7 @@ export function ErrorState({ error, onRetry }: { error: Error; onRetry?: () => v
 
 export function EmptyState({ icon, title, children, action }: { icon?: ReactNode; title: string; children?: ReactNode; action?: ReactNode }) {
   return (
-    <div className="flex flex-col items-center gap-3 rounded-2xl border border-dashed border-line-strong px-6 py-10 text-center">
+    <div className="flex flex-col items-center gap-3 rounded-[var(--radius-card)] border border-dashed border-line-strong px-6 py-10 text-center">
       {icon && <div className="text-brand">{icon}</div>}
       <h3 className="font-semibold">{title}</h3>
       {children && <div className="max-w-md text-sm text-ink-muted">{children}</div>}
@@ -259,7 +265,7 @@ export function EmptyState({ icon, title, children, action }: { icon?: ReactNode
 // ---------------------------------------------------------------- forms
 
 export const inputClass =
-  "h-11 w-full rounded-xl border border-line-strong bg-surface-2 px-3.5 text-ink placeholder:text-ink-faint focus:border-brand focus:outline-none";
+  "h-11 w-full rounded-[var(--radius-control)] border border-line-strong bg-surface-2 px-3.5 text-base text-ink placeholder:text-ink-faint disabled:cursor-not-allowed disabled:opacity-55";
 
 export function Field({ label, error, children, hint }: { label: string; error?: string; children: ReactNode; hint?: string }) {
   return (
@@ -275,10 +281,10 @@ export function Field({ label, error, children, hint }: { label: string; error?:
 export function Logo({ className }: { className?: string }) {
   return (
     <span className={cx("inline-flex items-center gap-2 font-semibold tracking-tight", className)}>
-      <span className="grid size-8 place-items-center rounded-xl bg-gradient-to-br from-brand to-accent text-sm font-bold text-brand-ink shadow-[0_4px_16px_-4px_#8b8cff]">
+      <span className="grid size-8 place-items-center rounded-[10px] bg-brand font-display text-sm font-bold text-brand-ink" aria-hidden>
         M
       </span>
-      <span>
+      <span className="font-display">
         MENTOR<span className="text-brand">X</span>
       </span>
     </span>

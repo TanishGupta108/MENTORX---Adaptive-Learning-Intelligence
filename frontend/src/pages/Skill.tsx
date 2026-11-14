@@ -33,7 +33,7 @@ type Tab = (typeof TABS)[number]["id"];
 function DetailBlock({ title, children }: { title: string; children: ReactNode }) {
   return (
     <div>
-      <h3 className="mb-1.5 text-xs font-semibold uppercase tracking-wider text-ink-faint">{title}</h3>
+      <h3 className="mb-1.5 text-sm font-medium text-ink-muted">{title}</h3>
       <div className="text-sm">{children}</div>
     </div>
   );
@@ -101,7 +101,7 @@ function ModePicker({ k, onChange }: { k: SkillDetail; onChange: () => void }) {
   return (
     <div>
       <p className="text-ink-muted">
-        Now: <span className="font-medium text-ink">{MODE_LABEL[k.mode]}</span> · {k.mode_is_override ? "chosen by you" : "set automatically from your answers"}
+        Now: <span className="font-medium text-ink">{MODE_LABEL[k.mode]}</span> ({k.mode_is_override ? "chosen by you" : "set automatically from your answers"})
       </p>
       <div className="mt-2 grid gap-2 sm:grid-cols-2">
         {MODES.map((m) => (
@@ -136,7 +136,7 @@ function Details({ k, onChange }: { k: SkillDetail; onChange: () => void }) {
             {k.attempts ? (
               <>
                 <p>
-                  {k.correct} of {k.attempts} correct ({pct(k.observed_accuracy)}) · recent {pct(k.recent_accuracy)}
+                  {k.correct} of {k.attempts} correct ({pct(k.observed_accuracy)}), recent {pct(k.recent_accuracy)}
                 </p>
                 <EvidenceMeter evidence={k.evidence} />
               </>
@@ -188,13 +188,13 @@ function Details({ k, onChange }: { k: SkillDetail; onChange: () => void }) {
         <div className="grid gap-6 sm:grid-cols-2">
           <DetailBlock title="Question bank">
             <p>
-              {k.n_items} questions · {k.fresh_questions} you haven't seen
+              {k.n_items} questions, {k.fresh_questions} you haven’t seen
             </p>
             <p className="mt-1 text-xs text-ink-muted">
               {(["easy", "medium", "hard", "unrated"] as const)
                 .filter((d) => k.difficulty_counts[d])
                 .map((d) => `${d} ${k.difficulty_counts[d]}`)
-                .join(" · ")}
+                .join(", ")}
             </p>
           </DetailBlock>
           <DetailBlock title="Last check">
@@ -265,15 +265,17 @@ export function SkillPage() {
       </Link>
 
       <header className="space-y-3">
-        <p className="text-xs font-semibold uppercase tracking-[0.14em] text-brand">
-          {k.domain_name}
-          {k.grade !== null && ` · Grade ${k.grade}`}
-        </p>
-        <h1 className="text-2xl font-semibold tracking-tight sm:text-[28px]">{k.name}</h1>
+        <div>
+          <h1 className="text-[28px] font-semibold leading-tight tracking-tight sm:text-[32px]">{k.name}</h1>
+          <p className="mt-1 text-ink-muted">
+            {k.domain_name}
+            {k.grade !== null && `, grade ${k.grade}`}
+          </p>
+        </div>
         <div className="flex flex-wrap items-center gap-2">
           <StatusBadge status={k.status} />
           {k.completed && <span className="rounded-full bg-strength/12 px-2.5 py-1 text-xs font-medium text-strength">Completed</span>}
-          {k.review_due && <span className="rounded-full bg-accent/12 px-2.5 py-1 text-xs font-medium text-accent">Due for review</span>}
+          {k.review_due && <span className="rounded-full border border-line-strong px-2.5 py-1 text-xs font-medium text-ink">Due for review</span>}
         </div>
         {k.mastery?.progress_hint && <p className="text-[15px] text-ink-muted">{k.mastery.progress_hint}</p>}
         {primary && (
@@ -337,7 +339,7 @@ export function SkillPage() {
                   Start practice
                 </StartButton>
                 {!canCheck && !k.completed && (
-                  <p className="w-full text-sm text-ink-muted">You've seen almost every question here, so there's no fresh check. Meeting the mastery goal in practice completes this skill.</p>
+                  <p className="w-full text-sm text-ink-muted">You’ve seen almost every question here, so there’s no fresh check. Meeting the mastery goal in practice completes this skill.</p>
                 )}
                 {canCheck && (
                   <StartButton action={{ endpoint: "assessment", kind: checkKind, skill_id: k.id }} variant="soft">

@@ -8,12 +8,11 @@ import { Button, Field, inputClass, Logo } from "../components/ui";
 function AuthShell({ title, subtitle, children, footer }: { title: string; subtitle: string; children: ReactNode; footer: ReactNode }) {
   return (
     <div className="relative grid min-h-screen place-items-center px-4 py-10">
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(50%_40%_at_50%_0%,#6d6ef72b,transparent)]" />
       <main className="relative w-full max-w-md">
         <Link to="/" className="mb-8 inline-block">
           <Logo />
         </Link>
-        <div className="rounded-3xl border border-line bg-surface p-7 shadow-[0_30px_80px_-40px_#6d6ef766]">
+        <div className="rounded-[var(--radius-card)] border border-line bg-surface p-7 sm:p-8">
           <h1 className="text-2xl font-semibold tracking-tight">{title}</h1>
           <p className="mt-1 text-sm text-ink-muted">{subtitle}</p>
           <div className="mt-6">{children}</div>
@@ -53,7 +52,7 @@ export function LoginPage() {
   }
 
   return (
-    <AuthShell title="Welcome back" subtitle="Sign in to continue your learning journey." footer={<>New to MENTORX? <Link to="/register" className="font-medium text-brand hover:underline">Create an account</Link></>}>
+    <AuthShell title="Welcome back" subtitle="Sign in to pick up where you left off." footer={<>New to MENTORX? <Link to="/register" className="font-medium text-brand hover:underline">Create an account</Link></>}>
       <form onSubmit={submit} className="space-y-4" noValidate>
         <Field label="Email">
           <input className={inputClass} type="email" autoComplete="email" required value={email} onChange={(e) => setEmail(e.target.value)} />
@@ -126,7 +125,7 @@ export function RegisterPage() {
           <input className={inputClass} type="password" autoComplete="new-password" value={password} onChange={(e) => setPassword(e.target.value)} />
         </Field>
         <label className="flex items-start gap-3 text-sm text-ink-muted">
-          <input type="checkbox" className="mt-1 size-4 accent-[#8b8cff]" checked={accepted} onChange={(e) => setAccepted(e.target.checked)} />
+          <input type="checkbox" className="mt-1 size-4 accent-brand" checked={accepted} onChange={(e) => setAccepted(e.target.checked)} />
           <span>
             I agree that MENTORX stores my answers to personalise my learning. My data is never sold or shared.
             {fields.privacy_accepted && <span className="block text-danger">{fields.privacy_accepted}</span>}

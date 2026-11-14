@@ -34,17 +34,15 @@ export function ResourceCard({ resource, defaultOpen = false, showSkill = false,
   }
 
   return (
-    <article className={cx("rounded-2xl border bg-surface-2/50", done ? "border-strength/30" : "border-line")}>
-      <div className="flex items-start gap-3 p-4">
-        <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-surface-3 text-brand">
-          <k.icon className="size-4" />
-        </span>
-        <div className="min-w-0 flex-1">
-          <p className="text-[11px] font-semibold uppercase tracking-wider text-ink-faint">
-            {k.label} · {resource.minutes} min
-            {showSkill && resource.skill_code && <span className="normal-case tracking-normal"> · {resource.skill_code}</span>}
+    <article className={cx("rounded-[var(--radius-card)] border", done ? "border-strength/40" : "border-line")}>
+      <div className="flex flex-wrap items-start gap-3 p-4">
+        <k.icon className="mt-0.5 size-5 shrink-0 text-ink-muted" aria-hidden />
+        <div className="min-w-0 flex-1 basis-[14rem]">
+          <h3 className="font-medium">{resource.title}</h3>
+          <p className="text-sm text-ink-muted">
+            {k.label}, {resource.minutes} min
+            {showSkill && resource.skill_code && `, ${resource.skill_code}`}
           </p>
-          <h3 className="mt-0.5 font-medium">{resource.title}</h3>
           {showSkill && resource.skill_name && <p className="text-xs text-ink-muted">{resource.skill_name}</p>}
           {resource.description && <p className="mt-1 text-sm text-ink-muted">{resource.description}</p>}
           <p className="mt-1 text-xs text-ink-faint">Source: {resource.source_label}</p>
@@ -53,7 +51,7 @@ export function ResourceCard({ resource, defaultOpen = false, showSkill = false,
           type="button"
           onClick={toggle}
           disabled={busy}
-          className={cx("flex shrink-0 items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-medium", done ? "text-strength" : "text-ink-muted hover:bg-surface-3")}
+          className={cx("flex min-h-11 shrink-0 items-center gap-1.5 rounded-lg px-2.5 text-sm font-medium sm:min-h-9", done ? "text-strength hover:bg-surface-2" : "text-ink-muted hover:bg-surface-2 hover:text-ink")}
           aria-pressed={done}
         >
           {done ? <CheckCircle2 className="size-4" /> : <Circle className="size-4" />}

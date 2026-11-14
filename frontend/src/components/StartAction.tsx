@@ -5,7 +5,6 @@
 import { useState } from "react";
 import type { ReactNode } from "react";
 import { useNavigate } from "react-router";
-import { ArrowRight } from "lucide-react";
 import { ApiError } from "../api/client";
 import { tutor } from "../api/tutor";
 import type { NextAction, PracticeKind, PracticeSummary, SkillDetail, StartSpec } from "../api/tutor";
@@ -94,7 +93,7 @@ export function StartButton({ action, children = "Start", variant = "primary", s
   const spec: Launch = "start" in action ? action.start : action;
   return (
     <div className={className}>
-      <Button variant={variant} size={size} onClick={() => void launch(spec)} loading={busy} icon={busy ? undefined : <ArrowRight className="size-4" />}>
+      <Button variant={variant} size={size} onClick={() => void launch(spec)} loading={busy}>
         {children}
       </Button>
       {error && (

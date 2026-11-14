@@ -52,7 +52,7 @@ function Subjects() {
         {subjects.map((s) => {
           const current = s.code === profile.subject_code || (profile.subject_code == null && s.current);
           return (
-            <li key={s.code} className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-line px-4 py-3">
+            <li key={s.code} className="flex flex-wrap items-center justify-between gap-3 border-b border-line py-4 last:border-b-0">
               <span className="min-w-0">
                 <span className="block font-medium">{s.name}</span>
                 <span className="block text-sm text-ink-muted">{s.enrolled ? (s.diagnostic_completed ? "Placement check done" : "Started") : `${s.n_skills} skills`}</span>
@@ -154,12 +154,12 @@ export function ProfilePage() {
                 ))}
               </div>
             </div>
-            <label className="flex min-h-11 items-center justify-between gap-4 rounded-xl border border-line p-3 text-sm">
+            <label className="flex min-h-11 items-center justify-between gap-4 border-t border-line pt-4 text-sm">
               <span>
                 <span className="font-medium">Offer hints during practice</span>
                 <span className="block text-xs text-ink-muted">A right answer after a hint counts as &quot;with help&quot;.</span>
               </span>
-              <input type="checkbox" className="size-5 accent-[#8b8cff]" checked={hints} onChange={(e) => setHints(e.target.checked)} />
+              <input type="checkbox" className="size-5 accent-brand" checked={hints} onChange={(e) => setHints(e.target.checked)} />
             </label>
           </div>
         </Card>

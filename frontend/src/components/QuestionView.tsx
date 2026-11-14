@@ -139,8 +139,8 @@ export function QuestionView({ question, onSubmit, submitting, locked, feedback,
             spellCheck={false}
             placeholder={question.input_hint ?? "e.g. 12, 0.5, 3/4 or 1 1/2"}
             className={cx(
-              "h-12 w-full rounded-xl border bg-surface-2 px-4 text-lg tracking-wide focus:outline-none",
-              feedback ? (feedback.correct ? "border-strength" : "border-weakness") : "border-line-strong focus:border-brand",
+              "h-12 w-full rounded-[var(--radius-control)] border bg-surface-2 px-4 text-lg disabled:cursor-not-allowed",
+              feedback ? (feedback.correct ? "border-strength" : "border-weakness") : "border-line-strong",
             )}
           />
           {question.input_hint && question.answer_type !== "algebraic" && (
@@ -264,7 +264,7 @@ export function FeedbackPanel({ feedback }: { feedback: { correct: boolean; corr
   const ca = feedback.correct_answer;
   return (
     <div
-      className={cx("flex gap-3 rounded-2xl border p-4 animate-rise", feedback.correct ? "border-strength/40 bg-strength/8" : "border-weakness/40 bg-weakness/8")}
+      className={cx("flex gap-3 rounded-xl p-4 animate-rise", feedback.correct ? "bg-strength/10" : "bg-weakness/10")}
       role="status"
       aria-live="polite"
     >
@@ -299,12 +299,12 @@ export function plainHint(text: string) {
 
 export function HintBox({ text, source, label, note }: { text: string; source: string; label?: string; note?: string }) {
   return (
-    <div className="flex gap-3 rounded-2xl border border-accent/30 bg-accent/8 p-4 text-sm animate-rise">
-      <Lightbulb className="mt-0.5 size-5 shrink-0 text-accent" />
+    <div className="flex gap-3 rounded-xl bg-surface-2 p-4 text-sm animate-rise">
+      <Lightbulb className="mt-0.5 size-5 shrink-0 text-ink-muted" aria-hidden />
       <div>
-        <p className="mb-1 text-xs font-semibold uppercase tracking-wider text-accent">Hint · {source}</p>
+        <p className="mb-1 text-sm font-medium text-ink-muted">Hint: {source}</p>
         {note && <p className="mb-1.5 text-xs text-developing">{note}</p>}
-        <p className="whitespace-pre-line leading-6 text-ink/90">{plainHint(text)}</p>
+        <p className="whitespace-pre-line leading-6 text-ink">{plainHint(text)}</p>
         {label && <p className="mt-2 text-[11px] text-ink-faint">{label}</p>}
       </div>
     </div>

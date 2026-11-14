@@ -25,6 +25,16 @@ The detailed design and the honest list of what is limited are in `docs/modules/
 - Production scripts from the laptop: put the Render External Database URL in `backend/.env.prod`
   (git-ignored) and set it as DATABASE_URL for the script; never print it.
 
+## Hallmark redesign (2026-11-14), committed locally, NOT deployed
+- `design.md` (root) locks the system: navy, one periwinkle signal (old blue accent removed),
+  Bricolage Grotesque on headings only, system body face, hairlines before cards. Tokens in
+  `frontend/src/index.css` `@theme` (OKLCH). Landing keeps its own scoped block (`landing.css`).
+- Shell is a top bar (`components/AppShell.tsx`), bottom tabs under 60rem; Home leads with the
+  one task for today; Diagnosis summary is a figure row; app lint (`sloplint --scope app`) clean.
+- Diagnosis rule: from `ANSWERS_DECIDE_AFTER` = 5 answers the model has no veto. After deploying,
+  run `scripts/refresh_states.py` on production once (stored statuses are stale until then).
+- Local sample student `sam@example.com` exists only in the local DB (landing screenshots).
+
 ## Where we were (2026-11-12)
 - v2.1 is DEPLOYED (2026-11-12): `main` = `feat/mentorx-v2-maths-tutor`, pushed. Render (API) and
   Vercel (frontend) run it; the production DB is seeded with Mathematics; `OPENROUTER_API_KEY` and

@@ -1,13 +1,14 @@
 /** Charts (Recharts). Only the student's own answers are drawn; predictions are never charted. */
 import { Bar, CartesianGrid, ComposedChart, Legend, Line, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import type { DayPoint } from "../api/tutor";
+import { token } from "./ui";
 
-const AXIS = { stroke: "#6b7697", fontSize: 12, tickLine: false, axisLine: false } as const;
-const GRID = <CartesianGrid stroke="#253150" strokeDasharray="3 4" vertical={false} />;
+const AXIS = { stroke: token("ink-faint"), fontSize: 12, tickLine: false, axisLine: false } as const;
+const GRID = <CartesianGrid stroke={token("line")} strokeDasharray="3 4" vertical={false} />;
 const tooltipStyle = {
-  contentStyle: { background: "#172036", border: "1px solid #33416a", borderRadius: 12, color: "#e8ebf5", fontSize: 13 },
-  labelStyle: { color: "#9aa5c4" },
-  cursor: { fill: "#8b8cff14" },
+  contentStyle: { background: "var(--color-surface-2)", border: "1px solid var(--color-line-strong)", borderRadius: 12, color: "var(--color-ink)", fontSize: 13 },
+  labelStyle: { color: "var(--color-ink-muted)" },
+  cursor: { fill: token("surface-3") },
 };
 
 function shortDate(iso: string) {
@@ -26,9 +27,9 @@ export function ActivityChart({ data, height = 240 }: { data: DayPoint[]; height
         <YAxis yAxisId="n" {...AXIS} allowDecimals={false} />
         <YAxis yAxisId="acc" orientation="right" domain={[0, 100]} {...AXIS} unit="%" />
         <Tooltip {...tooltipStyle} formatter={(v, name) => (name === "% correct" ? [`${v}%`, name] : [v, name])} />
-        <Legend wrapperStyle={{ fontSize: 12, color: "#9aa5c4" }} iconType="circle" />
-        <Bar yAxisId="n" dataKey="attempts" name="Questions answered" fill="#8b8cff" radius={[6, 6, 0, 0]} maxBarSize={28} opacity={0.85} />
-        <Line yAxisId="acc" type="monotone" dataKey="accuracyPct" name="% correct" stroke="#34d399" strokeWidth={2.5} dot={{ r: 3 }} connectNulls />
+        <Legend wrapperStyle={{ fontSize: 12, color: "var(--color-ink-muted)" }} iconType="circle" />
+        <Bar yAxisId="n" dataKey="attempts" name="Questions answered" fill={token("brand")} radius={[6, 6, 0, 0]} maxBarSize={28} />
+        <Line yAxisId="acc" type="monotone" dataKey="accuracyPct" name="% correct" stroke={token("strength")} strokeWidth={2.5} dot={{ r: 3 }} connectNulls />
       </ComposedChart>
     </ResponsiveContainer>
   );

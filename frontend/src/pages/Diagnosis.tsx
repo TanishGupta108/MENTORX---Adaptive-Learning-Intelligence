@@ -6,7 +6,7 @@ import { useApi } from "../hooks/useApi";
 import { useProfile } from "../components/AppShell";
 import { Disclosure } from "../components/Disclosure";
 import { StartButton } from "../components/StartAction";
-import { Button, Card, EmptyState, ErrorState, ModelEstimate, PageHeader, PageLoader, STATUS_META, StatusBadge } from "../components/ui";
+import { Button, EmptyState, ErrorState, ModelEstimate, PageHeader, PageLoader, STATUS_META, StatusBadge } from "../components/ui";
 
 const ORDER: Status[] = ["likely_strength", "developing", "potential_weakness", "needs_assessment"];
 
@@ -58,23 +58,23 @@ export function DiagnosisPage() {
     <div className="space-y-6">
       <PageHeader title="Your learning profile is ready." subtitle={data.headline} actions={<Button to="/home" icon={<ArrowRight className="size-4" />}>Go to Home</Button>} />
 
-      <Card>
-        <p className="text-lg font-semibold">
-          {data.assessment.correct} of {data.assessment.answered} correct
-        </p>
-        <ul className="mt-3 flex flex-wrap gap-x-5 gap-y-2 text-sm">
-          {ORDER.map((s) => (
-            <li key={s} className="flex items-center gap-2">
-              <span className={`size-2 rounded-full ${STATUS_META[s].dot}`} aria-hidden />
-              <span className="font-semibold">{data.counts[s] ?? 0}</span>
-              <span className="text-ink-muted">{STATUS_META[s].label}</span>
-            </li>
-          ))}
-        </ul>
-      </Card>
+      <dl className="grid grid-cols-2 gap-x-6 gap-y-5 border-y border-line py-6 sm:grid-cols-5">
+        <div className="col-span-2 sm:col-span-1">
+          <dt className="text-sm text-ink-muted">Placement check</dt>
+          <dd className="mt-1 text-[28px] font-semibold tabular-nums leading-tight">
+            {data.assessment.correct} of {data.assessment.answered} correct
+          </dd>
+        </div>
+        {ORDER.map((s) => (
+          <div key={s} className="sm:border-l sm:border-line sm:pl-6">
+            <dt className={`text-sm font-medium ${STATUS_META[s].text}`}>{STATUS_META[s].label}</dt>
+            <dd className="mt-1 text-[28px] font-semibold tabular-nums leading-tight">{data.counts[s] ?? 0}</dd>
+          </div>
+        ))}
+      </dl>
 
       <section aria-labelledby="assessed">
-        <h2 id="assessed" className="mb-3 text-sm font-semibold uppercase tracking-wider text-ink-faint">
+        <h2 id="assessed" className="mb-3 text-[19px] font-semibold tracking-tight">
           Skills in your check
         </h2>
         <ul className="divide-y divide-line/60 rounded-2xl border border-line bg-surface">

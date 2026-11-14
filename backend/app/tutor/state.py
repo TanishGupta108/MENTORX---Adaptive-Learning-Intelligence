@@ -396,3 +396,33 @@ def refresh(
             st.revision_due_at = st.revision_due_at or now + timedelta(days=REVIEW_INTERVALS[0])
     db.flush()
     return states
+
+
+def refresh_everyone(db: Session, dry_run: bool = False) -> dict:
+    """Recompute every enrolled student's skill states (and recommendations) with today's
+    rules, e.g. after a diagnosis rule changes. Returns counts; idempotent. With dry_run the
+    changes are rolled back and only counted."""
+    from app.db.models import Enrollment
+    from app.tutor import recommend
+
+    pairs = db.execute(select(Enrollment.user_id, Enrollment.subject_id)).all()
+    before = {(st.user_id, st.skill_id): st.status for st in db.scalars(select(SkillState))}
+    for user_id, subject_id in pairs:
+        refresh(db, user_id, subject_id)
+        if not dry_run:
+            recommend.generate(db, user_id, "rules", subject_id=subject_id)
+    db.flush()
+    changed = sum(
+        1
+        for st in db.scalars(select(SkillState))
+        if (st.user_id, st.skill_id) in before and before[(st.user_id, st.skill_id)] != st.status
+    )
+    if dry_run:
+        db.rollback()
+    else:
+        db.commit()
+    return {
+        "students": len({u for u, _ in pairs}),
+        "enrolments": len(pairs),
+        "statuses_changed": changed,
+    }

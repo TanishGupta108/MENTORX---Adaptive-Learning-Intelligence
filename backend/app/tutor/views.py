@@ -333,7 +333,7 @@ def next_activity_for(
         }
     return {
         "action": "practice",
-        "label": f"Continue {MODE_LABEL[state.effective_mode(st)]} practice",
+        "label": f"Continue practice ({MODE_LABEL[state.effective_mode(st)].lower()})",
         "skill_id": skill.id,
     }
 

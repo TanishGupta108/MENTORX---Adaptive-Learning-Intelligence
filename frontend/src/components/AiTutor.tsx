@@ -127,8 +127,8 @@ export function AiExplain({ interactionId, label = "Explain with AI", className 
 
   if (text) {
     return (
-      <div className={cx("rounded-2xl border border-accent/30 bg-accent/8 p-4 animate-rise", className)} aria-live="polite">
-        <p className="mb-2 flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-accent">
+      <div className={cx("rounded-xl bg-surface-2 p-4 animate-rise", className)} aria-live="polite">
+        <p className="mb-2 flex items-center gap-2 text-sm font-medium text-ink-muted">
           <Sparkles className="size-3.5" aria-hidden /> AI tutor
         </p>
         <Markdown source={text.content} />

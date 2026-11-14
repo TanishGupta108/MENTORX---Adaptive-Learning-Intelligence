@@ -20,7 +20,7 @@ export function WhyButton({ label = "Why?", children, className, align = "start"
         {label}
       </button>
       {open && (
-        <div id={id} className="mt-1 w-full rounded-xl border border-line bg-surface-2 px-3 py-2.5 text-left text-sm text-ink-muted animate-rise">
+        <div id={id} className="mt-1 w-full rounded-xl bg-surface-2 px-3 py-2.5 text-left text-sm text-ink-muted animate-rise">
           {children}
         </div>
       )}

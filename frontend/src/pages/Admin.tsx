@@ -34,12 +34,12 @@ function TestAi() {
         {busy ? "Testing… up to a minute" : "Test AI"}
       </Button>
       {res && (
-        <div className={cx("mt-4 rounded-xl border p-3 text-sm", res.ok ? "border-strength/40 bg-strength/8" : "border-weakness/40 bg-weakness/8")} role="status">
+        <div className={cx("mt-4 rounded-xl p-3 text-sm", res.ok ? "bg-strength/10" : "bg-weakness/10")} role="status">
           <p className="font-medium">{res.ok ? "OK: the AI tutor answered." : "Not working."}</p>
           <p className="mt-1 text-ink-muted">{res.message}</p>
           <p className="mt-1 text-xs text-ink-faint">
-            Model: {res.model ?? "—"} · Time: {res.latency_ms === null ? "—" : `${(res.latency_ms / 1000).toFixed(1)} s`}
-            {res.error_code ? ` · Error: ${res.error_code}` : ""}
+            Model: {res.model ?? "none"}. Time: {res.latency_ms === null ? "none" : `${(res.latency_ms / 1000).toFixed(1)} s`}
+            {res.error_code ? `. Error: ${res.error_code}` : ""}
           </p>
         </div>
       )}
@@ -99,7 +99,7 @@ function SkillsTab({ subject }: { subject: string }) {
           {skills.data?.map((s) => (
             <button key={s.id} type="button" onClick={() => { setSel(s); setDesc(s.description); setMsg(undefined); }} className={cx("block w-full rounded-lg px-3 py-2 text-left text-sm", sel?.id === s.id ? "bg-brand-soft" : "hover:bg-surface-2")}>
               <span className="font-medium">{s.code}</span> <span className="text-ink-muted">{s.name}</span>
-              <span className="block text-xs text-ink-faint">{s.n_items} usable · {s.is_available ? "available" : "hidden (fewer than 5 usable)"}</span>
+              <span className="block text-xs text-ink-faint">{s.n_items} usable, {s.is_available ? "available" : "hidden (fewer than 5 usable)"}</span>
             </button>
           ))}
         </div>
@@ -122,7 +122,7 @@ function SkillsTab({ subject }: { subject: string }) {
                   <div key={i.id} className="flex items-start gap-3 rounded-lg bg-surface-2/60 px-3 py-2 text-sm">
                     <span className="min-w-0 flex-1">
                       <span className="block truncate">{i.preview}</span>
-                      <span className="block text-xs text-ink-faint">#{i.id} · {i.answer_type} · {i.difficulty}{i.exclusion_reason ? ` · excluded: ${i.exclusion_reason}` : ""}</span>
+                      <span className="block text-xs text-ink-faint">#{i.id}, {i.answer_type}, {i.difficulty}{i.exclusion_reason ? `, excluded: ${i.exclusion_reason}` : ""}</span>
                     </span>
                     {!i.exclusion_reason && (
                       <Button size="sm" variant={i.is_active ? "secondary" : "soft"} onClick={async () => { await adminApi.setItem(i.id, !i.is_active); items.reload(); }}>
@@ -191,7 +191,7 @@ function ResourcesTab() {
               <div key={r.id} className="flex items-center gap-3 rounded-lg bg-surface-2/60 px-3 py-2 text-sm">
                 <span className="min-w-0 flex-1">
                   <span className="block truncate font-medium">{r.title}</span>
-                  <span className="block text-xs text-ink-faint">skill {r.skill_id} · {r.kind} · {r.source_label}</span>
+                  <span className="block text-xs text-ink-faint">skill {r.skill_id}, {r.kind}, {r.source_label}</span>
                 </span>
                 <button type="button" className="rounded-lg p-2 text-ink-muted hover:bg-danger/15 hover:text-danger" aria-label="Delete resource" onClick={async () => { if (confirm(`Delete "${r.title}"?`)) { await adminApi.deleteResource(r.id); res.reload(); } }}>
                   <Trash2 className="size-4" />
@@ -225,7 +225,7 @@ function PrereqTab() {
             <div key={`${l.skill_id}-${l.prerequisite_id}`} className="flex items-center gap-3 rounded-lg bg-surface-2/60 px-3 py-2 text-sm">
               <span className="min-w-0 flex-1">
                 <span className="block truncate">{l.skill}</span>
-                <span className="block truncate text-xs text-ink-faint">requires {l.prerequisite} · {l.source}</span>
+                <span className="block truncate text-xs text-ink-faint">requires {l.prerequisite} ({l.source})</span>
               </span>
               <button type="button" className="rounded-lg p-2 text-ink-muted hover:bg-danger/15 hover:text-danger" aria-label="Remove link" onClick={async () => { await adminApi.removePrerequisite(l.skill_id, l.prerequisite_id); p.reload(); }}>
                 <Trash2 className="size-4" />
@@ -249,8 +249,7 @@ export function AdminPage() {
   return (
     <div>
       <PageHeader
-        eyebrow="Admin"
-        title="Content management"
+        title="Content admin"
         subtitle="Resources, skill descriptions, question availability, prerequisite links, the model and the AI tutor."
         actions={
           bySubject && subjectOptions.length > 1 ? (
