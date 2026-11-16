@@ -1,4 +1,6 @@
-import { lazy } from "react";
+import { lazy, useEffect, useState } from "react";
+import { Loader2 } from "lucide-react";
+import { setWakingHandler } from "./api/client";
 import { BrowserRouter, Navigate, Outlet, Route, Routes, useLocation } from "react-router";
 import { AuthProvider, useAuth } from "./auth/AuthContext";
 import { AppShell, ProfileGate } from "./components/AppShell";
@@ -83,9 +85,28 @@ export function AppRoutes() {
   );
 }
 
+/** Shown while a sleeping server starts, so a slow first request isn't mistaken for a fault. */
+function WakingBanner() {
+  const [waking, setWaking] = useState(false);
+  useEffect(() => {
+    setWakingHandler(setWaking);
+    return () => setWakingHandler(null);
+  }, []);
+  if (!waking) return null;
+  return (
+    <div role="status" aria-live="polite" className="fixed inset-x-0 top-0 z-50 flex justify-center px-4 pt-3">
+      <p className="flex items-center gap-2.5 rounded-xl border border-line-strong bg-surface-2 px-4 py-2.5 text-sm">
+        <Loader2 className="size-4 animate-spin text-brand" aria-hidden />
+        Starting the server. After a quiet spell this takes up to a minute.
+      </p>
+    </div>
+  );
+}
+
 export default function App() {
   return (
     <ErrorBoundary>
+      <WakingBanner />
       <BrowserRouter>
         <AuthProvider>
           <AppRoutes />

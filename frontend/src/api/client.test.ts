@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { mockApi } from "../test/mockApi";
-import { api, ApiError, setAccessToken, setSessionExpiredHandler } from "./client";
+import { api, ApiError, setAccessToken, setSessionExpiredHandler, setWakingHandler, wakeRetry } from "./client";
 
 beforeEach(() => setAccessToken("old"));
 afterEach(() => {
@@ -82,11 +82,40 @@ describe("api client", () => {
     expect(err.message).toBe("The AI tutor is busy. Please try again.");
   });
 
+  it("waits for a sleeping server and retries instead of failing", async () => {
+    const saved = wakeRetry.delaysMs;
+    wakeRetry.delaysMs = [1, 1, 1];
+    const waking: boolean[] = [];
+    setWakingHandler((w) => waking.push(w));
+    let n = 0;
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async () =>
+        n++ < 2
+          ? new Response("<html>Bad gateway</html>", { status: 502, headers: { "Content-Type": "text/html" } })
+          : new Response(JSON.stringify({ ok: true }), { status: 200, headers: { "Content-Type": "application/json" } }),
+      ),
+    );
+    expect(await api.post("/auth/login", { email: "a@b.c", password: "x" }, { noRetry: true })).toEqual({ ok: true });
+    expect(n).toBe(3);
+    expect(waking).toEqual([true, false]);
+    // a JSON 503 comes from the app itself (e.g. the AI tutor): never retried
+    n = 0;
+    vi.stubGlobal("fetch", vi.fn(async () => (n++, new Response(JSON.stringify({ error: { code: "ai_unavailable", message: "busy" } }), { status: 503, headers: { "Content-Type": "application/json" } }))));
+    await api.get("/me").catch(() => undefined);
+    expect(n).toBe(1);
+    setWakingHandler(null);
+    wakeRetry.delaysMs = saved;
+  });
+
   it("explains a proxy's non-JSON 502/504 as the server waking up", async () => {
+    const saved = wakeRetry.delaysMs;
+    wakeRetry.delaysMs = [];
     vi.stubGlobal("fetch", vi.fn(async () => new Response("<html>Bad gateway</html>", { status: 504, headers: { "Content-Type": "text/html" } })));
     const err = (await api.get("/me").catch((e) => e)) as ApiError;
     expect(err.status).toBe(504);
     expect(err.message).toBe("The server is waking up or busy. Please try again.");
+    wakeRetry.delaysMs = saved;
   });
 
   it("gives up after the client timeout", async () => {

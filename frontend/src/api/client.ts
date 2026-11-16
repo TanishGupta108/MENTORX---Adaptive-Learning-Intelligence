@@ -83,14 +83,64 @@ async function parseError(res: Response): Promise<ApiError> {
   return new ApiError(res.status, code, message, requestId, fields);
 }
 
+/**
+ * Free hosting puts the API to sleep after about 15 idle minutes; the first request then gets
+ * the proxy's own non-JSON 502/503/504 page while the server starts (about a minute). Such a
+ * request never reached the app, so it is safe to send again, even a sign-in. The client waits
+ * and retries quietly, and tells the UI so it can say what is happening.
+ */
+export const wakeRetry = { delaysMs: [3000, 5000, 10000, 10000, 15000, 15000, 15000, 15000] };
+let onWaking: ((waking: boolean) => void) | null = null;
+
+export function setWakingHandler(handler: ((waking: boolean) => void) | null) {
+  onWaking = handler;
+}
+
+function isColdStart(res: Response) {
+  return [502, 503, 504].includes(res.status) && !(res.headers.get("content-type") ?? "").includes("application/json");
+}
+
+function pause(ms: number, signal?: AbortSignal) {
+  return new Promise<void>((resolve, reject) => {
+    if (signal?.aborted) return reject(new DOMException("Aborted", "AbortError"));
+    const timer = setTimeout(resolve, ms);
+    signal?.addEventListener(
+      "abort",
+      () => {
+        clearTimeout(timer);
+        reject(new DOMException("Aborted", "AbortError"));
+      },
+      { once: true },
+    );
+  });
+}
+
+async function sendWhileWaking(send: () => Promise<Response>, signal?: AbortSignal) {
+  let res = await send();
+  if (!isColdStart(res)) return res;
+  onWaking?.(true);
+  try {
+    for (const ms of wakeRetry.delaysMs) {
+      await pause(ms, signal);
+      res = await send();
+      if (!isColdStart(res)) break;
+    }
+  } finally {
+    onWaking?.(false);
+  }
+  return res;
+}
+
 /** Exchange the refresh cookie for a new access token. Returns false if there is no session. */
 export function refreshSession(): Promise<boolean> {
   refreshing ??= (async () => {
     try {
-      const res = await fetch(`${BASE_URL}/api/v1/auth/refresh`, {
-        method: "POST",
-        credentials: "include",
-      });
+      const res = await sendWhileWaking(() =>
+        fetch(`${BASE_URL}/api/v1/auth/refresh`, {
+          method: "POST",
+          credentials: "include",
+        }),
+      );
       if (!res.ok) {
         accessToken = null;
         return false;
@@ -157,10 +207,10 @@ async function perform<T>(method: string, path: string, opts: RequestOptions, si
       body: opts.body !== undefined ? JSON.stringify(opts.body) : undefined,
     });
 
-  let res = await send();
+  let res = await sendWhileWaking(send, signal);
   if (res.status === 401 && !opts.noRetry) {
     if (await refreshSession()) {
-      res = await send();
+      res = await sendWhileWaking(send, signal);
     } else {
       onSessionExpired?.();
     }
