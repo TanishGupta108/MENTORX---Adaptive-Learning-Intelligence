@@ -92,7 +92,7 @@ The pilot export is written in the same canonical schema (`ml/mentorx_ml/data/sc
 
 | | |
 |---|---|
-| Purpose in MENTORX | The Mathematics subject: skills, questions, answer keys, historical difficulty, and the training data of the DKT-Q / DKT models served by `/api/v2` |
+| Purpose in MENTORX | The Mathematics subject: skills, questions, answer keys, historical difficulty, and the training data of the DKT-Q + Attention, DKT-Q and DKT models served by `/api/v2` |
 | Source | https://huggingface.co/datasets/ASSISTments/FoundationalASSIST (gated: log in and accept the terms) |
 | Paper | Worden, Heffernan, Heffernan & Sonkar. *FoundationalASSIST: An Educational Dataset for Foundational Knowledge Tracing and Pedagogical Grounding of LLMs.* AIED 2026, arXiv:2602.00070 |
 | Licence | **CC BY-NC 4.0**, research and educational use, following the providers' responsible-use guidelines |

@@ -5,6 +5,18 @@ FoundationalASSIST dataset) and Geography map skills (Slepemapy.cz, `docs/module
 each with its own trained DKT-Q knowledge-tracing model. The product brief is `build.md`.
 The detailed design and the honest list of what is limited are in `docs/modules/tutor.md`.
 
+## Maths model switch (2026-11-25): DKT-Q + Attention
+- Final-evaluation ask: compare the deployed LSTM (DKT-Q) with an LSTM variation.
+  `ml/notebooks/04_lstm_variants_kaggle.ipynb` (Kaggle T4) trained DKT-Q, GRU, 2-layer LSTM and
+  LSTM + Attention x 3 seeds; all three variants beat DKT-Q. LSTM + Attention won on validation:
+  test AUC 0.8154 vs 0.8100 (paired +0.0061, CI +0.0053..+0.0069). Run outputs are git-ignored in
+  `ml/notebooks/lstm_outputs/`. The slide deck is a claude.ai artifact (MoR8Mxz2bWdukz4YsFwpdM).
+- Served as `dkt_q_attn` (seed 123, chosen by validation log loss): `ml/scripts/export_kt_attn.py`
+  (run with a Python that has torch) wrote `dkt_q_attn.npz` and set `default_model` in Maths'
+  `kt_meta.json`. Geography stays on `dkt_q`. `KT_MODEL` is now empty by default.
+- AKT side experiment (`03_akt_foundationalassist_kaggle.ipynb`, outputs `ml/notebooks/akt_outputs/`):
+  run 1 AKT 0.8103 vs DKT-Q 0.8118, not adopted.
+
 ## Where we are (2026-11-13): v3 DEPLOYED
 - `main` = `feat/mentorx-v2-maths-tutor` at the v3 commit, pushed; Render + Vercel run it.
   Multi-subject (Maths + Geography map skills, `docs/modules/geography.md`), Home/Progress pages,
@@ -65,7 +77,7 @@ The detailed design and the honest list of what is limited are in `docs/modules/
   - Subjects (codes, credits, per-subject options): `subjects.py`; student's local day: `localtime.py`.
   - Answer checking: `answers.py`, `mathexpr.py` (safe SymPy). Ordering keys: `ordering.py`.
   - Question HTML, images, WIRIS → MathML: `html.py`.
-  - Model serving: `kt.py`, with NumPy inference in `app/ml/dkt.py`.
+  - Model serving: `kt.py`, with NumPy inference (LSTM and LSTM + attention) in `app/ml/dkt.py`.
   - Adaptive diagnostic and reassessment: `assess.py`.
   - Skill and Mixed practice: `practice.py`.
   - Diagnosis rules: `state.py`.

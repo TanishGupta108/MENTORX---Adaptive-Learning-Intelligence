@@ -79,7 +79,9 @@ class Settings(BaseSettings):
     # One knowledge-tracing model per subject: "CODE=dir,CODE=dir". A subject without a model
     # (missing files) shows observed performance only. MATH uses kt_artifacts_dir unless named.
     kt_subjects: str = "GEO=model_artifacts/geography"
-    kt_model: str = Field(default="dkt_q", pattern="^(dkt_q|dkt)$")  # which exported model serves
+    # Which exported model serves. Empty = each subject's kt_meta.json `default_model`
+    # (Mathematics: dkt_q_attn; Geography: dkt_q). A name a subject lacks falls back to its default.
+    kt_model: str = Field(default="", pattern="^(|dkt_q|dkt|dkt_q_attn)$")
     diagnostic_length: int = Field(default=10, ge=3, le=30)  # overall diagnostic questions
     skill_check_length: int = Field(default=6, ge=3, le=20)  # diagnostic for one chosen skill
     reassessment_length: int = Field(default=5, ge=3, le=20)

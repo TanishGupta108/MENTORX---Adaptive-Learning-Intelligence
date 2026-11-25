@@ -1,6 +1,6 @@
 # MENTORX — Adaptive Learning Intelligence
 
-**Learn Smarter. Improve Faster.** An AI-powered personal learning mentor for **Mathematics** (grades 6–8, Common Core). A short diagnostic finds what a student already knows. Then a trained deep knowledge-tracing model (DKT-Q, test AUC 0.81) plus transparent rules build a personal plan: skill diagnosis, recommendations with reasons, learning modules, adaptive practice and fresh reassessments, until the student reaches the goal.
+**Learn Smarter. Improve Faster.** An AI-powered personal learning mentor for **Mathematics** (grades 6–8, Common Core). A short diagnostic finds what a student already knows. Then a trained deep knowledge-tracing model (DKT-Q + Attention, an LSTM with attention; test AUC 0.815) plus transparent rules build a personal plan: skill diagnosis, recommendations with reasons, learning modules, adaptive practice and fresh reassessments, until the student reaches the goal.
 
 **v2 (November 2026):** the adaptive Mathematics tutor on the [FoundationalASSIST](https://huggingface.co/datasets/ASSISTments/FoundationalASSIST) dataset ([module doc](docs/modules/tutor.md)). It answers five questions for every student: what do I understand, what am I struggling with, what next, how should I practise, am I improving? Observed performance and model predictions are always shown separately.
 

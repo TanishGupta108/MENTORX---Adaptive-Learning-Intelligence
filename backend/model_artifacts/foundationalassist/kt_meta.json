@@ -3603,6 +3603,53 @@
     "Brier": 0.18661,
     "ECE": 0.00924
    }
+  },
+  "dkt_q_attn": {
+   "display_name": "DKT-Q + Attention (LSTM + attention over earlier attempts)",
+   "architecture": "lstm_attn",
+   "heads": 4,
+   "uses_question_ids": true,
+   "file": "dkt_q_attn.npz",
+   "sha256": "e851a4bfd2029dd025786f5409d736c4fa0dbcdf616bfe09296b306be4ef6ddf",
+   "parameters": 1695610,
+   "parity_max_abs_diff": 2.086162567138672e-07,
+   "parity_detail": {
+    "sequence": 2.086162567138672e-07,
+    "serving_path": 8.940696716308594e-08
+   },
+   "notebook": "ml/notebooks/04_lstm_variants_kaggle.ipynb",
+   "training_seed": 123,
+   "chosen_by": "lowest validation log loss of 3 training seeds",
+   "test_metrics": {
+    "AUC": 0.8152952348241816,
+    "LogLoss": 0.5031703364010113,
+    "Accuracy": 0.7531521259522759,
+    "Brier": 0.16677624251862613,
+    "ECE": 0.004143609956600192
+   },
+   "validation_metrics": {
+    "AUC": 0.8109698361910044,
+    "LogLoss": 0.5096979056317285,
+    "Accuracy": 0.7483629596754728,
+    "Brier": 0.16933981699990902,
+    "ECE": 0.003915010225595589
+   },
+   "comparison_with_dkt_q": {
+    "same_run_baseline": "DKT-Q (LSTM), same split and settings, 3 seeds",
+    "test_auc_mean_3_seeds": {
+     "DKT-Q": 0.80996,
+     "DKT-Q + Attention": 0.81537
+    },
+    "paired_auc_difference_seed42": {
+     "diff": 0.006143341308148975,
+     "ci": [
+      0.005349716599816476,
+      0.006898799253373655
+     ],
+     "verdict": "better than DKT-Q"
+    }
+   }
   }
- }
+ },
+ "default_model": "dkt_q_attn"
 }

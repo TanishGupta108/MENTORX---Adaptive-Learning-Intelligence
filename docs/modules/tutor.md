@@ -125,12 +125,27 @@ The correct answer is shown exactly first, with a rounded hint: `11/3 (about 3.6
 
 ## Machine learning
 
-- **Maths model:** DKT-Q, an LSTM over (skill, response) and (question, response) embeddings plus
-  the previous attempt's hints, answer reveal and time gap, with a per-question difficulty bias,
-  trained in `ml/notebooks/02_foundationalassist_knowledge_tracing.ipynb`. Test AUC **0.812**,
-  accuracy 0.749 on held-out students. Plain DKT (AUC 0.773) can be served with `KT_MODEL=dkt`.
+- **Maths model (served since 2026-11-25): DKT-Q + Attention** (`dkt_q_attn`). It is DKT-Q (below)
+  plus 4-head attention: the next question is the query, and the LSTM states after every *earlier*
+  attempt are the keys and values, so it can look straight back at a related old answer.
+  Trained in `ml/notebooks/04_lstm_variants_kaggle.ipynb`, which compared DKT-Q with GRU, 2-layer
+  LSTM and LSTM + Attention on the same split (3 training seeds each; variant chosen on validation).
+  Results: `ml/notebooks/lstm_outputs/results_lstm.json`. Test AUC, mean of 3 seeds: **0.8154** vs
+  0.8100 for DKT-Q in the same run. Paired gain (seed 42): +0.0061, 95% CI +0.0053 to +0.0069.
+  The served seed (123) was picked by validation log loss; its test AUC is 0.8153. Exported by
+  `ml/scripts/export_kt_attn.py` (parity checked on both the sequence and the serving path).
+- **DKT-Q**, the previous Maths model and still Geography's: an LSTM over (skill, response) and
+  (question, response) embeddings plus the previous attempt's hints, answer reveal and time gap,
+  with a per-question difficulty bias, trained in
+  `ml/notebooks/02_foundationalassist_knowledge_tracing.ipynb`. Test AUC **0.812**, accuracy 0.749
+  on held-out students. Plain DKT (AUC 0.773) is exported too.
+- **Choosing the model:** each subject's `kt_meta.json` names its `default_model`. `KT_MODEL`
+  (empty by default) forces `dkt_q_attn`, `dkt_q` or `dkt`. A subject without that export keeps
+  its default.
 - **Serving:** `.npz` weights + `kt_meta.json`, NumPy forward pass in `backend/app/ml/dkt.py`
-  (parity with PyTorch checked at export). Loaded once at startup, never trained by the app. Within
+  (parity with PyTorch checked at export). The attention model's state is the (T, 128) matrix of
+  every LSTM state, not one vector. Scoring all 2,950 Maths questions for a student with 400
+  answers took about 84 ms on the development laptop (DKT-Q: 35 ms). Loaded once at startup, never trained by the app. Within
   one request the student's model state is computed once and reused (cache on the DB session,
   keyed by the history), not across requests.
 - **Where the model is used:** the adaptive diagnostic (most informative question, p(1−p)),

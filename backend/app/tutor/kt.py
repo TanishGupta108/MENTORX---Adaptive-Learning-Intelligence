@@ -57,8 +57,16 @@ def _load(code: str) -> KTInference | None:
         path = BACKEND_DIR / path
     try:
         with _lock:
-            model = KTInference.from_artifacts(path, cfg.kt_model)
-        logger.info("kt model loaded for %s: %s from %s", code, cfg.kt_model, path)
+            try:
+                model = KTInference.from_artifacts(path, cfg.kt_model or None)
+            except KeyError:
+                if not cfg.kt_model:
+                    raise
+                logger.warning(
+                    "kt model %s not exported for %s: using its default", cfg.kt_model, code
+                )
+                model = KTInference.from_artifacts(path)
+        logger.info("kt model loaded for %s: %s from %s", code, model.name, path)
         return model
     except (FileNotFoundError, KeyError, OSError) as exc:
         logger.warning("kt model for %s unavailable (%s): observed performance only", code, exc)
