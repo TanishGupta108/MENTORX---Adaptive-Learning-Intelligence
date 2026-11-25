@@ -5,7 +5,11 @@ FoundationalASSIST dataset) and Geography map skills (Slepemapy.cz, `docs/module
 each with its own trained DKT-Q knowledge-tracing model. The product brief is `build.md`.
 The detailed design and the honest list of what is limited are in `docs/modules/tutor.md`.
 
-## Maths model switch (2026-11-25): DKT-Q + Attention
+## Maths model switch (2026-11-25): DKT-Q + Attention, DEPLOYED (d4faa06, 2026-11-26)
+- Production `/api/v1/health/model` reports `dkt_q_attn`; live smoke PASSED (v3) incl. Geography;
+  `refresh_states.py` run on production (4 students, 8 enrolments, 0 statuses changed).
+  The same push shipped 7a94a98 (cold-start retry banner + keepalive workflow).
+- Checks (2026-11-25): backend 312 passed, frontend 46 passed, typecheck and build clean.
 - Final-evaluation ask: compare the deployed LSTM (DKT-Q) with an LSTM variation.
   `ml/notebooks/04_lstm_variants_kaggle.ipynb` (Kaggle T4) trained DKT-Q, GRU, 2-layer LSTM and
   LSTM + Attention x 3 seeds; all three variants beat DKT-Q. LSTM + Attention won on validation:
